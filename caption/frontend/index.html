@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caption Forge | Standalone Caption Engine MVP</title>
+  
+  <!-- Google Fonts for Style Presets -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Anton&family=Archivo+Black&family=Audiowide&family=Bangers&family=Caveat:wght@700&family=Dancing+Script:wght@700&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,700;0,800;1,700&family=Montserrat:ital,wght@0,800;1,800;1,900&family=Orbitron:wght@700;900&family=Outfit:ital,wght@0,500;0,700;0,800;0,900;1,700;1,800&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:ital,wght@1,700;1,900&family=Poppins:ital,wght@0,600;0,700;1,600&family=Quicksand:wght@600;700&family=Shrikhand&family=Space+Mono:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="app-header">
+      <div class="brand-title">
+        <span class="lightning-icon">⚡</span>
+        <h1>CaptionForge <span class="badge-tag">MVP Phase 2</span></h1>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div class="mode-tabs">
+        <button id="tabTextMode" class="tab-btn active">
+          <span>📝 Text Input</span>
+        </button>
+        <button id="tabAudioMode" class="tab-btn">
+          <span>🎙️ Audio STT (Groq)</span>
+        </button>
+      </div>
+
+      <div class="header-status">
+        <span class="status-dot active"></span>
+        <span class="status-text" id="statusText">Phase 2: Audio STT & Canvas Engine</span>
+      </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <main class="workspace-grid">
+      
+      <!-- Left Panel: Text Input & Block Editor -->
+      <section class="panel editor-panel">
+        <div class="panel-header">
+          <h2 id="panelModeTitle">1. Script & Caption Blocks</h2>
+          <span class="step-indicator" id="panelModeTag">Text Engine</span>
+        </div>
+
+        <!-- Mode 1: Text Input Area -->
+        <div id="textModeContainer" class="mode-section">
+          <div class="input-group">
+            <label for="scriptInput">Paste Your Script Text</label>
+            <textarea 
+              id="scriptInput" 
+              placeholder="Paste your text here... For example:&#10;We are building a standalone caption engine MVP first, so we can create high-quality captions without getting distracted by full video-editor complexity."
+              rows="5"
+            ></textarea>
+          </div>
+
+          <div class="controls-row">
+            <div class="control-item">
+              <label for="maxWordsSlider">Max Words Per Block: <b id="maxWordsVal">4</b></label>
+              <input type="range" id="maxWordsSlider" min="2" max="6" value="4">
+            </div>
+            <div class="control-item">
+              <label for="playbackSpeed">Reading Speed (WPM): <b id="speedVal">180</b></label>
+              <input type="range" id="playbackSpeed" min="100" max="300" step="10" value="180">
+            </div>
+          </div>
+
+          <button id="generateBtn" class="btn btn-primary margin-top-sm">
+            <span>⚡ Generate & Segment Captions</span>
+          </button>
+        </div>
+
+        <!-- Mode 2: Audio Upload Area (Phase 2) -->
+        <div id="audioModeContainer" class="mode-section hidden">
+          <div class="audio-dropzone" id="audioDropzone">
+            <input type="file" id="audioFileInput" accept="audio/*" class="file-input-hidden">
+            <div class="dropzone-content">
+              <span class="upload-icon">🎙️</span>
+              <p><b>Click to Upload Audio File</b> or Drag & Drop</p>
+              <span class="file-specs">Supports MP3, WAV, M4A, OGG (Max 25MB)</span>
+            </div>
+            <div id="audioFileInfo" class="audio-file-info hidden">
+              <span class="file-name" id="fileNameDisplay">audio.mp3</span>
+              <span class="file-size" id="fileSizeDisplay">2.4 MB</span>
+            </div>
+          </div>
+
+          <div class="controls-row margin-top-sm">
+            <div class="control-item">
+              <label for="audioMaxWordsSlider">Max Words Per Block: <b id="audioMaxWordsVal">4</b></label>
+              <input type="range" id="audioMaxWordsSlider" min="2" max="6" value="4">
+            </div>
+          </div>
+
+          <button id="transcribeAudioBtn" class="btn btn-primary margin-top-sm">
+            <span id="transcribeBtnText">🎙️ Transcribe Speech with Groq Whisper</span>
+          </button>
+
+          <!-- Hidden HTML5 Audio element synced with scrubber -->
+          <audio id="syncAudioPlayer" class="hidden"></audio>
+        </div>
+
+        <!-- Style Preset Selector -->
+        <div class="panel-section-title margin-top-sm">
+          <span>🎨 Select Caption Style Preset</span>
+        </div>
+        <div class="style-presets-grid">
+          <button id="presetPrettyGirl" class="preset-btn active" data-style="pretty-pretty-girl">
+            <span>🌸 Pretty Girl</span>
+          </button>
+          <button id="presetFitCheck" class="preset-btn" data-style="fit-check">
+            <span>💅 Fit Check</span>
+          </button>
+          <button id="presetRansomNote" class="preset-btn" data-style="ransom-note">
+            <span>📰 Ransom Note</span>
+          </button>
+          <button id="presetMinimalScript" class="preset-btn" data-style="minimal-script">
+            <span>✨ Minimal Script</span>
+          </button>
+          <button id="presetCreateEveryDay" class="preset-btn" data-style="create-every-day">
+            <span>✍️ Script</span>
+          </button>
+          <button id="presetTriangle" class="preset-btn" data-style="retro-triangle">
+            <span>▽ Retro</span>
+          </button>
+        </div>
+
+        <!-- Layout & Element Controls (Canva-style positioning & scaling) -->
+        <div class="panel-section-title margin-top-sm">
+          <span>📐 Caption Box Layout & Scale</span>
+        </div>
+        <div class="controls-row">
+          <div class="control-item">
+            <label for="scaleSlider">Element Scale: <b id="scaleVal">1.0x</b></label>
+            <input type="range" id="scaleSlider" min="0.5" max="2.0" step="0.05" value="1.0">
+          </div>
+          <div class="control-item flex-row-btns">
+            <button id="centerBtn" class="btn btn-secondary btn-sm" title="Reset to Center">
+              🎯 Center
+            </button>
+            <button id="toggleSafeZoneBtn" class="btn btn-secondary btn-sm active" title="Toggle Safe Zones">
+              📱 Safe Zones
+            </button>
+          </div>
+        </div>
+        <!-- Canva Elements / Stickers Section -->
+        <div class="panel-section-title margin-top-sm">
+          <span>✨ Add Canva Elements (Stickers)</span>
+        </div>
+
+        <!-- Search bar for stickers -->
+        <div class="element-search-wrapper" style="margin-bottom: 8px;">
+          <input type="text" id="elementSearch" placeholder="🔍 Search stickers (speaker, star, flower...)" style="width: 100%; padding: 8px 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.8rem; outline: none; transition: border-color 0.2s;">
+        </div>
+
+        <div class="elements-selector-grid" id="elementsGrid">
+          <button class="element-btn" data-type="heart_neon" title="Neon Pink Heart">
+            💖 Neon Heart
+          </button>
+          <button class="element-btn" data-type="sparkle_gold" title="Gold Sparkle">
+            ✨ Gold Sparkle
+          </button>
+          <button class="element-btn" data-type="blossom_cherry" title="Cherry Blossom">
+            🌸 Blossom
+          </button>
+          <button class="element-btn" data-type="crown_gold" title="Golden Crown">
+            👑 Crown
+          </button>
+          <button class="element-btn" data-type="fire_flame" title="Neon Flame">
+            🔥 Flame
+          </button>
+          <button class="element-btn" data-type="butterfly_pastel" title="Pastel Butterfly">
+            🦋 Butterfly
+          </button>
+          <button class="element-btn" data-type="daisy_vintage" title="Vintage Daisy">
+            🌼 Daisy
+          </button>
+          <button class="element-btn" data-type="apple_cute" title="Cute Glossy Apple">
+            🍎 Apple
+          </button>
+          <button class="element-btn" data-type="tape_retro" title="Retro Tape">
+            📼 Washi Tape
+          </button>
+          <button class="element-btn" data-type="star_cyber" title="Cyber Star">
+            ⭐ Cyber Star
+          </button>
+        </div>
+
+        <div class="selected-element-controls hidden" id="elementControls" style="margin-top: 8px;">
+          <div class="controls-row">
+            <div class="control-item">
+              <label for="elRotationSlider">Rotation: <b id="elRotationVal">0°</b></label>
+              <input type="range" id="elRotationSlider" min="-180" max="180" value="0" style="width: 100%;">
+            </div>
+            <div class="control-item flex-row-btns" style="align-items: flex-end;">
+              <button id="deleteElementBtn" class="btn btn-secondary btn-sm" style="color: #ef4444; border-color: rgba(239,68,68,0.3); width: 100%;">
+                🗑️ Delete Sticker
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Segmented Blocks List -->
+        <div class="blocks-container margin-top-sm">
+          <div class="blocks-header">
+            <h3>Segmented Blocks (<span id="blockCount">0</span>)</h3>
+            <span class="hint-text">Click text to edit inline</span>
+          </div>
+          <div id="blocksList" class="blocks-list">
+            <div class="empty-state">
+              <p>No caption blocks yet. Generate text or upload audio above.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Panel: Lightning Comic Preview & Export -->
+      <section class="panel preview-panel">
+        <div class="panel-header">
+          <h2>2. Interactive Stage Preview</h2>
+          <div class="header-badges">
+            <span class="style-badge">Preset: Lightning Comic ⚡</span>
+          </div>
+        </div>
+
+        <!-- Canvas Display Area -->
+        <div class="preview-stage-container">
+          <div class="video-ratio-box" id="stageBox">
+            <canvas id="captionCanvas" width="1080" height="1920"></canvas>
+            
+            <!-- Safe Zone Overlay Lines -->
+            <div id="safeZoneOverlay" class="safe-zone-container">
+              <div class="safe-zone-top">Top Overlay Safe Zone</div>
+              <div class="safe-zone-bottom">Bottom UI Safe Zone</div>
+            </div>
+
+            <!-- Canva-style Interactive Selection Box -->
+            <div id="canvaBoundingBox" class="canva-handle-box">
+              <div class="canva-handle handle-nw"></div>
+              <div class="canva-handle handle-ne"></div>
+              <div class="canva-handle handle-sw"></div>
+              <div class="canva-handle handle-se"></div>
+              <div class="canva-delete-badge hidden" id="canvaDeleteBadge" title="Delete Sticker">×</div>
+            </div>
+
+            <!-- DOM Overlay -->
+            <div id="domOverlayContainer" class="dom-caption-overlay"></div>
+          </div>
+        </div>
+
+        <!-- Playback Scrub Bar & Controls -->
+        <div class="playback-bar">
+          <button id="playPauseBtn" class="btn btn-circle" title="Play / Pause">
+            <span id="playIcon">▶</span>
+          </button>
+          <button id="resetBtn" class="btn btn-circle btn-secondary" title="Reset">
+            <span>↺</span>
+          </button>
+          
+          <div class="scrubber-wrapper">
+            <input type="range" id="timeScrubber" min="0" max="100" value="0" step="0.1">
+            <div class="time-display">
+              <span id="currentTime">0.00s</span> / <span id="totalTime">0.00s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Action Bar -->
+        <div class="export-actions">
+          <input type="file" id="importJsonInput" accept=".json" class="hidden">
+          <button id="importJsonBtn" class="btn btn-secondary">
+            <span>📥 Import Session</span>
+          </button>
+          <button id="exportJsonBtn" class="btn btn-outline">
+            <span>📄 Export JSON</span>
+          </button>
+          <button id="exportFrameBtn" class="btn btn-secondary">
+            <span>📸 Export PNG</span>
+          </button>
+          <button id="exportVideoBtn" class="btn btn-success">
+            <span>🎥 Export Video</span>
+          </button>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Caption Forge MVP • Rule-Based & Groq Whisper STT Engine • Phase 2</p>
+    </footer>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/normalizer.js"></script>
+  <script src="js/segmenter.js"></script>
+  <script src="js/director.js"></script>
+  <script src="js/cutmap.js"></script>
+  <script src="js/alignment.js"></script>
+  <script src="js/accuracy.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
