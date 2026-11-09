@@ -1,0 +1,71 @@
+{
+  "system_info": {
+    "os": "Windows 11",
+    "os_architecture": "64bit",
+    "python_version": "3.12.9",
+    "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "parselmouth_version": "0.4.7"
+  },
+  "results_by_duration": {
+    "10s": {
+      "audio_duration_seconds": 10.0,
+      "iterations": 5,
+      "mean_execution_seconds": 0.1089,
+      "std_execution_seconds": 0.0414,
+      "min_execution_seconds": 0.0853,
+      "max_execution_seconds": 0.1916,
+      "mean_execution_ms": 108.9,
+      "real_time_factor": 0.01089,
+      "real_time_multiplier": 91.8,
+      "baseline_working_set_mb": 101.23,
+      "peak_working_set_mb": 116.34,
+      "mean_peak_python_heap_mb": 1.22,
+      "extracted_features_summary": {
+        "voiced_fraction": 0.7192,
+        "mean_f0_hz": 149.6,
+        "mean_intensity_db": 71.28,
+        "detected_pauses": 5
+      }
+    },
+    "30s": {
+      "audio_duration_seconds": 30.0,
+      "iterations": 5,
+      "mean_execution_seconds": 0.2134,
+      "std_execution_seconds": 0.01,
+      "min_execution_seconds": 0.2047,
+      "max_execution_seconds": 0.2327,
+      "mean_execution_ms": 213.37,
+      "real_time_factor": 0.00711,
+      "real_time_multiplier": 140.6,
+      "baseline_working_set_mb": 101.23,
+      "peak_working_set_mb": 130.12,
+      "mean_peak_python_heap_mb": 3.66,
+      "extracted_features_summary": {
+        "voiced_fraction": 0.7167,
+        "mean_f0_hz": 151.64,
+        "mean_intensity_db": 71.01,
+        "detected_pauses": 15
+      }
+    },
+    "60s": {
+      "audio_duration_seconds": 60.0,
+      "iterations": 5,
+      "mean_execution_seconds": 0.4053,
+      "std_execution_seconds": 0.011,
+      "min_execution_seconds": 0.3925,
+      "max_execution_seconds": 0.4183,
+      "mean_execution_ms": 405.32,
+      "real_time_factor": 0.00676,
+      "real_time_multiplier": 148.0,
+      "baseline_working_set_mb": 101.23,
+      "peak_working_set_mb": 153.93,
+      "mean_peak_python_heap_mb": 7.33,
+      "extracted_features_summary": {
+        "voiced_fraction": 0.7144,
+        "mean_f0_hz": 154.44,
+        "mean_intensity_db": 71.1,
+        "detected_pauses": 30
+      }
+    }
+  }
+}

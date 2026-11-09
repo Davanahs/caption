@@ -30,6 +30,9 @@
         <button id="tabAudioMode" class="tab-btn">
           <span>🎙️ Audio STT (Groq)</span>
         </button>
+        <button id="tabVideoMode" class="tab-btn">
+          <span>🎬 Video Upload</span>
+        </button>
       </div>
 
       <div class="header-status">
@@ -105,6 +108,59 @@
           <audio id="syncAudioPlayer" class="hidden"></audio>
         </div>
 
+        <!-- Mode 3: Video Upload Area -->
+        <div id="videoModeContainer" class="mode-section hidden">
+          <div class="video-dropzone" id="videoDropzone">
+            <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/*,image/*" class="file-input-hidden">
+            <div class="dropzone-content" id="videoDropContent">
+              <span class="upload-icon">🎬</span>
+              <p><b>Click to Upload Video or Image</b> or Drag & Drop</p>
+              <span class="file-specs">Supports MP4, MOV, WEBM, MKV, JPG, PNG (Max 100MB)</span>
+            </div>
+            <div id="videoFileInfo" class="video-file-info hidden">
+              <div class="file-info-header">
+                <span class="file-icon">🎥</span>
+                <div class="file-meta">
+                  <span class="file-name" id="videoFileNameDisplay">video.mp4</span>
+                  <span class="file-size" id="videoFileSizeDisplay">0 MB</span>
+                </div>
+                <button type="button" class="btn-clear-file" id="clearVideoFileBtn" title="Change video">✕</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="controls-row margin-top-sm">
+            <div class="control-item">
+              <label for="videoMaxWordsSlider">Max Words Per Block: <b id="videoMaxWordsVal">4</b></label>
+              <input type="range" id="videoMaxWordsSlider" min="2" max="6" value="4">
+            </div>
+          </div>
+
+          <button id="transcribeVideoBtn" class="btn btn-primary margin-top-sm" disabled>
+            <span id="transcribeVideoBtnText">⚡ Extract Audio & Generate Captions</span>
+          </button>
+
+          <!-- Video Processing Stepper / Status Card -->
+          <div id="videoProcessingStatus" class="video-processing-card hidden">
+            <div class="processing-header">
+              <span class="spinner-icon" id="videoStatusSpinner">⏳</span>
+              <span class="status-title" id="videoStatusTitle">Processing Video...</span>
+            </div>
+            <div class="processing-steps" id="videoProcessingSteps">
+              <div class="step-badge" id="stepUpload"><span class="step-dot"></span> 1. Video</div>
+              <div class="step-badge" id="stepExtract"><span class="step-dot"></span> 2. Audio Track</div>
+              <div class="step-badge" id="stepTranscribe"><span class="step-dot"></span> 3. Whisper + Praat</div>
+              <div class="step-badge" id="stepSegment"><span class="step-dot"></span> 4. Director</div>
+            </div>
+            <div class="status-detail" id="videoStatusDetail">Preparing video upload...</div>
+            <div class="acoustic-summary-pill hidden" id="acousticSummaryPill">
+              <span class="acoustic-icon">📊</span>
+              <span id="acousticSummaryText">Praat Acoustics: Analyzing waveform...</span>
+            </div>
+            <button id="retryVideoBtn" class="btn btn-secondary btn-sm margin-top-sm hidden">↺ Retry Generation</button>
+          </div>
+        </div>
+
         <!-- Style Preset Selector -->
         <div class="panel-section-title margin-top-sm">
           <span>🎨 Select Caption Style Preset</span>
@@ -112,6 +168,9 @@
         <div class="style-presets-grid">
           <button id="presetPrettyGirl" class="preset-btn active" data-style="pretty-pretty-girl">
             <span>🌸 Pretty Girl</span>
+          </button>
+          <button id="presetBehindPerson" class="preset-btn" data-style="behind-person" style="border-color: rgba(255, 230, 0, 0.6); box-shadow: 0 0 10px rgba(255, 230, 0, 0.2);">
+            <span>👤 Behind Person</span>
           </button>
           <button id="presetFitCheck" class="preset-btn" data-style="fit-check">
             <span>💅 Fit Check</span>
@@ -148,6 +207,29 @@
             </button>
           </div>
         </div>
+
+        <!-- Caption Placement & Depth (In Front vs Behind Person) -->
+        <div class="panel-section-title margin-top-sm">
+          <span>👥 Caption Placement / Depth</span>
+        </div>
+        <div class="depth-segmented-control" role="group" aria-label="Caption Depth Layer">
+          <button id="depthInFrontBtn" class="depth-btn active" type="button" title="Standard caption overlaid in front of video — fully visible anywhere, even across the person's face">
+            <span>🔲 In Front (Normal)</span>
+          </button>
+          <button id="depthBehindPersonBtn" class="depth-btn" type="button" title="3D depth caption behind person using AI segmentation">
+            <span>👤 Behind Person (Depth)</span>
+          </button>
+        </div>
+        <!-- Quick Alignment Presets for Behind-Person Mode -->
+        <div id="depthPositionRow" class="depth-position-row hidden">
+          <button id="posAboveHeadBtn" class="depth-pos-btn active" type="button" title="Place caption in clear background space above head (100% visible & readable)">
+            🔝 Above Head (Readable)
+          </button>
+          <button id="posShouldersBtn" class="depth-pos-btn" type="button" title="Place caption behind shoulders spanning wide across background">
+            👤 Wide Shoulders
+          </button>
+        </div>
+        <button id="toggleBehindPersonBtn" class="hidden" style="display:none;" aria-hidden="true"></button>
         <!-- Canva Elements / Stickers Section -->
         <div class="panel-section-title margin-top-sm">
           <span>✨ Add Canva Elements (Stickers)</span>
@@ -223,15 +305,25 @@
       <section class="panel preview-panel">
         <div class="panel-header">
           <h2>2. Interactive Stage Preview</h2>
-          <div class="header-badges">
-            <span class="style-badge">Preset: Lightning Comic ⚡</span>
+          <div class="stage-aspect-selector">
+            <span class="ratio-label">Ratio:</span>
+            <div class="aspect-btns" id="aspectBtnsContainer">
+              <button class="aspect-btn active" data-ratio="auto" title="Auto: Match original video ratio">Auto 🎬</button>
+              <button class="aspect-btn" data-ratio="9:16" title="9:16 Vertical (Reels / TikTok / Shorts)">9:16 📱</button>
+              <button class="aspect-btn" data-ratio="16:9" title="16:9 Landscape (YouTube / Desktop)">16:9 🖥️</button>
+              <button class="aspect-btn" data-ratio="1:1" title="1:1 Square (Instagram)">1:1 ⏹️</button>
+              <button class="aspect-btn" data-ratio="4:5" title="4:5 Portrait (Feed)">4:5 📸</button>
+            </div>
           </div>
         </div>
 
         <!-- Canvas Display Area -->
         <div class="preview-stage-container">
           <div class="video-ratio-box" id="stageBox">
+            <video id="previewVideoPlayer" class="preview-video-player hidden" playsinline></video>
+            <img id="previewImagePlayer" class="preview-image-player hidden" alt="Uploaded Image Preview">
             <canvas id="captionCanvas" width="1080" height="1920"></canvas>
+            <canvas id="personCutoutCanvas" class="person-cutout-layer hidden" width="1080" height="1920"></canvas>
             
             <!-- Safe Zone Overlay Lines -->
             <div id="safeZoneOverlay" class="safe-zone-container">
@@ -268,6 +360,14 @@
               <span id="currentTime">0.00s</span> / <span id="totalTime">0.00s</span>
             </div>
           </div>
+
+          <!-- Volume & Mute Controls -->
+          <div class="volume-control-wrapper">
+            <button id="volumeToggleBtn" class="btn-icon volume-btn" title="Mute / Unmute">
+              <span id="volumeIcon">🔊</span>
+            </button>
+            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1" title="Adjust Volume">
+          </div>
         </div>
 
         <!-- Export Action Bar -->
@@ -297,13 +397,15 @@
   </div>
 
   <!-- Scripts -->
-  <script src="js/normalizer.js"></script>
-  <script src="js/segmenter.js"></script>
-  <script src="js/director.js"></script>
-  <script src="js/cutmap.js"></script>
-  <script src="js/alignment.js"></script>
-  <script src="js/accuracy.js"></script>
-  <script src="js/renderer.js"></script>
-  <script src="js/app.js"></script>
+  <!-- Google MediaPipe Selfie Segmentation for Text-Behind-Person Cutout (Loaded with defer so it never blocks page init) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+  <script src="js/normalizer.js?v=2.5"></script>
+  <script src="js/segmenter.js?v=2.5"></script>
+  <script src="js/director.js?v=2.5"></script>
+  <script src="js/cutmap.js?v=2.5"></script>
+  <script src="js/alignment.js?v=2.5"></script>
+  <script src="js/accuracy.js?v=2.5"></script>
+  <script src="js/renderer.js?v=2.5"></script>
+  <script src="js/app.js?v=2.5"></script>
 </body>
 </html>

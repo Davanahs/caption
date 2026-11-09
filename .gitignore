@@ -26,3 +26,29 @@ tmp/
 *.tmp
 *.webm
 *.mp4
+*.mov
+*.mkv
+*.avi
+cfvideo_*
+cfaudio_*
+
+# Python virtual environments & bytecode
+.venv/
+*/.venv/
+venv/
+*/venv/
+__pycache__/
+*/__pycache__/
+*.pyc
+
+# Local audio test fixtures
+*.wav
+*.mp3
+*.ogg
+*.flac
+*.m4a
+
+# Separate sub-repos and standalone projects
+bagbuddy/
+caption/clipforage/
+

@@ -6,18 +6,281 @@ const multer = require('multer');
 const Groq = require('groq-sdk');
 const fs = require('fs');
 const os = require('os');
+const { spawn } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const AUDIO_CACHE_DIR = path.join(os.tmpdir(), 'cf_audio_cache');
+if (!fs.existsSync(AUDIO_CACHE_DIR)) {
+  fs.mkdirSync(AUDIO_CACHE_DIR, { recursive: true });
+}
+
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// Multer: in-memory storage, 25MB limit
+// Multer: in-memory storage for audio, 25MB limit
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 25 * 1024 * 1024 }
 });
+
+// Multer: disk storage for video uploads (streams up to 100MB to os.tmpdir)
+const uploadVideo = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, os.tmpdir()),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase() || '.mp4';
+      cb(null, `cfvideo_${Date.now()}_${Math.random().toString(36).substring(2, 8)}${ext}`);
+    }
+  }),
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100 MB video limit
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowedExts = ['.mp4', '.mov', '.webm', '.mkv', '.avi', '.m4v'];
+    if (file.mimetype.startsWith('video/') || allowedExts.includes(ext)) {
+      cb(null, true);
+    } else {
+      const err = new Error(`Unsupported video format (${ext || 'unknown'}). Supported formats: MP4, MOV, WEBM, MKV, AVI.`);
+      err.code = 'UNSUPPORTED_FORMAT';
+      cb(err);
+    }
+  }
+});
+
+function getFFmpegPath() {
+  return process.env.FFMPEG_PATH || 'ffmpeg';
+}
+
+function checkFFmpegAvailable() {
+  return new Promise((resolve) => {
+    const ffmpegCmd = getFFmpegPath();
+    const proc = spawn(ffmpegCmd, ['-version']);
+    proc.on('error', () => resolve(false));
+    proc.on('close', (code) => resolve(code === 0));
+  });
+}
+
+function extractAudioFromVideo(videoPath, audioPath) {
+  return new Promise((resolve, reject) => {
+    const ffmpegCmd = getFFmpegPath();
+    // Extract mono 16kHz PCM WAV
+    const args = [
+      '-y',
+      '-i', videoPath,
+      '-vn',
+      '-acodec', 'pcm_s16le',
+      '-ar', '16000',
+      '-ac', '1',
+      audioPath
+    ];
+
+    let stderr = '';
+    const proc = spawn(ffmpegCmd, args);
+
+    proc.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+
+    proc.on('error', (err) => {
+      if (err.code === 'ENOENT') {
+        const notFoundErr = new Error('FFmpeg is not installed or not found on PATH. To enable backend video audio extraction, please install FFmpeg (e.g. winget install Gyan.FFmpeg or https://ffmpeg.org) and ensure it is on PATH or set FFMPEG_PATH in backend/.env.');
+        notFoundErr.code = 'FFMPEG_NOT_FOUND';
+        return reject(notFoundErr);
+      }
+      reject(err);
+    });
+
+    proc.on('close', (code) => {
+      if (code === 0) {
+        try {
+          const stats = fs.statSync(audioPath);
+          if (stats.size === 0) {
+            const emptyErr = new Error('Extracted audio file is empty (0 bytes). The video may not contain audible sound.');
+            emptyErr.code = 'EMPTY_AUDIO';
+            return reject(emptyErr);
+          }
+          resolve(audioPath);
+        } catch (e) {
+          reject(new Error(`Failed to locate extracted audio file: ${e.message}`));
+        }
+      } else {
+        const lowerStderr = stderr.toLowerCase();
+        if (
+          lowerStderr.includes('does not contain any stream') ||
+          lowerStderr.includes('output file does not contain any stream') ||
+          lowerStderr.includes('matches no streams') ||
+          lowerStderr.includes('audio: none') ||
+          lowerStderr.includes('no audio')
+        ) {
+          const noAudioErr = new Error('The uploaded video does not contain an audio stream.');
+          noAudioErr.code = 'NO_AUDIO_STREAM';
+          return reject(noAudioErr);
+        }
+        if (lowerStderr.includes('invalid data found when processing input') || lowerStderr.includes('moov atom not found')) {
+          const corruptErr = new Error('The uploaded video is corrupted or not a valid video file.');
+          corruptErr.code = 'CORRUPTED_VIDEO';
+          return reject(corruptErr);
+        }
+        const generalErr = new Error(`Audio extraction failed with exit code ${code}.`);
+        generalErr.details = stderr.slice(-400);
+        reject(generalErr);
+      }
+    });
+  });
+}
+
+// ─── Automated Praat + Parselmouth Acoustic Engine ──────────────────────────
+function getPraatPythonPath() {
+  return process.env.PRAAT_PYTHON_PATH || path.join(__dirname, '../audio_analysis/.venv/Scripts/python.exe');
+}
+
+function checkPraatAvailable() {
+  return new Promise((resolve) => {
+    const pythonExe = getPraatPythonPath();
+    if (!fs.existsSync(pythonExe)) return resolve(false);
+    const cliScript = path.join(__dirname, '../audio_analysis/cli.py');
+    const proc = spawn(pythonExe, [cliScript, '--help']);
+    proc.on('error', () => resolve(false));
+    proc.on('close', (code) => resolve(code === 0));
+  });
+}
+
+/**
+ * Runs local acoustic analysis on the audio file using Praat / Parselmouth.
+ * Measures F0 pitch (Hz), vocal intensity (dB), pause intervals, and word acoustic summaries.
+ */
+function runPraatAnalysis(audioPath, words = []) {
+  return new Promise((resolve) => {
+    const pythonExe = getPraatPythonPath();
+    const cliScript = path.join(__dirname, '../audio_analysis/cli.py');
+
+    if (!fs.existsSync(pythonExe) || !fs.existsSync(cliScript)) {
+      console.warn('⚠️ Praat Python environment not found at', pythonExe);
+      return resolve(null);
+    }
+
+    let tempIntervalsFile = null;
+    const args = [cliScript, audioPath, '--compact'];
+
+    if (Array.isArray(words) && words.length > 0) {
+      try {
+        const intervals = words.map(w => ({
+          start: w.start,
+          end: w.end,
+          label: (w.word || '').trim()
+        }));
+        tempIntervalsFile = path.join(os.tmpdir(), `cfintervals_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.json`);
+        fs.writeFileSync(tempIntervalsFile, JSON.stringify(intervals));
+        args.push('--intervals', tempIntervalsFile);
+      } catch (err) {
+        console.warn('⚠️ Failed to write intervals for Praat:', err.message);
+      }
+    }
+
+    let stdout = '';
+    let stderr = '';
+    const proc = spawn(pythonExe, args);
+
+    proc.stdout.on('data', chunk => stdout += chunk);
+    proc.stderr.on('data', chunk => stderr += chunk);
+
+    proc.on('close', (code) => {
+      if (tempIntervalsFile) {
+        try { fs.unlinkSync(tempIntervalsFile); } catch (_) {}
+      }
+
+      if (code === 0) {
+        try {
+          const parsed = JSON.parse(stdout);
+          const voicedPct = ((parsed.pitch_analysis?.voiced_fraction || 0) * 100).toFixed(0);
+          const pauseCount = parsed.pause_analysis?.pause_count || 0;
+          console.log(`✅ Automated Praat Analysis complete in ${parsed.analysis_duration_seconds}s (voiced: ${voicedPct}%, pauses: ${pauseCount})`);
+          resolve(parsed);
+        } catch (e) {
+          console.warn('⚠️ Praat output parse error:', e.message);
+          resolve(null);
+        }
+      } else {
+        console.warn('⚠️ Praat exited with code', code, stderr.slice(-300));
+        resolve(null);
+      }
+    });
+
+    proc.on('error', (err) => {
+      if (tempIntervalsFile) {
+        try { fs.unlinkSync(tempIntervalsFile); } catch (_) {}
+      }
+      console.warn('⚠️ Praat process error:', err.message);
+      resolve(null);
+    });
+  });
+}
+
+/**
+ * Augments caption blocks with Praat acoustic emphasis (pitch spikes + loudness peaks).
+ */
+function applyAcousticEmphasis(blocks, praatResult) {
+  if (!praatResult || !praatResult.interval_summaries || !Array.isArray(praatResult.interval_summaries)) {
+    return blocks;
+  }
+
+  const summaries = praatResult.interval_summaries.filter(s => s.intensity && s.intensity.mean_db > 0);
+  if (summaries.length === 0) return blocks;
+
+  const avgDb = summaries.reduce((sum, s) => sum + s.intensity.mean_db, 0) / summaries.length;
+  const voicedSummaries = summaries.filter(s => s.pitch && s.pitch.mean_hz > 0);
+  const avgHz = voicedSummaries.length > 0 
+    ? (voicedSummaries.reduce((sum, s) => sum + s.pitch.mean_hz, 0) / voicedSummaries.length) 
+    : 0;
+
+  const summaryMap = new Map();
+  summaries.forEach(s => {
+    summaryMap.set(parseFloat(s.start.toFixed(2)), s);
+  });
+
+  return blocks.map(block => {
+    let hasAcousticEmphasis = false;
+    const words = (block.words || []).map(w => {
+      const match = summaryMap.get(parseFloat((w.start || 0).toFixed(2)));
+      let isAcousticEmphasis = false;
+      let pitchHz = null;
+      let intensityDb = null;
+
+      if (match) {
+        intensityDb = match.intensity ? parseFloat(match.intensity.mean_db.toFixed(1)) : null;
+        pitchHz = match.pitch ? parseFloat(match.pitch.mean_hz.toFixed(1)) : null;
+
+        const isLoud = intensityDb && (intensityDb >= avgDb + 2.5);
+        const isHighPitch = avgHz > 0 && pitchHz && (pitchHz >= avgHz * 1.15);
+
+        if (isLoud || isHighPitch) {
+          isAcousticEmphasis = true;
+          hasAcousticEmphasis = true;
+        }
+      }
+
+      return {
+        ...w,
+        pitchHz,
+        intensityDb,
+        isAcousticEmphasis,
+        isEmphasis: w.isEmphasis || isAcousticEmphasis
+      };
+    });
+
+    let colorTag = block.colorTag;
+    if (hasAcousticEmphasis && (!colorTag || colorTag === 'neutral')) {
+      colorTag = 'highlight';
+    }
+
+    return {
+      ...block,
+      colorTag,
+      words
+    };
+  });
+}
 
 // Initialize Groq Client
 function getGroqClient() {
@@ -104,12 +367,36 @@ function segmentWhisperWordsToBlocks(words, maxWordsPerBlock = 4, maxCharsPerBlo
 }
 
 // ─── Health Check ──────────────────────────────────────────────────────────
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
+  const ffmpegOk = await checkFFmpegAvailable();
+  const praatOk = await checkPraatAvailable();
   res.json({
     status: 'online',
-    phase: 'Phase 2 — Audio STT Caption Engine',
+    phase: 'Phase 3 — Video & Audio STT + Praat Acoustics',
     groqConfigured: !!(process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'your_groq_api_key_here'),
+    ffmpegAvailable: ffmpegOk,
+    praatAvailable: praatOk,
     timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/ffmpeg-status', async (req, res) => {
+  const ffmpegOk = await checkFFmpegAvailable();
+  res.json({
+    available: ffmpegOk,
+    ffmpegPath: getFFmpegPath(),
+    recommendation: ffmpegOk
+      ? 'FFmpeg is installed and ready for video audio extraction.'
+      : 'FFmpeg is not detected on PATH. To enable backend video audio extraction, install FFmpeg (e.g. winget install Gyan.FFmpeg) and add it to PATH or set FFMPEG_PATH in backend/.env.'
+  });
+});
+
+app.get('/api/praat-status', async (req, res) => {
+  const praatOk = await checkPraatAvailable();
+  res.json({
+    available: praatOk,
+    pythonPath: getPraatPythonPath(),
+    description: 'Local Praat + Parselmouth Acoustic Engine for pitch, intensity, and pause detection'
   });
 });
 
@@ -170,24 +457,24 @@ function ruleBasedDirectorPass(blocks) {
 }
 
 /**
- * Groq LLM Caption Director Pass
+ * Groq LLM Caption Director Pass with Praat Acoustic Emphasis Integration
  */
-async function runDirectorPass(blocks) {
+async function runDirectorPass(blocks, praatResult = null) {
+  let annotatedBlocks;
   try {
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey || apiKey === 'your_groq_api_key_here') {
       console.log('⚠️ GROQ_API_KEY not configured — using deterministic rule-based Director Pass');
-      return ruleBasedDirectorPass(blocks);
-    }
+      annotatedBlocks = ruleBasedDirectorPass(blocks);
+    } else {
+      const groq = getGroqClient();
+      const promptPayload = blocks.map(b => ({ id: b.id, text: b.text }));
 
-    const groq = getGroqClient();
-    const promptPayload = blocks.map(b => ({ id: b.id, text: b.text }));
-
-    const response = await groq.chat.completions.create({
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert Short-Form Video Caption Director (like Submagic/CapCut).
+      const response = await groq.chat.completions.create({
+        messages: [
+          {
+            role: 'system',
+            content: `You are an expert Short-Form Video Caption Director (like Submagic/CapCut).
 Analyze caption text blocks and return visual director annotations to maximize viewer engagement.
 
 For each block, return:
@@ -203,50 +490,57 @@ Respond ONLY with valid JSON:
     { "id": "block_001", "colorTag": "money", "emoji": "💰", "sfx": "cash", "emphasisWords": ["$10,000"] }
   ]
 }`
-        },
-        {
-          role: 'user',
-          content: JSON.stringify({ blocks: promptPayload })
-        }
-      ],
-      model: 'openai/gpt-oss-20b',
-      temperature: 0.2,
-      response_format: { type: 'json_object' }
-    });
-
-    const parsed = JSON.parse(response.choices[0].message.content);
-    const annotations = parsed.annotations || parsed.blocks || [];
-    const annotationMap = new Map(annotations.map(a => [a.id, a]));
-
-    return blocks.map(block => {
-      const ann = annotationMap.get(block.id) || {};
-      const emphasisWords = ann.emphasisWords || [];
-      const colorTag = ann.colorTag || 'neutral';
-      const emoji = ann.emoji || null;
-      const sfx = ann.sfx || null;
-
-      const words = (block.words || []).map(w => {
-        const isEmph = emphasisWords.some(ew => ew.toUpperCase() === w.word.toUpperCase());
-        return {
-          ...w,
-          isEmphasis: isEmph
-        };
+          },
+          {
+            role: 'user',
+            content: JSON.stringify({ blocks: promptPayload })
+          }
+        ],
+        model: 'openai/gpt-oss-20b',
+        temperature: 0.2,
+        response_format: { type: 'json_object' }
       });
 
-      return {
-        ...block,
-        colorTag,
-        emoji,
-        sfx,
-        emphasisWords,
-        words
-      };
-    });
+      const parsed = JSON.parse(response.choices[0].message.content);
+      const annotations = parsed.annotations || parsed.blocks || [];
+      const annotationMap = new Map(annotations.map(a => [a.id, a]));
 
+      annotatedBlocks = blocks.map(block => {
+        const ann = annotationMap.get(block.id) || {};
+        const emphasisWords = ann.emphasisWords || [];
+        const colorTag = ann.colorTag || 'neutral';
+        const emoji = ann.emoji || null;
+        const sfx = ann.sfx || null;
+
+        const words = (block.words || []).map(w => {
+          const isEmph = emphasisWords.some(ew => ew.toUpperCase() === w.word.toUpperCase());
+          return {
+            ...w,
+            isEmphasis: isEmph
+          };
+        });
+
+        return {
+          ...block,
+          colorTag,
+          emoji,
+          sfx,
+          emphasisWords,
+          words
+        };
+      });
+    }
   } catch (err) {
     console.warn('⚠️ Groq Director Pass failed, falling back to rule-based director:', err.message);
-    return ruleBasedDirectorPass(blocks);
+    annotatedBlocks = ruleBasedDirectorPass(blocks);
   }
+
+  // ── Apply Praat Acoustic Emphasis (Pitch & Loudness Peaks) ────────────────
+  if (praatResult) {
+    annotatedBlocks = applyAcousticEmphasis(annotatedBlocks, praatResult);
+  }
+
+  return annotatedBlocks;
 }
 
 // ─── Phase 4: Audio Cleanup & Silence Trimming ─────────────────────────────
@@ -521,29 +815,53 @@ app.post('/api/caption/transcribe-audio', (req, res) => {
 
       const groq = getGroqClient();
 
-      const transcription = await groq.audio.transcriptions.create({
+      const whisperParams = {
         file: fs.createReadStream(tempPath),
         model: 'whisper-large-v3',
         response_format: 'verbose_json',
-        timestamp_granularities: ['word'],
-        language: 'en'
-      });
+        timestamp_granularities: ['word']
+      };
+      if (req.body.language && req.body.language !== 'auto') {
+        whisperParams.language = req.body.language;
+      }
 
-      // Cleanup temp file
-      try { fs.unlinkSync(tempPath); } catch (_) {}
+      const transcription = await groq.audio.transcriptions.create(whisperParams);
 
       const rawWords = transcription.words || [];
       const maxWords = parseInt(req.body.maxWords || '4', 10);
       const rawBlocks = segmentWhisperWordsToBlocks(rawWords, maxWords, 24, 0.25);
       console.log(`✅ Transcribed ${rawWords.length} words → ${rawBlocks.length} caption blocks`);
 
+      // ── Automated Praat Acoustic Analysis ──────────────────────────
+      console.log('📊 Running automated Praat acoustic analysis on audio...');
+      const praatResult = await runPraatAnalysis(tempPath, rawWords);
+
+      // Cleanup temp file
+      try { fs.unlinkSync(tempPath); } catch (_) {}
+
       console.log('🎬 Running Caption Director Pass on transcribed speech...');
-      const annotatedBlocks = await runDirectorPass(rawBlocks);
+      const annotatedBlocks = await runDirectorPass(rawBlocks, praatResult);
 
       res.json({
         success: true,
         text: transcription.text,
         wordCount: rawWords.length,
+        acousticData: praatResult ? {
+          pitch: {
+            meanHz: praatResult.pitch_analysis?.statistics_hz?.mean ? parseFloat(praatResult.pitch_analysis.statistics_hz.mean.toFixed(1)) : 0,
+            maxHz: praatResult.pitch_analysis?.statistics_hz?.max ? parseFloat(praatResult.pitch_analysis.statistics_hz.max.toFixed(1)) : 0,
+            voicedRatio: parseFloat(((praatResult.pitch_analysis?.voiced_fraction || 0) * 100).toFixed(0))
+          },
+          intensity: {
+            meanDb: praatResult.intensity_analysis?.statistics_db?.mean ? parseFloat(praatResult.intensity_analysis.statistics_db.mean.toFixed(1)) : 0,
+            maxDb: praatResult.intensity_analysis?.statistics_db?.max ? parseFloat(praatResult.intensity_analysis.statistics_db.max.toFixed(1)) : 0
+          },
+          pauses: {
+            count: praatResult.pause_analysis?.pause_count || 0,
+            totalDurationSeconds: praatResult.pause_analysis?.total_pause_duration_seconds ? parseFloat(praatResult.pause_analysis.total_pause_duration_seconds.toFixed(2)) : 0
+          },
+          analysisDurationSeconds: praatResult.analysis_duration_seconds || 0
+        } : null,
         captionData: {
           version: '2.0',
           styleId: 'lightning-comic',
@@ -559,6 +877,122 @@ app.post('/api/caption/transcribe-audio', (req, res) => {
         error: 'Transcription failed',
         details: err.message || String(err)
       });
+    }
+  });
+});
+
+// ─── Serve Extracted Audio Stream (16kHz PCM WAV) ──────────────────────────
+app.get('/api/caption/extracted-audio/:filename', (req, res) => {
+  const safeFilename = path.basename(req.params.filename);
+  const filePath = path.join(AUDIO_CACHE_DIR, safeFilename);
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: 'Extracted audio not found or expired.' });
+  }
+  const stat = fs.statSync(filePath);
+  res.writeHead(200, {
+    'Content-Type': 'audio/wav',
+    'Content-Length': stat.size,
+    'Accept-Ranges': 'bytes'
+  });
+  fs.createReadStream(filePath).pipe(res);
+});
+
+// ─── Phase 3: Video Upload & Automatic Caption Generation Endpoint ──────────
+app.post('/api/caption/transcribe-video', (req, res) => {
+  uploadVideo.single('video')(req, res, async (multerErr) => {
+    if (multerErr) {
+      console.error('❌ Multer video upload error:', multerErr.message);
+      if (multerErr.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ error: 'Video file exceeds the 100MB limit.' });
+      }
+      return res.status(400).json({ error: multerErr.message || 'Video file upload failed' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'No video file received. Make sure the field name is "video".' });
+    }
+
+    const videoTempPath = req.file.path;
+    const audioId = `cfaudio_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const audioTempPath = path.join(AUDIO_CACHE_DIR, `${audioId}.wav`);
+
+    console.log(`🎬 Received video: ${req.file.originalname} (${(req.file.size / (1024 * 1024)).toFixed(2)} MB, ${req.file.mimetype})`);
+
+    try {
+      console.log('🔊 Extracting audio track with FFmpeg (16kHz mono WAV)...');
+      await extractAudioFromVideo(videoTempPath, audioTempPath);
+
+      console.log('🎙️ Sending extracted audio to Groq Whisper API (Auto Language Detection)...');
+      const groq = getGroqClient();
+
+      const whisperParams = {
+        file: fs.createReadStream(audioTempPath),
+        model: 'whisper-large-v3',
+        response_format: 'verbose_json',
+        timestamp_granularities: ['word']
+      };
+      if (req.body.language && req.body.language !== 'auto') {
+        whisperParams.language = req.body.language;
+      }
+
+      const transcription = await groq.audio.transcriptions.create(whisperParams);
+
+      const rawWords = transcription.words || [];
+      const maxWords = parseInt(req.body.maxWords || '4', 10);
+      const rawBlocks = segmentWhisperWordsToBlocks(rawWords, maxWords, 24, 0.25);
+      console.log(`✅ Transcribed ${rawWords.length} words from video → ${rawBlocks.length} caption blocks (detected lang: ${transcription.language || 'auto'})`);
+
+      // ── Automated Praat Acoustic Analysis ──────────────────────────
+      console.log('📊 Running automated Praat acoustic analysis on extracted video audio...');
+      const praatResult = await runPraatAnalysis(audioTempPath, rawWords);
+
+      console.log('🎬 Running Caption Director Pass on video transcription...');
+      const annotatedBlocks = await runDirectorPass(rawBlocks, praatResult);
+
+      res.json({
+        success: true,
+        text: transcription.text,
+        wordCount: rawWords.length,
+        language: transcription.language || 'auto',
+        audioUrl: `/api/caption/extracted-audio/${audioId}.wav`,
+        audioDuration: transcription.duration || (rawBlocks.length > 0 ? rawBlocks[rawBlocks.length - 1].end : 0),
+        acousticData: praatResult ? {
+          pitch: {
+            meanHz: praatResult.pitch_analysis?.statistics_hz?.mean ? parseFloat(praatResult.pitch_analysis.statistics_hz.mean.toFixed(1)) : 0,
+            maxHz: praatResult.pitch_analysis?.statistics_hz?.max ? parseFloat(praatResult.pitch_analysis.statistics_hz.max.toFixed(1)) : 0,
+            voicedRatio: parseFloat(((praatResult.pitch_analysis?.voiced_fraction || 0) * 100).toFixed(0))
+          },
+          intensity: {
+            meanDb: praatResult.intensity_analysis?.statistics_db?.mean ? parseFloat(praatResult.intensity_analysis.statistics_db.mean.toFixed(1)) : 0,
+            maxDb: praatResult.intensity_analysis?.statistics_db?.max ? parseFloat(praatResult.intensity_analysis.statistics_db.max.toFixed(1)) : 0
+          },
+          pauses: {
+            count: praatResult.pause_analysis?.pause_count || 0,
+            totalDurationSeconds: praatResult.pause_analysis?.total_pause_duration_seconds ? parseFloat(praatResult.pause_analysis.total_pause_duration_seconds.toFixed(2)) : 0
+          },
+          analysisDurationSeconds: praatResult.analysis_duration_seconds || 0
+        } : null,
+        captionData: {
+          version: '2.0',
+          styleId: 'lightning-comic',
+          layout: { x: 0.5, y: 0.52, scale: 1.0, rotation: 0 },
+          blocks: annotatedBlocks
+        }
+      });
+
+    } catch (err) {
+      console.error('❌ Video Processing Error:', err.message || err);
+      const status = err.code === 'FFMPEG_NOT_FOUND' ? 503 : (err.code === 'NO_AUDIO_STREAM' || err.code === 'CORRUPTED_VIDEO' || err.code === 'EMPTY_AUDIO') ? 400 : 500;
+      res.status(status).json({
+        error: err.message || 'Video processing failed',
+        code: err.code || 'VIDEO_PROCESS_ERROR',
+        details: err.details || null
+      });
+    } finally {
+      // Clean up uploaded video temp file immediately; keep extracted WAV in cache for frontend audio sync playback
+      if (videoTempPath) {
+        try { fs.unlinkSync(videoTempPath); } catch (_) {}
+      }
     }
   });
 });

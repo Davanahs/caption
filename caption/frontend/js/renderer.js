@@ -89,6 +89,21 @@ const SKINS = {
     secondaryGlowColor: '#FF2E9A', // Dual Pink Glow
     strokeColor: '#06040C',
     strokeWidthPct: 0.08
+  },
+  behindperson: {
+    id: 'behindperson',
+    name: 'Text Behind Person',
+    font: "'Anton', 'Archivo Black', 'Montserrat', sans-serif",
+    fontSize: 105,
+    textColor: '#FFE600', // Iconic vibrant yellow text behind subject
+    contextAlpha: 0.95,
+    activeTextColor: '#FFFFFF',
+    chipBg: '#000000',
+    chipPadding: { x: 24, y: 12 },
+    chipRadius: 14,
+    strokeColor: '#000000',
+    strokeWidthPct: 0.08,
+    behindSubject: true
   }
 };
 
@@ -98,7 +113,8 @@ const PRESETS = {
   'ransom-note': { skin: 'ransomnote', animation: 'ransomNoteCutout' },
   'minimal-script': { skin: 'minimalscript', animation: 'minimalScriptHybrid' },
   'create-every-day': { skin: 'script', animation: 'scriptElegance' },
-  'retro-triangle': { skin: 'retro', animation: 'neonGlow' }
+  'retro-triangle': { skin: 'retro', animation: 'neonGlow' },
+  'behind-person': { skin: 'behindperson', animation: 'behindSubjectCutout' }
 };
 
 class LightningComicRenderer {
@@ -107,12 +123,12 @@ class LightningComicRenderer {
     this.ctx = canvasElement.getContext('2d');
     this.overlay = overlayContainer;
     
-    // Canvas Native Resolution (Vertical 1080x1920)
+    // Canvas Native Resolution (Defaults to Vertical 1080x1920)
     this.width = 1080;
     this.height = 1920;
     this.canvas.width = this.width;
     this.canvas.height = this.height;
-    
+
     // Legacy theme compatibility object
     this.theme = {
       fontComic: "'Anton', 'Archivo Black', sans-serif",
@@ -136,6 +152,18 @@ class LightningComicRenderer {
       question: '#3B82F6',  // Vivid Blue
       neutral: '#FFE600'    // Default Neon Yellow
     };
+  }
+
+  /**
+   * Dynamically update canvas dimensions to match video aspect ratio (16:9, 9:16, 1:1, etc.)
+   */
+  setSize(width, height) {
+    this.width = width;
+    this.height = height;
+    if (this.canvas) {
+      this.canvas.width = width;
+      this.canvas.height = height;
+    }
   }
 
   getWordHighlightColor(w, blockColorTag) {
@@ -518,7 +546,22 @@ class LightningComicRenderer {
               ctx.fillText(wordText.toUpperCase(), 0, 0);
             }
           }
-          // 7. Sticker Chip Highlight Box (Submagic / CapCut / MrBeast)
+          // 7. Text Behind Person (Vibrant Bold Yellow with Black Outline Pop)
+          else if (animType === 'behindSubjectCutout') {
+            const popScale = 1.0 + Math.sin(Math.min(activeProgress, 1.0) * Math.PI) * 0.14;
+            ctx.scale(popScale, popScale);
+
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+            ctx.shadowBlur = 18;
+            ctx.lineWidth = strokeWidth * 1.25;
+            ctx.strokeStyle = '#000000';
+            ctx.lineJoin = 'round';
+            ctx.strokeText(wordText, 0, 0);
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText(wordText, 0, 0);
+          }
+          // 8. Sticker Chip Highlight Box (Submagic / CapCut / MrBeast)
           else {
             const popScale = 1.0 + Math.sin(Math.min(activeProgress, 1.0) * Math.PI) * 0.16;
             ctx.scale(popScale, popScale);
@@ -579,6 +622,16 @@ class LightningComicRenderer {
             } else {
               ctx.fillText(wordText.toUpperCase(), 0, 0);
             }
+          } else if (animType === 'behindSubjectCutout') {
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+            ctx.shadowBlur = 12;
+            ctx.lineWidth = strokeWidth;
+            ctx.strokeStyle = '#000000';
+            ctx.lineJoin = 'round';
+            ctx.strokeText(wordText, 0, 0);
+
+            ctx.fillStyle = skin.textColor || '#FFE600';
+            ctx.fillText(wordText, 0, 0);
           } else {
             const wordFillColor = isPast && animType === 'karaokeFill' ? (skin.sweepColor || '#22C55E') : skin.textColor;
 
@@ -736,6 +789,7 @@ class LightningComicRenderer {
       if (presetKey === 'fit-check') sampleText = 'fit check';
       if (presetKey === 'ransom-note') sampleText = 'the end';
       if (presetKey === 'minimal-script') sampleText = 'best of me';
+      if (presetKey === 'behind-person') sampleText = 'BEHIND';
 
       tempRenderer.render({
         styleId: presetKey,
