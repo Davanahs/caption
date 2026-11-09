@@ -1,0 +1,68 @@
+[
+  {
+    "batch": "Batch A (Latest 3)",
+    "source_ytid": "UBHOWXL4Apg",
+    "clip_id": "ab96872a-e81f-482d-98eb-2024919e3bbb",
+    "title": "Why the number 4 key breaks everything \ud83d\udd11",
+    "status": "published",
+    "youtube_id": "YpHobheDpk8",
+    "url": "https://www.youtube.com/shorts/YpHobheDpk8",
+    "published_at": "2026-10-26T13:17:59.357985+00:00",
+    "note": "Reused verified publication"
+  },
+  {
+    "batch": "Batch A (Latest 3)",
+    "source_ytid": "Cm45rJ_ayA4",
+    "clip_id": "988b9d0d-1244-4e57-9771-f3d0b1d552d9",
+    "title": "Software Engineer Salary vs Cost of Living: Which City Wins? \ud83c\udfd9\ufe0f",
+    "status": "published",
+    "youtube_id": "kkXWbXZI_iM",
+    "url": "https://www.youtube.com/shorts/kkXWbXZI_iM",
+    "published_at": "2026-10-26T13:20:25.170918+00:00",
+    "duration_seconds": 38.086564
+  },
+  {
+    "batch": "Batch A (Latest 3)",
+    "source_ytid": "MjDUTSOsUMg",
+    "clip_id": "a0dfbe13-bb91-4a60-bb7a-dcbdf02c1466",
+    "title": "Adobe's Moat Just Died? \ud83d\ude31",
+    "status": "published",
+    "youtube_id": "0OfOivc-tpU",
+    "url": "https://www.youtube.com/shorts/0OfOivc-tpU",
+    "published_at": "2026-10-26T13:20:27.270914+00:00",
+    "duration_seconds": 2.095925
+  },
+  {
+    "batch": "Batch B (3 Most-Viewed)",
+    "source_ytid": "-rPzGJH1acU",
+    "clip_id": "b1b8af97-d7b9-4873-baf0-e0013f2660a1",
+    "title": "Ben Affleck Paid $587M For AI? \ud83e\udd16",
+    "status": "published",
+    "youtube_id": "39w4TLjreFU",
+    "url": "https://www.youtube.com/shorts/39w4TLjreFU",
+    "published_at": "2026-10-26T13:20:28.824616+00:00",
+    "duration_seconds": 1.549665
+  },
+  {
+    "batch": "Batch B (3 Most-Viewed)",
+    "source_ytid": "bBlahWRZ2Yw",
+    "clip_id": "f9bedd47-4eb4-411d-ab9d-6fff5205ce5a",
+    "title": "Why Your AI Content Fails \ud83d\ude31",
+    "status": "published",
+    "youtube_id": "L3ihlJVo_3A",
+    "url": "https://www.youtube.com/shorts/L3ihlJVo_3A",
+    "published_at": "2026-10-26T13:20:29.845227+00:00",
+    "duration_seconds": 1.016514
+  },
+  {
+    "batch": "Batch B (3 Most-Viewed)",
+    "source_ytid": "m5hidzW-_i0",
+    "clip_id": "295a2da3-7a04-4a85-90d8-1e981d84b534",
+    "title": "Is $200 AI Worth It? Free vs Paid \ud83e\udd14",
+    "status": "published",
+    "youtube_id": "FoNMm4F9qIM",
+    "url": "https://www.youtube.com/shorts/FoNMm4F9qIM",
+    "published_at": "2026-10-26T13:20:31.340015+00:00",
+    "duration_seconds": 1.489402
+  }
+]

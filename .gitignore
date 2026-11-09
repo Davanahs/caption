@@ -50,5 +50,14 @@ __pycache__/
 
 # Separate sub-repos and standalone projects
 bagbuddy/
-caption/clipforage/
+
+# ClipForge runtime, database, storage & build artifacts
+**/clipforge/data/
+**/clipforge/uploads/
+**/clipforge/outputs/
+**/clipforge/tokens/
+**/clipforge/tmp/
+**/clipforge/frontend/.next/
+**/.next/
+
 

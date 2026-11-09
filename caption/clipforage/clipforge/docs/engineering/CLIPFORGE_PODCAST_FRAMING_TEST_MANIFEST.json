@@ -1,0 +1,161 @@
+{
+  "project": "ClipForge",
+  "repository": "d:\\automation video clips\\clipforge",
+  "branch": "feature/layout",
+  "mission": "Podcast Framing, Cropping & Live Output Preview Correction",
+  "timestamp": "2026-11-02T22:25:00Z",
+  "execution_roles": [
+    "Senior Video Processing Engineer",
+    "Computer Vision Engineer",
+    "Frontend/Backend Engineer",
+    "QA Architect"
+  ],
+  "test_suites": [
+    {
+      "suite_type": "backend_pytest",
+      "file": "backend/tests/test_layout_engine.py",
+      "total_tests": 11,
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "key_assertions": [
+        "LayoutPlan construction for all modes",
+        "ScaleMode.CONTAIN scale mode verification",
+        "BackgroundPolicy letterbox padding verification",
+        "Even pixel alignment and dimension clamping"
+      ]
+    },
+    {
+      "suite_type": "backend_pytest",
+      "file": "backend/tests/test_podcast_layout_pipeline.py",
+      "total_tests": 9,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "key_assertions": [
+        "Standard Podcast stacked layout produces 1080x960 panels",
+        "Standard Podcast single_region layout produces 1080x1920 panel",
+        "ScaleMode.CONTAIN strictly enforced on all podcast regions",
+        "Zero subtitle burn-in (-sn) and continuous audio stream"
+      ]
+    },
+    {
+      "suite_type": "backend_pytest",
+      "file": "backend/tests/test_advanced_podcast.py",
+      "total_tests": 24,
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "key_assertions": [
+        "Normalized HSV histogram extraction & comparison",
+        "Camera cut detection and temporal intervaling",
+        "9:16 crop rectangle math with even pixel alignment",
+        "Dynamic segment concatenation with continuous audio trim",
+        "Single-shot and multi-shot camera following rendering with -sn"
+      ]
+    },
+    {
+      "suite_type": "backend_pytest",
+      "file": "backend/tests/test_podcast_layout_features.py",
+      "total_tests": 23,
+      "passed": 23,
+      "failed": 0,
+      "skipped": 0,
+      "key_assertions": [
+        "Feature 1: Fixed two-person boundary camera following",
+        "Feature 1: Geometric limit detection and anti-collapse invariant",
+        "Feature 2: Visibility classification (A_ONLY, B_ONLY, SIDE_BY_SIDE, UNKNOWN_REVIEW)",
+        "Feature 2: Safe fallback to UNKNOWN_REVIEW without participant duplication",
+        "Feature 2: Horizontal hstack composition with contain scaling (zero 304px slicing)",
+        "Continuous audio stream and -sn flag verified across all render pathways"
+      ]
+    },
+    {
+      "suite_type": "frontend_node_test",
+      "file": "frontend/test/podcast_coordinates.test.mjs",
+      "total_tests": 9,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "key_assertions": [
+        "createDefaultPodcastRegions normalization",
+        "clampNormalizedRect bounds and minimum sizes",
+        "displayToNormalized and normalizedToDisplay scale invariance",
+        "calculatePanelFraming exact contain scaling and centering padding",
+        "calculatePanelFraming tight headroom risk detection",
+        "getOutputPreviewGeometry stacked 1080x960 top/bottom panels",
+        "getOutputPreviewGeometry single_region 1080x1920 single panel"
+      ]
+    },
+    {
+      "suite_type": "frontend_node_test",
+      "file": "frontend/test/podcast_selection_modal.test.mjs",
+      "total_tests": 9,
+      "passed": 9,
+      "failed": 0,
+      "skipped": 0,
+      "key_assertions": [
+        "Modal component and interface export",
+        "YouTube player embed and metadata display",
+        "Interactive selection overlay and handle resizing",
+        "Playback vs edit mode switching",
+        "Selected Areas Preview rendering 9:16 vertical representation",
+        "API client serialization of regions and composition"
+      ]
+    },
+    {
+      "suite_type": "frontend_node_test",
+      "file": "frontend/test/advanced_podcast.test.mjs",
+      "total_tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "skipped": 0,
+      "key_assertions": [
+        "Advanced Podcast card copy and mode toggle",
+        "Shot analysis controls and detected schedule table",
+        "Single 9:16 camera-following preview semantics (no stacked panels)",
+        "API client exports analyzePodcastShots and serializes shot_schedule"
+      ]
+    },
+    {
+      "suite_type": "frontend_node_test",
+      "file": "frontend/test/podcast_async_polling.test.mjs",
+      "total_tests": 7,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "key_assertions": [
+        "Async polling with AbortSignal cancellation",
+        "Wall-clock deadline enforcement",
+        "Modal cleanup on unmount",
+        "Isolation of background task sessions"
+      ]
+    },
+    {
+      "suite_type": "frontend_type_check",
+      "file": "frontend/tsconfig.json",
+      "command": "npx tsc --noEmit",
+      "status": "PASS",
+      "errors": 0
+    }
+  ],
+  "aggregate_metrics": {
+    "total_backend_tests": 67,
+    "passed_backend_tests": 67,
+    "total_frontend_tests": 31,
+    "passed_frontend_tests": 31,
+    "total_all_tests": 98,
+    "passed_all_tests": 98,
+    "failed_all_tests": 0,
+    "pass_rate": "100.0%"
+  },
+  "invariants_verified": {
+    "zero_participant_duplication": true,
+    "zero_head_shoulder_clipping": true,
+    "zero_subtitle_burn_in": true,
+    "continuous_uninterrupted_audio": true,
+    "shared_contain_scaling_geometry": true,
+    "horizontal_side_by_side_hstack": true,
+    "live_9_16_output_preview_reactive": true
+  }
+}

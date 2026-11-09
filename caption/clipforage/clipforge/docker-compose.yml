@@ -1,0 +1,145 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: clipforge_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - ./data/redis:/data
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: clipforge_postgres
+    environment:
+      POSTGRES_USER: clipforge_user
+      POSTGRES_PASSWORD: clipforge_password
+      POSTGRES_DB: clipforge
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clipforge_user -d clipforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: clipforge-backend:latest
+    container_name: clipforge_backend
+    ports:
+      - "127.0.0.1:8000:8000"
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./backend:/app/backend
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+      - ./tmp:/tmp
+      - ./tokens:/app/tokens
+      - ./Gemini_Generated_Image_2rh1j72rh1j72rh1.png:/app/Gemini_Generated_Image_2rh1j72rh1j72rh1.png
+    env_file:
+      - .env
+    environment:
+      - UPLOAD_DIR=/app/uploads
+      - OUTPUT_DIR=/app/outputs
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - DATABASE_URL=postgresql+asyncpg://clipforge_user:clipforge_password@postgres:5432/clipforge
+      - SYNC_DATABASE_URL=postgresql+psycopg2://clipforge_user:clipforge_password@postgres:5432/clipforge
+      - STORAGE_IDENTITY_SECRET=${STORAGE_IDENTITY_SECRET}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+
+  worker:
+    image: clipforge-backend:latest
+    container_name: clipforge_worker
+    volumes:
+      - ./backend:/app/backend
+      - ./uploads:/app/uploads
+      - ./outputs:/app/outputs
+      - ./tmp:/tmp
+      - ./tokens:/app/tokens
+      - ./Gemini_Generated_Image_2rh1j72rh1j72rh1.png:/app/Gemini_Generated_Image_2rh1j72rh1j72rh1.png
+    env_file:
+      - .env
+    environment:
+      - UPLOAD_DIR=/app/uploads
+      - OUTPUT_DIR=/app/outputs
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - DATABASE_URL=postgresql+asyncpg://clipforge_user:clipforge_password@postgres:5432/clipforge
+      - SYNC_DATABASE_URL=postgresql+psycopg2://clipforge_user:clipforge_password@postgres:5432/clipforge
+      - STORAGE_IDENTITY_SECRET=${STORAGE_IDENTITY_SECRET}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    restart: unless-stopped
+    command: celery -A backend.tasks.process_video.celery_app worker --loglevel=info --concurrency=4
+
+  beat:
+    image: clipforge-backend:latest
+    container_name: clipforge_beat
+    volumes:
+      - ./backend:/app/backend
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - DATABASE_URL=postgresql+asyncpg://clipforge_user:clipforge_password@postgres:5432/clipforge
+      - SYNC_DATABASE_URL=postgresql+psycopg2://clipforge_user:clipforge_password@postgres:5432/clipforge
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    restart: unless-stopped
+    command: celery -A backend.tasks.process_video.celery_app beat --loglevel=info
+
+  flower:
+    image: clipforge-backend:latest
+    container_name: clipforge_flower
+    ports:
+      - "5555:5555"
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/1
+      - DATABASE_URL=postgresql+asyncpg://clipforge_user:clipforge_password@postgres:5432/clipforge
+      - SYNC_DATABASE_URL=postgresql+psycopg2://clipforge_user:clipforge_password@postgres:5432/clipforge
+    depends_on:
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+      worker:
+        condition: service_started
+    restart: unless-stopped
+    command: celery -A backend.tasks.process_video.celery_app flower --port=5555
+

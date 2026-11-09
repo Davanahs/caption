@@ -1,0 +1,3961 @@
+[
+  {
+    "eventId": "EVT-001",
+    "timestamp": "2026-11-04T08:46:29.144Z",
+    "route": "/",
+    "controlId": "CTL-NAV-004",
+    "familyId": "FAM-NAV-ROUTE-DSH",
+    "description": "Initial navigation to Dashboard landmark",
+    "action": "navigate",
+    "value": "http://localhost:3000/",
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/",
+        "status": 200,
+        "durationMs": 41
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/css/app/layout.css?v=1793781989160",
+        "status": 200,
+        "durationMs": 11
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/webpack.js?v=1793781989160",
+        "status": 200,
+        "durationMs": 29
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/main-app.js?v=1793781989160",
+        "status": 200,
+        "durationMs": 276
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "durationMs": 29
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/layout.js",
+        "status": 200,
+        "durationMs": 29
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/page.js",
+        "status": 200,
+        "durationMs": 63
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        "status": 200,
+        "durationMs": 562
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+        "status": 200,
+        "durationMs": 490
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+        "status": 200,
+        "durationMs": 480
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf",
+        "status": 200,
+        "durationMs": 424
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf",
+        "status": 200,
+        "durationMs": 548
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+        "status": 200,
+        "durationMs": 540
+      },
+      {
+        "method": "GET",
+        "url": "/api/health",
+        "status": 200,
+        "durationMs": 31
+      },
+      {
+        "method": "GET",
+        "url": "/api/stats",
+        "status": 200,
+        "durationMs": 70
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/active",
+        "status": 200,
+        "durationMs": 81
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/history?limit=24",
+        "status": 200,
+        "durationMs": 70
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/stats",
+        "status": 200,
+        "durationMs": 59
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/stats",
+        "status": 200,
+        "durationMs": 139
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/0GjbIOS9Q90/hqdefault.jpg",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/24DrO-q47dU/hqdefault.jpg",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [
+      {
+        "timestamp": "2026-11-04T08:46:29.970Z",
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js",
+          "line": 27,
+          "column": 27,
+          "lineNumber": 27,
+          "columnNumber": 27
+        }
+      }
+    ],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-002",
+    "timestamp": "2026-11-04T08:46:30.600Z",
+    "route": "/",
+    "controlId": "CTL-DSH-001",
+    "familyId": "FAM-DSH-MODE-TAB",
+    "description": "Activate Single URL ingestion tab",
+    "action": "click",
+    "selector": "button:has-text(\"Single URL\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Single URL",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Single URL",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-003",
+    "timestamp": "2026-11-04T08:46:31.369Z",
+    "route": "/",
+    "controlId": "CTL-DSH-002",
+    "familyId": "FAM-DSH-MODE-TAB",
+    "description": "Toggle to Bulk / Batch multi-line URL textarea",
+    "action": "click",
+    "selector": "button:has-text(\"Bulk / Batch\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Bulk / Batch",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Bulk / Batch",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-004",
+    "timestamp": "2026-11-04T08:46:32.161Z",
+    "route": "/",
+    "controlId": "CTL-DSH-001",
+    "familyId": "FAM-DSH-MODE-TAB",
+    "description": "Toggle back to Single URL input mode",
+    "action": "click",
+    "selector": "button:has-text(\"Single URL\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Single URL",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Single URL",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-005",
+    "timestamp": "2026-11-04T08:46:32.941Z",
+    "route": "/",
+    "controlId": "CTL-DSH-004",
+    "familyId": "FAM-DSH-URL-INPUT",
+    "description": "Enter valid YouTube video URL in Quick Ingest field",
+    "action": "fill",
+    "selector": "input.input-field",
+    "value": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": "input-field"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-006",
+    "timestamp": "2026-11-04T08:46:33.489Z",
+    "route": "/",
+    "controlId": "CTL-DSH-005",
+    "familyId": "FAM-DSH-GENERATE-BTN",
+    "description": "Inspect Generate button state (assert enabled with valid URL)",
+    "action": "inspect",
+    "selector": "button:has-text(\"Generate\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "⚡ Generate",
+      "className": "btn-primary"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "⚡ Generate",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-007",
+    "timestamp": "2026-11-04T08:46:33.832Z",
+    "route": "/",
+    "controlId": "CTL-DSH-003",
+    "familyId": "FAM-DSH-PODCAST-CTA",
+    "description": "Click Podcast / Interview Mode button to trigger modal",
+    "action": "click",
+    "selector": "button#podcast-interview-mode-btn",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "🎙️\nPodcast / Interview",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "🎙️\nPodcast / Interview",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf",
+        "status": 200,
+        "durationMs": 176
+      },
+      {
+        "method": "GET",
+        "url": "https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1&rel=0&modestbranding=1",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
+        "status": 200,
+        "durationMs": 406
+      },
+      {
+        "method": "GET",
+        "url": "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-008",
+    "timestamp": "2026-11-04T08:46:34.656Z",
+    "route": "/",
+    "controlId": "CTL-POD-001",
+    "familyId": "FAM-POD-CLOSE-MODAL",
+    "description": "Dismiss Podcast Selection Modal via close icon",
+    "action": "click",
+    "selector": "button:has-text(\"✕\"), button[aria-label=\"Close\"]",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "✕",
+      "className": null
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "https://www.youtube-nocookie.com/s/player/4a1e575f/www-player.css",
+        "status": 200,
+        "durationMs": 163
+      },
+      {
+        "method": "GET",
+        "url": "https://www.youtube-nocookie.com/s/_/ytembeds/_/ss/k=ytembeds.base.8XZt5NemICA.L.X.O/am=AAAAQABgDA/d=1/br=1/rs=AGKMywEqgW9h0DJx3wYRUlhWpsFfoPDEsw/m=root,base",
+        "status": 200,
+        "durationMs": 218
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/roboto/v48/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWubEbVmUiA8.ttf",
+        "status": 200,
+        "durationMs": 204
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/roboto/v48/KFOMCnqEu92Fr1ME7kSn66aGLdTylUAMQXC89YmC2DPNWub2bVmUiA8.ttf",
+        "status": 200,
+        "durationMs": 157
+      },
+      {
+        "method": "GET",
+        "url": "https://www.youtube-nocookie.com/s/_/ytembeds/_/js/k=ytembeds.base.en_US.etQ6AbNK8cc.es5.O/am=AAAAQABgDA/d=1/excm=base,root/br=1/rs=AGKMywHFQSASVCy9rKkFkCA9BHYyFJbQpA/m=root,base",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://www.youtube-nocookie.com/s/player/4a1e575f/player_embed.vflset/en_GB/base.js",
+        "status": "FAILED",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-009",
+    "timestamp": "2026-11-04T08:46:35.721Z",
+    "route": "/",
+    "controlId": "CTL-DSH-004",
+    "familyId": "FAM-DSH-URL-INPUT",
+    "description": "Clear YouTube URL input (reverts generate button to disabled)",
+    "action": "fill",
+    "selector": "input.input-field",
+    "value": "",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": "input-field"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-010",
+    "timestamp": "2026-11-04T08:46:36.267Z",
+    "route": "/podcasts",
+    "controlId": "CTL-NAV-005",
+    "familyId": "FAM-NAV-ROUTE-POD",
+    "description": "Navigate to Podcast / Interview Studio route",
+    "action": "navigate",
+    "value": "http://localhost:3000/podcasts",
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/podcasts",
+        "status": 200,
+        "durationMs": 44
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/css/app/layout.css?v=1793781996283",
+        "status": 200,
+        "durationMs": 8
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/webpack.js?v=1793781996283",
+        "status": 200,
+        "durationMs": 26
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/main-app.js?v=1793781996283",
+        "status": 200,
+        "durationMs": 283
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "durationMs": 25
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/layout.js",
+        "status": 200,
+        "durationMs": 25
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/podcasts/page.js",
+        "status": 200,
+        "durationMs": 27
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/health",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/stats",
+        "status": 200,
+        "durationMs": 0
+      }
+    ],
+    "consoleMessages": [
+      {
+        "timestamp": "2026-11-04T08:46:37.134Z",
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js",
+          "line": 27,
+          "column": 27,
+          "lineNumber": 27,
+          "columnNumber": 27
+        }
+      }
+    ],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-011",
+    "timestamp": "2026-11-04T08:46:37.143Z",
+    "route": "/podcasts",
+    "controlId": "CTL-POD-001",
+    "familyId": "FAM-POD-STUDIO-OPEN",
+    "description": "Open Podcast Selection Studio modal",
+    "action": "click",
+    "selector": "button:has-text(\"Open Podcast Selection Studio\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Open Podcast Selection Studio",
+      "className": "btn-primary"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Open Podcast Selection Studio",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-012",
+    "timestamp": "2026-11-04T08:46:37.855Z",
+    "route": "/podcasts",
+    "controlId": "CTL-POD-002",
+    "familyId": "FAM-POD-MODE-SELECTOR",
+    "description": "Inspect Stacked Split controls inside Podcast Selection Modal",
+    "action": "inspect",
+    "selector": "button:has-text(\"Stacked Split\"), [data-testid=\"mode-stacked-split\"], button:has-text(\"Next\"), button:has-text(\"✕\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "✕",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "✕",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-013",
+    "timestamp": "2026-11-04T08:46:38.182Z",
+    "route": "/podcasts",
+    "controlId": "CTL-POD-001",
+    "familyId": "FAM-POD-CLOSE-MODAL",
+    "description": "Dismiss Podcast Selection Modal back to Studio card",
+    "action": "click",
+    "selector": "button:has-text(\"✕\"), button:has-text(\"Cancel\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "✕",
+      "className": null
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-014",
+    "timestamp": "2026-11-04T08:46:39.078Z",
+    "route": "/studio",
+    "controlId": "CTL-NAV-006",
+    "familyId": "FAM-NAV-ROUTE-STU",
+    "description": "Navigate to Upload Studio route",
+    "action": "navigate",
+    "value": "http://localhost:3000/studio",
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/studio",
+        "status": 200,
+        "durationMs": 40
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/css/app/layout.css?v=1793781999092",
+        "status": 200,
+        "durationMs": 4
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/webpack.js?v=1793781999092",
+        "status": 200,
+        "durationMs": 22
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/main-app.js?v=1793781999092",
+        "status": 200,
+        "durationMs": 286
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "durationMs": 23
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/layout.js",
+        "status": 200,
+        "durationMs": 25
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/studio/page.js",
+        "status": 200,
+        "durationMs": 26
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/health",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/health",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/stats",
+        "status": 200,
+        "durationMs": 0
+      }
+    ],
+    "consoleMessages": [
+      {
+        "timestamp": "2026-11-04T08:46:39.941Z",
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js",
+          "line": 27,
+          "column": 27,
+          "lineNumber": 27,
+          "columnNumber": 27
+        }
+      }
+    ],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-015",
+    "timestamp": "2026-11-04T08:46:39.958Z",
+    "route": "/studio",
+    "controlId": "CTL-STU-001",
+    "familyId": "FAM-STU-DROPZONE",
+    "description": "Inspect multi-video HTML5 dropzone input element",
+    "action": "inspect",
+    "selector": "#file-input",
+    "value": null,
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-016",
+    "timestamp": "2026-11-04T08:46:40.274Z",
+    "route": "/studio",
+    "controlId": "CTL-STU-004",
+    "familyId": "FAM-STU-CLEAR-QUEUE",
+    "description": "Inspect Clear Queue button state in empty queue condition",
+    "action": "inspect",
+    "selector": "button:has-text(\"Clear Queue\")",
+    "value": null,
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-017",
+    "timestamp": "2026-11-04T08:46:40.586Z",
+    "route": "/clips",
+    "controlId": "CTL-NAV-007",
+    "familyId": "FAM-NAV-ROUTE-CLP",
+    "description": "Navigate to Clips Library route",
+    "action": "navigate",
+    "value": "http://localhost:3000/clips",
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/clips",
+        "status": 200,
+        "durationMs": 38
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/css/app/layout.css?v=1793782000600",
+        "status": 200,
+        "durationMs": 8
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/webpack.js?v=1793782000600",
+        "status": 200,
+        "durationMs": 42
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/main-app.js?v=1793782000600",
+        "status": 200,
+        "durationMs": 324
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "durationMs": 9
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/layout.js",
+        "status": 200,
+        "durationMs": 41
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/clips/page.js",
+        "status": 200,
+        "durationMs": 52
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/health",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips",
+        "status": 307,
+        "durationMs": 2
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/stats",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [
+      {
+        "timestamp": "2026-11-04T08:46:41.505Z",
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js",
+          "line": 27,
+          "column": 27,
+          "lineNumber": 27,
+          "columnNumber": 27
+        }
+      }
+    ],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-018",
+    "timestamp": "2026-11-04T08:46:41.520Z",
+    "route": "/clips",
+    "controlId": "CTL-CLP-005",
+    "familyId": "FAM-CLP-SEARCH-INPUT",
+    "description": "Filter clips library by keyword search input",
+    "action": "fill",
+    "selector": "input[placeholder*=\"Search\"], input[type=\"search\"], input.input-field",
+    "value": "Podcast Highlight",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-019",
+    "timestamp": "2026-11-04T08:46:42.060Z",
+    "route": "/clips",
+    "controlId": "CTL-CLP-005",
+    "familyId": "FAM-CLP-SEARCH-INPUT",
+    "description": "Clear search filter to restore complete clip dataset",
+    "action": "fill",
+    "selector": "input[placeholder*=\"Search\"], input[type=\"search\"], input.input-field",
+    "value": "",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/api/clips/9710c554-d5db-4c31-aff2-083197debdf6/thumbnail",
+        "status": 200,
+        "durationMs": 46
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/8e03527a-5389-40ed-8abb-43456da76dc9/thumbnail",
+        "status": 200,
+        "durationMs": 45
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/1c20adaf-f950-4219-9be0-b75050e1e27e/thumbnail",
+        "status": 200,
+        "durationMs": 42
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/c0c86eb1-e690-43f1-a628-421ea4652490/thumbnail",
+        "status": 200,
+        "durationMs": 43
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2f5e6c35-278d-4bad-b41e-db8f4b0b1d86/thumbnail",
+        "status": 200,
+        "durationMs": 45
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/698dc92f-c946-486f-ac72-447cc918f415/thumbnail",
+        "status": 200,
+        "durationMs": 89
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/5790aacf-7bc1-4453-baac-85390f32b99b/thumbnail",
+        "status": 200,
+        "durationMs": 46
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/e12be962-1d6c-4dd4-98c5-04a32a858550/thumbnail",
+        "status": 200,
+        "durationMs": 47
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/aefafcc0-b26e-49c3-96a9-1928d84f45b2/thumbnail",
+        "status": 200,
+        "durationMs": 46
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/cbb61a78-90a3-4f0a-8357-4be97b0e5565/thumbnail",
+        "status": 200,
+        "durationMs": 46
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/7c379ce5-95d0-4c63-acd9-5e51a5a2ed07/thumbnail",
+        "status": 200,
+        "durationMs": 45
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/1d688001-5ad7-4a93-8e7a-1c3a3f22ac7b/thumbnail",
+        "status": 200,
+        "durationMs": 104
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/803695a0-0eb2-438f-a290-f4c5c101649c/thumbnail",
+        "status": 200,
+        "durationMs": 103
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/d00c5ee9-cb2b-44eb-904b-4f45fbabbfd6/thumbnail",
+        "status": 200,
+        "durationMs": 104
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/80f38f73-a638-4571-96f7-a6c305b37885/thumbnail",
+        "status": 200,
+        "durationMs": 137
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/7b3fd538-e588-48b8-b445-b1f45067c6a9/thumbnail",
+        "status": 200,
+        "durationMs": 102
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/0d3e4a67-6dca-4aeb-870c-564e93e0f29b/thumbnail",
+        "status": 200,
+        "durationMs": 130
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/13d2f9c2-66b0-4d31-b765-60fda9d30171/thumbnail",
+        "status": 200,
+        "durationMs": 157
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/cecc659b-c6f0-405b-9b7a-eaa0ddd7add6/thumbnail",
+        "status": 200,
+        "durationMs": 158
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/9cc8b475-d5d8-4fb2-9bdf-ff136aa36266/thumbnail",
+        "status": 200,
+        "durationMs": 158
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/3717a40a-2238-4d55-a7cd-14882378d121/thumbnail",
+        "status": 200,
+        "durationMs": 159
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/e688daf2-139e-4dcd-8fd2-c9f9b6a45075/thumbnail",
+        "status": 200,
+        "durationMs": 182
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a19ea050-7d58-48c5-bd22-5d4ae3ce5d15/thumbnail",
+        "status": 200,
+        "durationMs": 188
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/e97c713d-6de9-4678-a89e-74bbaad016d5/thumbnail",
+        "status": 200,
+        "durationMs": 206
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2bcb749d-0e43-4baa-9951-7fa6196a57ce/thumbnail",
+        "status": 200,
+        "durationMs": 214
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/8d361134-5eef-49e2-9558-03cd94b046dd/thumbnail",
+        "status": 200,
+        "durationMs": 219
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/9fd7db5b-4bdc-4851-ade1-ffdd58741c8f/thumbnail",
+        "status": 200,
+        "durationMs": 218
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/bf35638e-3eba-4e0d-a7e5-5928e0a35229/thumbnail",
+        "status": 200,
+        "durationMs": 413
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/486255c1-e698-4301-a6eb-ad79da5b3de3/thumbnail",
+        "status": 200,
+        "durationMs": 413
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/65a10ec4-1253-4eb9-932e-421a6d28d6ff/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/bfb6f2b6-5a85-4e7e-a39e-ef3a1257e8cc/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2b62dccd-5380-4802-b803-85103775cb70/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/6265b2b6-7d7b-4737-8c88-352e5e66683e/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/7cea22ba-8e5e-456d-904c-75e1020668af/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/bc5f2cc3-43d1-4a7e-a023-ccd2c8b0b448/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/4af1f142-000b-49c0-8558-77878693cecb/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/de7719b1-7f4d-4370-b967-8723f051fe28/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/f31e7aa0-8af2-47f4-8d8b-3df191179076/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/56a06bc9-93d4-4112-b78b-ccc7e55060d1/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/33ffa701-ebc6-4625-8d13-b5545e2856be/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/de12554d-4054-4a77-aaa8-a9b62f338295/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/f10bba9b-08a3-42aa-8c1d-a32322861035/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/7402b661-71ac-44f4-9372-9bebb29ff672/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/9eda114a-ffeb-49c1-9cfd-b7d2e4147d93/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/4dd71699-1792-42f6-b649-f02a7c461f05/thumbnail",
+        "status": 200,
+        "durationMs": 413
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/8cbff794-eb23-435a-87a4-65109b3d9427/thumbnail",
+        "status": 200,
+        "durationMs": 414
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/bbd37258-4498-46fc-94c5-2eb052ee4530/thumbnail",
+        "status": 200,
+        "durationMs": 415
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/b002c5a3-5e7a-4960-a07d-613475280ae7/thumbnail",
+        "status": 200,
+        "durationMs": 445
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a332b568-83c8-43a2-98e5-34740ef798a5/thumbnail",
+        "status": 200,
+        "durationMs": 416
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/5a458e41-bbbc-4e8f-9f6f-7682760242e3/thumbnail",
+        "status": 200,
+        "durationMs": 415
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/552309f8-4527-4532-9af3-4a5971e088f4/thumbnail",
+        "status": 200,
+        "durationMs": 416
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/10331813-bfcc-4a2d-9167-651e65148f37/thumbnail",
+        "status": 200,
+        "durationMs": 417
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/34b855b1-57f7-41bd-bfcf-b5ecf6d88fa5/thumbnail",
+        "status": 200,
+        "durationMs": 417
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/993b8118-0775-42e8-9477-985e83962b52/thumbnail",
+        "status": 200,
+        "durationMs": 418
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/dfbfbf16-bcb4-4c14-94a6-95f4b749983c/thumbnail",
+        "status": 200,
+        "durationMs": 417
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/bfb9a1cc-b5ff-499e-8d93-f09acc4a6ddc/thumbnail",
+        "status": 200,
+        "durationMs": 443
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/432933e5-ecdf-4820-a37a-b2ab7314b19f/thumbnail",
+        "status": 200,
+        "durationMs": 444
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/f7c68cb8-3f3c-463d-8b3f-5def397bf5f2/thumbnail",
+        "status": 200,
+        "durationMs": 446
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2fa57b42-ba72-42e6-b11c-faf98b7e0671/thumbnail",
+        "status": 200,
+        "durationMs": 479
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/437fcf00-c0f3-49c6-a4ae-c394721df9d6/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/c782e76a-da16-4afc-b2bd-a02b0ef59937/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/51ec1370-87fa-45fb-89d1-aecf84a01c58/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/9787727c-81ab-4187-aa05-a1c88a88fa11/thumbnail",
+        "status": 200,
+        "durationMs": 627
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/7bb9cd0a-efb3-4e13-86cb-aa46c6e6997c/thumbnail",
+        "status": 200,
+        "durationMs": 625
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a67b0114-9b6f-4e21-a1ce-68f570b604bc/thumbnail",
+        "status": 200,
+        "durationMs": 626
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/f828ab90-cb28-4ab9-9f00-edb3c1ebd4cd/thumbnail",
+        "status": 200,
+        "durationMs": 627
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/8b53fef8-8370-445b-9f4e-1f3549709759/thumbnail",
+        "status": 200,
+        "durationMs": 629
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a7a4b154-c591-4cb0-b2ae-801f8df6df75/thumbnail",
+        "status": 200,
+        "durationMs": 629
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/988b9d0d-1244-4e57-9771-f3d0b1d552d9/thumbnail",
+        "status": 200,
+        "durationMs": 629
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/5ff6e661-b3ce-43f5-b657-2c02ba8a80f7/thumbnail",
+        "status": 200,
+        "durationMs": 631
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/d9410634-1fce-4709-8b27-3c0e22a1304d/thumbnail",
+        "status": 200,
+        "durationMs": 630
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/8fb7d1a5-0d41-400f-b7c4-b77bf7c0a063/thumbnail",
+        "status": 200,
+        "durationMs": 631
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/ab96872a-e81f-482d-98eb-2024919e3bbb/thumbnail",
+        "status": 200,
+        "durationMs": 631
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2da0ef5e-9d95-4ee7-9732-d73396db083c/thumbnail",
+        "status": 200,
+        "durationMs": 692
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2b66518f-5e74-4f41-9ce3-b4e4f69554ea/thumbnail",
+        "status": 200,
+        "durationMs": 632
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a4724579-893c-4ea1-a330-5ab77edb2614/thumbnail",
+        "status": 200,
+        "durationMs": 645
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/aceceed5-fd98-4b1c-a8b1-6affa3030402/thumbnail",
+        "status": 200,
+        "durationMs": 645
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/107b73c7-1920-43e3-bee2-e4754fd9a042/thumbnail",
+        "status": 200,
+        "durationMs": 646
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a0dfbe13-bb91-4a60-bb7a-dcbdf02c1466/thumbnail",
+        "status": 200,
+        "durationMs": 645
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2c25e593-575c-411b-88eb-d51fc23fff68/thumbnail",
+        "status": 200,
+        "durationMs": 689
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/26aa4470-63dd-4628-a42d-8a7a3fb5e5cd/thumbnail",
+        "status": 200,
+        "durationMs": 690
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/9d1d2a98-dc02-41ca-9f56-ad7d28828616/thumbnail",
+        "status": 200,
+        "durationMs": 690
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/295a2da3-7a04-4a85-90d8-1e981d84b534/thumbnail",
+        "status": 200,
+        "durationMs": 726
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/c99a465c-1bb0-4004-bbea-512b9b779b14/thumbnail",
+        "status": 200,
+        "durationMs": 741
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/b938c9e5-e0b9-4dd9-a72f-e0e7ecdf3010/thumbnail",
+        "status": 200,
+        "durationMs": 744
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/c8b02611-9eff-4964-9299-54b4d76e7901/thumbnail",
+        "status": 200,
+        "durationMs": 757
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/79c557c4-c1b3-451b-8297-9a07f67f70ca/thumbnail",
+        "status": 200,
+        "durationMs": 756
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/249844d1-51fe-4086-b8c7-45f6825d501b/thumbnail",
+        "status": 200,
+        "durationMs": 777
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/b1b8af97-d7b9-4873-baf0-e0013f2660a1/thumbnail",
+        "status": 200,
+        "durationMs": 778
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/clip-section13-acceptance-private-001/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/6f67aec9-5719-4d47-91ff-bdfe8f75342e/thumbnail",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/165def90-c3a1-4382-bf34-54344d1d6b1b/thumbnail",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/c173faea-0cda-43fe-b623-0bc361041734/thumbnail",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2c448b64-b786-4adb-8656-63916ff2bccc/thumbnail",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/39cde2f8-0056-4294-8d9a-04b78f8fe6ac/thumbnail",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a2177c59-1e09-46cb-af5e-3f7289c8e23b/thumbnail",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/fcd491a3-8629-4701-86eb-cb32577f7862/thumbnail",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/7e6a1901-08e2-4567-8d58-754a60806c3f/thumbnail",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2dac2159-e6b9-4cc7-a177-8317ed4397ba/thumbnail",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/33042b65-1efe-44c0-bfa1-8e01cfa80aff/thumbnail",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-020",
+    "timestamp": "2026-11-04T08:46:43.232Z",
+    "route": "/clips",
+    "controlId": "CTL-CLP-007",
+    "familyId": "FAM-CLP-SAFE-CLEANUP-MODAL",
+    "description": "Click Safe Cleanup trigger to query preview metrics (GET /api/clips/cleanup/preview)",
+    "action": "click",
+    "selector": "button:has-text(\"Safe Cleanup\"), button:has-text(\"Cleanup\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "🧹 Safe Cleanup",
+      "className": "btn-danger"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": false,
+      "text": "Confirm Cleanup (0)",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/api/clips/cleanup/preview?score_threshold=5",
+        "status": 200,
+        "durationMs": 15
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-021",
+    "timestamp": "2026-11-04T08:46:43.998Z",
+    "route": "/clips",
+    "controlId": "CTL-CLP-016",
+    "familyId": "FAM-CLP-PURGE-EXECUTE",
+    "description": "SAFETY DISMISSAL (SAF-03): Dismiss Safe Cleanup modal without executing purge",
+    "action": "click",
+    "selector": "button.btn-ghost:has-text(\"Cancel\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Cancel",
+      "className": "btn-ghost"
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "DESTRUCTIVE_CONFIRM_DISMISSED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-022",
+    "timestamp": "2026-11-04T08:46:44.930Z",
+    "route": "/clips",
+    "controlId": "CTL-CLP-003",
+    "familyId": "FAM-CLP-DELETE-BTN",
+    "description": "SAFETY DISMISSAL (SAF-01): Trigger clip delete, trap window.confirm, and dismiss",
+    "action": "click",
+    "selector": "button.btn-danger:has-text(\"🗑\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "🗑",
+      "className": "btn-danger"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "🗑",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": [
+        {
+          "type": "confirm",
+          "message": "Delete this clip?",
+          "timestamp": "2026-11-04T08:46:45.068Z",
+          "dismissed": true
+        }
+      ]
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "DESTRUCTIVE_CONFIRM_DISMISSED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-023",
+    "timestamp": "2026-11-04T08:46:45.601Z",
+    "route": "/analytics",
+    "controlId": "CTL-NAV-008",
+    "familyId": "FAM-NAV-ROUTE-ANA",
+    "description": "Navigate to Analytics & Performance Metrics route",
+    "action": "navigate",
+    "value": "http://localhost:3000/analytics",
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/analytics",
+        "status": 200,
+        "durationMs": 36
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/css/app/layout.css?v=1793782005616",
+        "status": 200,
+        "durationMs": 8
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/webpack.js?v=1793782005616",
+        "status": 200,
+        "durationMs": 19
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/main-app.js?v=1793782005616",
+        "status": 200,
+        "durationMs": 396
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "durationMs": 12
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/layout.js",
+        "status": 200,
+        "durationMs": 18
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/analytics/page.js",
+        "status": 200,
+        "durationMs": 27
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/health",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/summary",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/ab-tests",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/insights",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips",
+        "status": 307,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/active",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/stats",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [
+      {
+        "timestamp": "2026-11-04T08:46:46.622Z",
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js",
+          "line": 27,
+          "column": 27,
+          "lineNumber": 27,
+          "columnNumber": 27
+        }
+      }
+    ],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-024",
+    "timestamp": "2026-11-04T08:46:46.632Z",
+    "route": "/analytics",
+    "controlId": "CTL-ANA-001",
+    "familyId": "FAM-ANA-METRIC-CARD",
+    "description": "Hover metric KPI card to verify tooltip and telemetry updates",
+    "action": "hover",
+    "selector": ".glass",
+    "value": null,
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "⚡ ENGINE PERFORMANCE\n0\nSuccessful Execution Phases\nAvg Phase",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/api/analytics/9710c554-d5db-4c31-aff2-083197debdf6",
+        "status": 200,
+        "durationMs": 47
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/seo/9710c554-d5db-4c31-aff2-083197debdf6",
+        "status": 200,
+        "durationMs": 44
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/optimize/9710c554-d5db-4c31-aff2-083197debdf6/log",
+        "status": 200,
+        "durationMs": 47
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/summary",
+        "status": 200,
+        "durationMs": 46
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/ab-tests",
+        "status": 200,
+        "durationMs": 25
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/insights",
+        "status": 200,
+        "durationMs": 24
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips",
+        "status": 307,
+        "durationMs": 25
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/active",
+        "status": 200,
+        "durationMs": 36
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/",
+        "status": 200,
+        "durationMs": 181
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-025",
+    "timestamp": "2026-11-04T08:46:47.427Z",
+    "route": "/analytics",
+    "controlId": "CTL-ANA-002",
+    "familyId": "FAM-ANA-REFRESH-STATS",
+    "description": "Trigger telemetry refresh request to backend API",
+    "action": "click",
+    "selector": "button:has-text(\"Refresh\"), button:has-text(\"Reload\"), [data-testid=\"btn-refresh-analytics\"]",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "🔄 Refresh Metrics",
+      "className": "btn-secondary"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "🔄 Refresh Metrics",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/api/analytics/summary",
+        "status": 200,
+        "durationMs": 31
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/ab-tests",
+        "status": 200,
+        "durationMs": 31
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/insights",
+        "status": 200,
+        "durationMs": 31
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips",
+        "status": 307,
+        "durationMs": 30
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/active",
+        "status": 200,
+        "durationMs": 31
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/",
+        "status": 200,
+        "durationMs": 143
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/9710c554-d5db-4c31-aff2-083197debdf6",
+        "status": 200,
+        "durationMs": 31
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/seo/9710c554-d5db-4c31-aff2-083197debdf6",
+        "status": 200,
+        "durationMs": 30
+      },
+      {
+        "method": "GET",
+        "url": "/api/analytics/optimize/9710c554-d5db-4c31-aff2-083197debdf6/log",
+        "status": 200,
+        "durationMs": 30
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-026",
+    "timestamp": "2026-11-04T08:46:48.179Z",
+    "route": "/automation",
+    "controlId": "CTL-NAV-009",
+    "familyId": "FAM-NAV-ROUTE-AUT",
+    "description": "Navigate to 24/7 Channel Automation route",
+    "action": "navigate",
+    "value": "http://localhost:3000/automation",
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/automation",
+        "status": 200,
+        "durationMs": 40
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/css/app/layout.css?v=1793782008195",
+        "status": 200,
+        "durationMs": 5
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/webpack.js?v=1793782008195",
+        "status": 200,
+        "durationMs": 32
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/main-app.js?v=1793782008195",
+        "status": 200,
+        "durationMs": 302
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "durationMs": 10
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/layout.js",
+        "status": 200,
+        "durationMs": 32
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/automation/page.js",
+        "status": 200,
+        "durationMs": 135
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/health",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/channels/",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/publish/destinations",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/channels/decisions/history?limit=50",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/channels/decisions/pending",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [
+      {
+        "timestamp": "2026-11-04T08:46:49.098Z",
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js",
+          "line": 27,
+          "column": 27,
+          "lineNumber": 27,
+          "columnNumber": 27
+        }
+      }
+    ],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-027",
+    "timestamp": "2026-11-04T08:46:49.113Z",
+    "route": "/automation",
+    "controlId": "CTL-AUT-001",
+    "familyId": "FAM-AUT-CHANNEL-INPUT",
+    "description": "Enter YouTube channel handle for 24/7 monitoring",
+    "action": "fill",
+    "selector": "input.input-field",
+    "value": "https://www.youtube.com/@HubermanLab",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": "input-field"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-028",
+    "timestamp": "2026-11-04T08:46:49.666Z",
+    "route": "/automation",
+    "controlId": "CTL-AUT-002",
+    "familyId": "FAM-AUT-AUTO-CLIP-TOGGLE",
+    "description": "Enable Auto-Clip toggle for new uploads",
+    "action": "check",
+    "selector": "input[type=\"checkbox\"]",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-029",
+    "timestamp": "2026-11-04T08:46:49.995Z",
+    "route": "/automation",
+    "controlId": "CTL-AUT-003",
+    "familyId": "FAM-AUT-AUTO-PUB-TOGGLE",
+    "description": "Disable Auto-Publish toggle to maintain safety isolation",
+    "action": "uncheck",
+    "selector": "input[type=\"checkbox\"]",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/api/jobs/stats",
+        "status": 200,
+        "durationMs": 57
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/24DrO-q47dU/hq720_custom_1.jpg?sqp=CKCJotcG-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLAuLmAxFtWRkFpjK3sJ-WEgQnKoqA",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/x09DdM19xhk/hq720.jpg?sqp=-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCYovLEpS__1WSkFFLRq0EOMu-N2Q",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/r09TnFVSwGI/hq720_custom_2.jpg?sqp=CMz_jNcG-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLCqpsMjZXYuHX2BLWKp587nxWE6vA",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/Fg3-u_pjgXY/oar1.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLDACJ-wtZf33ormaKPquCv2qSXzsQ",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/F6Jr2wf2kWE/oar1.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLCYXtjCfGQVxKrI9DfDO-0VMuEbIg",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/eFAY3UtI9xQ/oar1.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLC6Od5OAnAWgUee0qBRM5nIvHO_GA",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/Pp4Up0F7ST4/hq720_custom_2.jpg?sqp=CKT3iNcG-oaymwEcCOgCEMoBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLD3MmWrucn4lR9Fkb6Ss3alAQUHmA",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/pJw4lR3P_iI/oardefault.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLDySDWHnuBX5Md8CcFh9dV7E_MyxQ",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/yS5dV0jKLV8/oardefault.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLCQUlnDqhbt7INGAB4fLEq8cgJbkw",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/7RL893QLZTQ/oardefault.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLAFzNTENSxz0ri9xXVtiUFIVsmG1w",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/3Tgl-C19-bM/oardefault.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLB0ElYLgnaaw6m4_7ZKrmfAn0GoLg",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/AtAdnvztKms/oar2.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLB-8Wck7TVFOmSGM-3FJANKYIA_IA",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/YGhFC0hN4aw/mqdefault.jpg",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/0OfOivc-tpU/oar2.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLCwWFztgvPl4bMx_-CNYK1onmAj6g",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/kkXWbXZI_iM/oar2.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLCHParFafjqD2QqH1ZYvE3ZAIb_Ng",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/YpHobheDpk8/oar2.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLAGfRrNi5T52yJZOoIKGiFKo7j0jA",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/L3ihlJVo_3A/oar2.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLCrZxn8VUByX4_YfrwvMWHZw5vh6A",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/FoNMm4F9qIM/oar2.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLBUtDWcsqFRCHPl9wh9FrDDdWC45A",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/39w4TLjreFU/oar2.jpg?sqp=-oaymwEdCJUDENAFSFWQAgHyq4qpAwwIARUAAIhCcAHAAQY=&rs=AOn4CLCdIPEooXDGOJjpi00bV_NjAt6d2g",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/m5hidzW-_i0/hq720_custom_1.jpg?sqp=CJSR99YG-oaymwEgCOgCEMoBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLAHbpX7CfxGVtkkC9raoh4eXi210Q",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/-rPzGJH1acU/hq720_custom_1.jpg?sqp=CJSR99YG-oaymwEgCOgCEMoBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLAUIB4thmUr6DM_L_khgr3sLSnOpQ",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/MjDUTSOsUMg/hq720_custom_3.jpg?sqp=CJSR99YG-oaymwEgCOgCEMoBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLCOWSIgXB2AliUuy-OEYywXMUF2vQ",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/Cm45rJ_ayA4/hq720_custom_2.jpg?sqp=CJSR99YG-oaymwEgCOgCEMoBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLDE4gb6i5W41TNpkljsFuHuCQMdHQ",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/UBHOWXL4Apg/hq720_custom_3.jpg?sqp=CJSR99YG-oaymwEgCOgCEMoBSFXyq4qpAxIIARUAAIhCGAFwAcABBrgC9xg=&rs=AOn4CLDe9J749wfFMZbFIFLKW4nle2j_zA",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://i.ytimg.com/vi/X1M61eZtYL8/mqdefault.jpg",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-030",
+    "timestamp": "2026-11-04T08:46:50.510Z",
+    "route": "/automation",
+    "controlId": "CTL-AUT-001",
+    "familyId": "FAM-AUT-CHANNEL-INPUT",
+    "description": "Clear channel URL input without saving",
+    "action": "fill",
+    "selector": "input.input-field",
+    "value": "",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": "input-field"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-031",
+    "timestamp": "2026-11-04T08:46:51.131Z",
+    "route": "/automation",
+    "controlId": "CTL-AUT-016",
+    "familyId": "FAM-AUT-DELETE-CHANNEL",
+    "description": "SAFETY DISMISSAL (SAF-05): Trigger channel removal, trap confirmation, and dismiss",
+    "action": "click",
+    "selector": "button.btn-danger[title*=\"Remove\"], button.btn-danger:has-text(\"🗑\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "🗑",
+      "className": "btn-danger"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "🗑",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": [
+        {
+          "type": "confirm",
+          "message": "Remove this channel from 24/7 monitoring?",
+          "timestamp": "2026-11-04T08:46:51.340Z",
+          "dismissed": true
+        }
+      ]
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "DESTRUCTIVE_CONFIRM_DISMISSED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-032",
+    "timestamp": "2026-11-04T08:46:51.865Z",
+    "route": "/youtube-channels",
+    "controlId": "CTL-NAV-010",
+    "familyId": "FAM-NAV-ROUTE-YTC",
+    "description": "Navigate to Connected YouTube Channels route",
+    "action": "navigate",
+    "value": "http://localhost:3000/youtube-channels",
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/youtube-channels",
+        "status": 200,
+        "durationMs": 37
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/css/app/layout.css?v=1793782011880",
+        "status": 200,
+        "durationMs": 8
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/webpack.js?v=1793782011880",
+        "status": 200,
+        "durationMs": 18
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/main-app.js?v=1793782011880",
+        "status": 200,
+        "durationMs": 304
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "durationMs": 11
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/layout.js",
+        "status": 200,
+        "durationMs": 13
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/youtube-channels/page.js",
+        "status": 200,
+        "durationMs": 57
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/health",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/youtube-channels",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [
+      {
+        "timestamp": "2026-11-04T08:46:52.756Z",
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js",
+          "line": 27,
+          "column": 27,
+          "lineNumber": 27,
+          "columnNumber": 27
+        }
+      }
+    ],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-033",
+    "timestamp": "2026-11-04T08:46:52.770Z",
+    "route": "/youtube-channels",
+    "controlId": "CTL-YTC-001",
+    "familyId": "FAM-YTC-CONNECT-BTN",
+    "description": "Click Connect Channel button to mount OAuth manual auth dialog",
+    "action": "click",
+    "selector": "button[data-testid=\"btn-open-connect-modal\"], button:has-text(\"Connect YouTube Channel\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "+\nConnect YouTube Channel",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "+\nConnect YouTube Channel",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/api/youtube-channels/oauth-url",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-034",
+    "timestamp": "2026-11-04T08:46:53.466Z",
+    "route": "/youtube-channels",
+    "controlId": "CTL-YTC-002",
+    "familyId": "FAM-YTC-AUTH-CODE-INPUT",
+    "description": "Enter candidate authorization redirect URL in Connect dialog",
+    "action": "fill",
+    "selector": "textarea",
+    "value": "http://localhost:8080/?code=4/0AY0e-test-probe",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "https://yt3.ggpht.com/9XIpgbTNH6jT1yAzjcNaJP9RJNEXMPtpYmyWPSlGaJWz34cwxbAOnznB58vqe_nV1IISFY3jLEI=s88-c-k-c0x00ffffff-no-rj",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://yt3.ggpht.com/y2GLCenOZc2zC-ZoHRjQZmIXcWkJCEhQaqFXzfxq32ms7Rdiv3_mscUtmLgDbK6JiSe7RR3H4Kg=s88-c-k-c0x00ffffff-no-rj",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "https://yt3.ggpht.com/3VVwtdU_10WAr2mptnpzTzC83GEEbJryYb0LEkYFm92GYUTzc-jWEd0TQEgApzidMvJNTw_yTA=s88-c-k-c0x00ffffff-no-rj",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/stats",
+        "status": 200,
+        "durationMs": 10
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-035",
+    "timestamp": "2026-11-04T08:46:54.036Z",
+    "route": "/youtube-channels",
+    "controlId": "CTL-YTC-003",
+    "familyId": "FAM-YTC-CLOSE-MODAL",
+    "description": "Dismiss OAuth Connect modal via close icon",
+    "action": "click",
+    "selector": "button:has-text(\"✕\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "✕",
+      "className": null
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-036",
+    "timestamp": "2026-11-04T08:46:54.828Z",
+    "route": "/youtube-channels",
+    "controlId": "CTL-YTC-008",
+    "familyId": "FAM-YTC-DISCONNECT",
+    "description": "SAFETY DISMISSAL (SAF-04): Open Disconnect confirmation modal",
+    "action": "click",
+    "selector": "button[data-testid^=\"btn-disconnect-\"]",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Disconnect",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Disconnect",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "DESTRUCTIVE_CONFIRM_DISMISSED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-037",
+    "timestamp": "2026-11-04T08:46:55.558Z",
+    "route": "/youtube-channels",
+    "controlId": "CTL-YTC-009",
+    "familyId": "FAM-YTC-DISCONNECT-CANCEL",
+    "description": "SAFETY DISMISSAL (SAF-04): Click Cancel on Disconnect modal; verify unmount",
+    "action": "click",
+    "selector": "button:has-text(\"Cancel\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Cancel",
+      "className": null
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "DESTRUCTIVE_CONFIRM_DISMISSED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-038",
+    "timestamp": "2026-11-04T08:46:56.408Z",
+    "route": "/publish",
+    "controlId": "CTL-NAV-011",
+    "familyId": "FAM-NAV-ROUTE-PUB",
+    "description": "Navigate to Publishing Workstation route",
+    "action": "navigate",
+    "value": "http://localhost:3000/publish",
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/publish",
+        "status": 200,
+        "durationMs": 42
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/css/app/layout.css?v=1793782016423",
+        "status": 200,
+        "durationMs": 7
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/webpack.js?v=1793782016423",
+        "status": 200,
+        "durationMs": 42
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/main-app.js?v=1793782016423",
+        "status": 200,
+        "durationMs": 343
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "durationMs": 42
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/layout.js",
+        "status": 200,
+        "durationMs": 42
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/publish/page.js",
+        "status": 200,
+        "durationMs": 43
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/health",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "/api/publish/destinations",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/publish/auth-status",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/publish/queue",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/stats",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [
+      {
+        "timestamp": "2026-11-04T08:46:57.382Z",
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js",
+          "line": 27,
+          "column": 27,
+          "lineNumber": 27,
+          "columnNumber": 27
+        }
+      }
+    ],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-039",
+    "timestamp": "2026-11-04T08:46:57.390Z",
+    "route": "/publish",
+    "controlId": "CTL-PUB-001",
+    "familyId": "FAM-PUB-CLIP-PICKER",
+    "description": "Select clip from Visual Clip Picker for simulator inspection",
+    "action": "click",
+    "selector": "[data-testid^=\"clip-picker-option-\"], div[role=\"option\"]",
+    "value": null,
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "🎬\nUntitled Clip\nSource: Playing Each Other Childhood Games ",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/api/clips/",
+        "status": 200,
+        "durationMs": 597
+      },
+      {
+        "method": "GET",
+        "url": "/api/publish/channel-info",
+        "status": 200,
+        "durationMs": 362
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/aefafcc0-b26e-49c3-96a9-1928d84f45b2/thumbnail",
+        "status": 200,
+        "durationMs": 2
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/e12be962-1d6c-4dd4-98c5-04a32a858550/thumbnail",
+        "status": 200,
+        "durationMs": 3
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/7c379ce5-95d0-4c63-acd9-5e51a5a2ed07/thumbnail",
+        "status": 200,
+        "durationMs": 11
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/1d688001-5ad7-4a93-8e7a-1c3a3f22ac7b/thumbnail",
+        "status": 200,
+        "durationMs": 10
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/cbb61a78-90a3-4f0a-8357-4be97b0e5565/thumbnail",
+        "status": 200,
+        "durationMs": 10
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/0d3e4a67-6dca-4aeb-870c-564e93e0f29b/thumbnail",
+        "status": 200,
+        "durationMs": 10
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/cecc659b-c6f0-405b-9b7a-eaa0ddd7add6/thumbnail",
+        "status": 200,
+        "durationMs": 10
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/7b3fd538-e588-48b8-b445-b1f45067c6a9/thumbnail",
+        "status": 200,
+        "durationMs": 10
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/13d2f9c2-66b0-4d31-b765-60fda9d30171/thumbnail",
+        "status": 200,
+        "durationMs": 11
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/9cc8b475-d5d8-4fb2-9bdf-ff136aa36266/thumbnail",
+        "status": 200,
+        "durationMs": 12
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/3717a40a-2238-4d55-a7cd-14882378d121/thumbnail",
+        "status": 200,
+        "durationMs": 12
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a19ea050-7d58-48c5-bd22-5d4ae3ce5d15/thumbnail",
+        "status": 200,
+        "durationMs": 13
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2bcb749d-0e43-4baa-9951-7fa6196a57ce/thumbnail",
+        "status": 200,
+        "durationMs": 13
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/e97c713d-6de9-4678-a89e-74bbaad016d5/thumbnail",
+        "status": 200,
+        "durationMs": 13
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/9fd7db5b-4bdc-4851-ade1-ffdd58741c8f/thumbnail",
+        "status": 200,
+        "durationMs": 13
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/8d361134-5eef-49e2-9558-03cd94b046dd/thumbnail",
+        "status": 200,
+        "durationMs": 13
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/34b855b1-57f7-41bd-bfcf-b5ecf6d88fa5/thumbnail",
+        "status": 200,
+        "durationMs": 13
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/295a2da3-7a04-4a85-90d8-1e981d84b534/thumbnail",
+        "status": 200,
+        "durationMs": 13
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a0dfbe13-bb91-4a60-bb7a-dcbdf02c1466/thumbnail",
+        "status": 200,
+        "durationMs": 14
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/f9bedd47-4eb4-411d-ab9d-6fff5205ce5a/thumbnail",
+        "status": 200,
+        "durationMs": 156
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/b1b8af97-d7b9-4873-baf0-e0013f2660a1/thumbnail",
+        "status": 200,
+        "durationMs": 14
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/988b9d0d-1244-4e57-9771-f3d0b1d552d9/thumbnail",
+        "status": 200,
+        "durationMs": 14
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/ab96872a-e81f-482d-98eb-2024919e3bbb/thumbnail",
+        "status": 200,
+        "durationMs": 14
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/9787727c-81ab-4187-aa05-a1c88a88fa11/thumbnail",
+        "status": 200,
+        "durationMs": 14
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/7bb9cd0a-efb3-4e13-86cb-aa46c6e6997c/thumbnail",
+        "status": 200,
+        "durationMs": 15
+      },
+      {
+        "method": "GET",
+        "url": "https://yt3.ggpht.com/9XIpgbTNH6jT1yAzjcNaJP9RJNEXMPtpYmyWPSlGaJWz34cwxbAOnznB58vqe_nV1IISFY3jLEI=s88-c-k-c0x00ffffff-no-rj",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/33ffa701-ebc6-4625-8d13-b5545e2856be/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/39cde2f8-0056-4294-8d9a-04b78f8fe6ac/thumbnail",
+        "status": 200,
+        "durationMs": 8
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/c173faea-0cda-43fe-b623-0bc361041734/thumbnail",
+        "status": 200,
+        "durationMs": 8
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/165def90-c3a1-4382-bf34-54344d1d6b1b/thumbnail",
+        "status": 200,
+        "durationMs": 9
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/6f67aec9-5719-4d47-91ff-bdfe8f75342e/thumbnail",
+        "status": 200,
+        "durationMs": 10
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a7a4b154-c591-4cb0-b2ae-801f8df6df75/thumbnail",
+        "status": 200,
+        "durationMs": 13
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/8b53fef8-8370-445b-9f4e-1f3549709759/thumbnail",
+        "status": 200,
+        "durationMs": 13
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/f828ab90-cb28-4ab9-9f00-edb3c1ebd4cd/thumbnail",
+        "status": 200,
+        "durationMs": 14
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a67b0114-9b6f-4e21-a1ce-68f570b604bc/thumbnail",
+        "status": 200,
+        "durationMs": 17
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/56a06bc9-93d4-4112-b78b-ccc7e55060d1/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/f31e7aa0-8af2-47f4-8d8b-3df191179076/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/33042b65-1efe-44c0-bfa1-8e01cfa80aff/thumbnail",
+        "status": 200,
+        "durationMs": 18
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2c448b64-b786-4adb-8656-63916ff2bccc/thumbnail",
+        "status": 200,
+        "durationMs": 126
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2dac2159-e6b9-4cc7-a177-8317ed4397ba/thumbnail",
+        "status": 200,
+        "durationMs": 127
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/7e6a1901-08e2-4567-8d58-754a60806c3f/thumbnail",
+        "status": 200,
+        "durationMs": 127
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/fcd491a3-8629-4701-86eb-cb32577f7862/thumbnail",
+        "status": 200,
+        "durationMs": 127
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/486255c1-e698-4301-a6eb-ad79da5b3de3/thumbnail",
+        "status": 200,
+        "durationMs": 128
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/bfb9a1cc-b5ff-499e-8d93-f09acc4a6ddc/thumbnail",
+        "status": 200,
+        "durationMs": 128
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/a2177c59-1e09-46cb-af5e-3f7289c8e23b/thumbnail",
+        "status": 200,
+        "durationMs": 128
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/2fa57b42-ba72-42e6-b11c-faf98b7e0671/thumbnail",
+        "status": 200,
+        "durationMs": 128
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/bfb6f2b6-5a85-4e7e-a39e-ef3a1257e8cc/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/6265b2b6-7d7b-4737-8c88-352e5e66683e/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/d00c5ee9-cb2b-44eb-904b-4f45fbabbfd6/thumbnail",
+        "status": 200,
+        "durationMs": 128
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/bbd37258-4498-46fc-94c5-2eb052ee4530/thumbnail",
+        "status": 200,
+        "durationMs": 129
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/f7c68cb8-3f3c-463d-8b3f-5def397bf5f2/thumbnail",
+        "status": 200,
+        "durationMs": 129
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/c782e76a-da16-4afc-b2bd-a02b0ef59937/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/1c20adaf-f950-4219-9be0-b75050e1e27e/thumbnail",
+        "status": 200,
+        "durationMs": 129
+      },
+      {
+        "method": "GET",
+        "url": "/api/publish/clips/33ffa701-ebc6-4625-8d13-b5545e2856be/metadata",
+        "status": 200,
+        "durationMs": 2
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips/33ffa701-ebc6-4625-8d13-b5545e2856be/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/publish?clip=33ffa701-ebc6-4625-8d13-b5545e2856be&channel=518b3118-2367-4f84-898f-ff97a61df306&_rsc=qvk6VJV8fFprXCC5",
+        "status": 200,
+        "durationMs": 64
+      },
+      {
+        "method": "GET",
+        "url": "/api/publish/destinations",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/publish/auth-status",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/clips",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/publish/queue",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [
+      {
+        "timestamp": "2026-11-04T08:46:59.969Z",
+        "type": "warning",
+        "text": "Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior=\"smooth\"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior",
+        "location": {
+          "url": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js",
+          "line": 27,
+          "column": 27,
+          "lineNumber": 27,
+          "columnNumber": 27
+        }
+      }
+    ],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-040",
+    "timestamp": "2026-11-04T08:47:00.414Z",
+    "route": "/publish",
+    "controlId": "CTL-PUB-004",
+    "familyId": "FAM-PUB-TITLE-INPUT",
+    "description": "Enter optimized YouTube Shorts title in mobile simulator metadata textarea",
+    "action": "fill",
+    "selector": "textarea[placeholder*=\"Title your Short\"]",
+    "value": "Epic Podcast Moment #Shorts",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-041",
+    "timestamp": "2026-11-04T08:47:01.014Z",
+    "route": "/publish",
+    "controlId": "CTL-PUB-002",
+    "familyId": "FAM-PUB-DEST-DROPDOWN",
+    "description": "Inspect Destination Channel dropdown in Publishing workstation",
+    "action": "inspect",
+    "selector": "select.input-field",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "None (Select at publish time)\nTomorrow’s Circuit (UCH90024qr",
+      "className": "input-field"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "None (Select at publish time)\nTomorrow’s Circuit (UCH90024qr",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/api/clips/",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      },
+      {
+        "method": "GET",
+        "url": "/api/publish/channel-info",
+        "status": "IN_FLIGHT",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-042",
+    "timestamp": "2026-11-04T08:47:01.612Z",
+    "route": "/publish",
+    "controlId": "CTL-PUB-010",
+    "familyId": "FAM-PUB-PUBLISH-NOW",
+    "description": "SAFETY ISOLATION (SAF-06): Inspect Live Publish button; assert safety gate/disabled state",
+    "action": "inspect",
+    "selector": "button:has-text(\"Upload Short\"), button:has-text(\"Publish to YouTube Shorts Now\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Upload Short",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Upload Short",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/api/clips/33ffa701-ebc6-4625-8d13-b5545e2856be/thumbnail",
+        "status": "FAILED",
+        "durationMs": null
+      }
+    ],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "BLOCKED_ISOLATED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-043",
+    "timestamp": "2026-11-04T08:47:01.960Z",
+    "route": "/settings",
+    "controlId": "CTL-NAV-012",
+    "familyId": "FAM-NAV-ROUTE-SET",
+    "description": "Navigate to System Settings route",
+    "action": "navigate",
+    "value": "http://localhost:3000/settings",
+    "preState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "className": ""
+    },
+    "postState": {
+      "visible": false,
+      "enabled": false,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [
+      {
+        "method": "GET",
+        "url": "/settings",
+        "status": 200,
+        "durationMs": 39
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/css/app/layout.css?v=1793782021975",
+        "status": 200,
+        "durationMs": 7
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/webpack.js?v=1793782021975",
+        "status": 200,
+        "durationMs": 33
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/main-app.js?v=1793782021975",
+        "status": 200,
+        "durationMs": 306
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app-pages-internals.js",
+        "status": 200,
+        "durationMs": 10
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/layout.js",
+        "status": 200,
+        "durationMs": 33
+      },
+      {
+        "method": "GET",
+        "url": "/_next/static/chunks/app/settings/page.js",
+        "status": 200,
+        "durationMs": 39
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap",
+        "status": 200,
+        "durationMs": 1
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuI6fMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/inter/v20/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "https://fonts.gstatic.com/s/spacegrotesk/v22/V8mQoQDjQSkFtoMM3T6r8E7mF71Q-gOoraIAEj4PVksj.ttf",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/health",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/settings",
+        "status": 200,
+        "durationMs": 0
+      },
+      {
+        "method": "GET",
+        "url": "/api/jobs/stats",
+        "status": 200,
+        "durationMs": 1
+      }
+    ],
+    "consoleMessages": [
+      {
+        "timestamp": "2026-11-04T08:47:02.908Z",
+        "type": "log",
+        "text": "[HMR] connected",
+        "location": {
+          "url": "webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js",
+          "line": 27,
+          "column": 27,
+          "lineNumber": 27,
+          "columnNumber": 27
+        }
+      }
+    ],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-044",
+    "timestamp": "2026-11-04T08:47:02.928Z",
+    "route": "/settings",
+    "controlId": "CTL-SET-004",
+    "familyId": "FAM-SET-MODEL-PRESETS",
+    "description": "Select preset OpenRouter AI model quick-button",
+    "action": "click",
+    "selector": "button:has-text(\"DeepSeek R1\"), button:has-text(\"Gemini 2.0\")",
+    "value": null,
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "DeepSeek R1",
+      "className": null
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "DeepSeek R1",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-045",
+    "timestamp": "2026-11-04T08:47:03.663Z",
+    "route": "/settings",
+    "controlId": "CTL-SET-005",
+    "familyId": "FAM-SET-WHISPER-MODEL",
+    "description": "Change Whisper speech recognition model to \"base\"",
+    "action": "select",
+    "selector": "select#whisper-model",
+    "value": "base",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Tiny (Fastest)\nBase (Balanced)\nSmall\nMedium\nLarge (Slowest)",
+      "className": "input-field"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "Tiny (Fastest)\nBase (Balanced)\nSmall\nMedium\nLarge (Slowest)",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-046",
+    "timestamp": "2026-11-04T08:47:04.102Z",
+    "route": "/settings",
+    "controlId": "CTL-SET-006",
+    "familyId": "FAM-SET-CLIPS-PER-VIDEO",
+    "description": "Adjust default clips per video limit",
+    "action": "fill",
+    "selector": "input#clips-limit",
+    "value": "5",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": "input-field"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  },
+  {
+    "eventId": "EVT-047",
+    "timestamp": "2026-11-04T08:47:04.615Z",
+    "route": "/settings",
+    "controlId": "CTL-SET-007",
+    "familyId": "FAM-SET-CHECK-INTERVAL",
+    "description": "Adjust 24/7 channel polling interval to 30 minutes",
+    "action": "fill",
+    "selector": "input#channel-interval",
+    "value": "30",
+    "preState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "className": "input-field"
+    },
+    "postState": {
+      "visible": true,
+      "enabled": true,
+      "text": "",
+      "spinnerActive": false,
+      "toastAlert": "",
+      "dialogTrapped": null
+    },
+    "triggeredNetwork": [],
+    "consoleMessages": [],
+    "pageErrors": [],
+    "safetyCategory": "SAFE_EXECUTED",
+    "status": "PASS",
+    "error": null
+  }
+]

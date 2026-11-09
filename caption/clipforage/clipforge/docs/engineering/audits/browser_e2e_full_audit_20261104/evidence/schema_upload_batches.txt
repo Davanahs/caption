@@ -1,0 +1,27 @@
+                                      Table "public.upload_batches"
+         Column          |           Type           | Collation | Nullable |           Default            
+-------------------------+--------------------------+-----------+----------+------------------------------
+ id                      | character varying(64)    |           | not null | 
+ idempotency_key         | character varying(64)    |           | not null | 
+ name                    | character varying(255)   |           |          | 
+ status                  | character varying(30)    |           | not null | 'staging'::character varying
+ version                 | integer                  |           | not null | 1
+ total_files             | integer                  |           | not null | 0
+ reserved_bytes          | bigint                   |           | not null | '0'::bigint
+ created_at              | timestamp with time zone |           | not null | now()
+ updated_at              | timestamp with time zone |           | not null | now()
+ active_video_id         | character varying(64)    |           |          | 
+ active_task_id          | character varying(200)   |           |          | 
+ worker_heartbeat        | timestamp with time zone |           |          | 
+ processing_started_at   | timestamp with time zone |           |          | 
+ processing_completed_at | timestamp with time zone |           |          | 
+ batch_error             | text                     |           |          | 
+Indexes:
+    "upload_batches_pkey" PRIMARY KEY, btree (id)
+    "ix_upload_batches_status" btree (status)
+    "uq_upload_batches_idempotency_key" UNIQUE CONSTRAINT, btree (idempotency_key)
+Check constraints:
+    "ck_upload_batch_status" CHECK (status::text = ANY (ARRAY['staging'::character varying, 'uploading'::character varying, 'validating'::character varying, 'completed'::character varying, 'queued'::character varying, 'processing'::character varying, 'failed'::character varying, 'cancelling'::character varying, 'cancelled'::character varying, 'deleting'::character varying]::text[]))
+Referenced by:
+    TABLE "videos" CONSTRAINT "fk_videos_upload_batch_id" FOREIGN KEY (upload_batch_id) REFERENCES upload_batches(id) ON DELETE RESTRICT
+

@@ -1,0 +1,357 @@
+{
+  "": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClipForge Authentic Two-Person Podcast Camera Cut Reference Ground Truth (Independent)",
+  "version": "3.0.0",
+  "work_item": "PODCAST-CUT-VALIDATION-015",
+  "is_authorized": true,
+  "is_synthetic": false,
+  "governance_rule": "Master Engineering Rulebook Rule 15 (Zero Synthetic Substitution & Independent Empirical Proof)",
+  "media_path": "uploads/authentic_podcast_test.mp4",
+  "media_sha256": "8144a74a30ddebbbdb1946c43bbddd018e4b7891aedd31ddcb846d326ff7e4c0",
+  "media_bytes": 243392976,
+  "nominal_fps": 25.0,
+  "duration_sec": 981.08,
+  "total_video_frames": 24527,
+  "annotation_provenance": {
+    "methodology": "Blind multi-pass manual frame audit using OpenCV frame extraction and visual verification; independent of detector algorithms",
+    "annotator_role": "Principal Video Systems Architect & Independent QA Reviewer",
+    "creation_date": "2026-11-03",
+    "independence_attestation": "Ground truth timestamps and frame indices were established by direct visual inspection of frame differences, without back-fitting or calibrating to FFmpeg scdet or any candidate model output."
+  },
+  "evaluation_windows": {
+    "window_1_primary_0_to_180": {
+      "time_range_sec": [
+        0.0,
+        180.0
+      ],
+      "frame_range": [
+        0,
+        4500
+      ],
+      "editorial_cuts_count": 21,
+      "graphic_inserts_count": 2,
+      "status": "VERIFIED"
+    },
+    "window_2_secondary_180_to_300": {
+      "time_range_sec": [
+        180.0,
+        300.0
+      ],
+      "frame_range": [
+        4500,
+        7500
+      ],
+      "editorial_cuts_count": 9,
+      "graphic_inserts_count": 2,
+      "status": "VERIFIED"
+    },
+    "window_3_extended_300_to_981": {
+      "time_range_sec": [
+        300.0,
+        981.08
+      ],
+      "frame_range": [
+        7500,
+        24527
+      ],
+      "editorial_cuts_count": null,
+      "graphic_inserts_count": null,
+      "status": "UNANNOTATED_OPEN",
+      "notes": "681.08s of remaining footage is unannotated. Not evaluated to avoid false claims of complete 981s coverage."
+    }
+  },
+  "editorial_camera_cuts": [
+    {
+      "cut_id": 1,
+      "frame_index": 56,
+      "timestamp": 2.24,
+      "prior_shot": "INTRO_CARD",
+      "following_shot": "WIDE_TWO_SHOT",
+      "description": "Opening title graphic transitions to studio wide two-shot."
+    },
+    {
+      "cut_id": 2,
+      "frame_index": 429,
+      "timestamp": 17.16,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Wide two-shot cuts to Dr. Sweta Adatia solo close-up."
+    },
+    {
+      "cut_id": 3,
+      "frame_index": 808,
+      "timestamp": 32.32,
+      "prior_shot": "SPEAKER_A_SOLO",
+      "following_shot": "WIDE_TWO_SHOT",
+      "description": "Dr. Sweta Adatia solo cuts back to studio wide two-shot."
+    },
+    {
+      "cut_id": 4,
+      "frame_index": 939,
+      "timestamp": 37.56,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_B_SOLO",
+      "description": "Wide two-shot cuts to Raj Shamani solo close-up."
+    },
+    {
+      "cut_id": 5,
+      "frame_index": 1281,
+      "timestamp": 51.24,
+      "prior_shot": "SPEAKER_B_SOLO",
+      "following_shot": "WIDE_TWO_SHOT",
+      "description": "Raj Shamani solo cuts back to studio wide two-shot."
+    },
+    {
+      "cut_id": 6,
+      "frame_index": 1436,
+      "timestamp": 57.44,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_B_SOLO",
+      "description": "Wide two-shot cuts to Raj Shamani solo close-up."
+    },
+    {
+      "cut_id": 7,
+      "frame_index": 1484,
+      "timestamp": 59.36,
+      "prior_shot": "SPEAKER_B_SOLO",
+      "following_shot": "WIDE_TWO_SHOT",
+      "description": "Raj Shamani solo cuts back to studio wide two-shot."
+    },
+    {
+      "cut_id": 8,
+      "frame_index": 1769,
+      "timestamp": 70.76,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Wide two-shot cuts to Dr. Sweta Adatia solo close-up."
+    },
+    {
+      "cut_id": 9,
+      "frame_index": 1932,
+      "timestamp": 77.28,
+      "prior_shot": "SPEAKER_A_SOLO",
+      "following_shot": "SPEAKER_B_SOLO",
+      "description": "Dr. Sweta Adatia solo cuts to Raj Shamani solo close-up (with topic insert)."
+    },
+    {
+      "cut_id": 10,
+      "frame_index": 2050,
+      "timestamp": 82.0,
+      "prior_shot": "SPEAKER_B_SOLO",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Raj Shamani solo cuts to Dr. Sweta Adatia solo close-up."
+    },
+    {
+      "cut_id": 11,
+      "frame_index": 2254,
+      "timestamp": 90.16,
+      "prior_shot": "SPEAKER_A_SOLO",
+      "following_shot": "WIDE_TWO_SHOT",
+      "description": "Dr. Sweta Adatia solo cuts back to studio wide two-shot."
+    },
+    {
+      "cut_id": 12,
+      "frame_index": 2446,
+      "timestamp": 97.84,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_B_SOLO",
+      "description": "Wide two-shot cuts to Raj Shamani solo close-up."
+    },
+    {
+      "cut_id": 13,
+      "frame_index": 2578,
+      "timestamp": 103.12,
+      "prior_shot": "SPEAKER_B_SOLO",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Raj Shamani solo cuts to Dr. Sweta Adatia solo close-up."
+    },
+    {
+      "cut_id": 14,
+      "frame_index": 2791,
+      "timestamp": 111.64,
+      "prior_shot": "SPEAKER_A_SOLO",
+      "following_shot": "WIDE_TWO_SHOT",
+      "description": "Dr. Sweta Adatia solo cuts back to studio wide two-shot."
+    },
+    {
+      "cut_id": 15,
+      "frame_index": 2933,
+      "timestamp": 117.32,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Wide two-shot cuts to Dr. Sweta Adatia solo close-up."
+    },
+    {
+      "cut_id": 16,
+      "frame_index": 3191,
+      "timestamp": 127.64,
+      "prior_shot": "SPEAKER_A_SOLO",
+      "following_shot": "SPEAKER_B_SOLO",
+      "description": "Dr. Sweta Adatia solo cuts to Raj Shamani solo close-up."
+    },
+    {
+      "cut_id": 17,
+      "frame_index": 3448,
+      "timestamp": 137.92,
+      "prior_shot": "SPEAKER_B_SOLO",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Raj Shamani solo cuts to Dr. Sweta Adatia solo close-up."
+    },
+    {
+      "cut_id": 18,
+      "frame_index": 3636,
+      "timestamp": 145.44,
+      "prior_shot": "SPEAKER_A_SOLO",
+      "following_shot": "WIDE_TWO_SHOT",
+      "description": "Dr. Sweta Adatia solo cuts back to studio wide two-shot."
+    },
+    {
+      "cut_id": 19,
+      "frame_index": 3711,
+      "timestamp": 148.44,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_B_SOLO",
+      "description": "Wide two-shot cuts to Raj Shamani solo close-up."
+    },
+    {
+      "cut_id": 20,
+      "frame_index": 3969,
+      "timestamp": 158.76,
+      "prior_shot": "SPEAKER_B_SOLO",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Raj Shamani solo cuts to Dr. Sweta Adatia solo close-up."
+    },
+    {
+      "cut_id": 21,
+      "frame_index": 4328,
+      "timestamp": 173.12,
+      "prior_shot": "SPEAKER_A_SOLO",
+      "following_shot": "SPEAKER_B_SOLO",
+      "description": "Dr. Sweta Adatia solo cuts to Raj Shamani solo close-up."
+    },
+    {
+      "cut_id": 22,
+      "frame_index": 5115,
+      "timestamp": 204.6,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Wide two-shot cuts to Dr. Sweta Adatia solo close-up."
+    },
+    {
+      "cut_id": 23,
+      "frame_index": 5386,
+      "timestamp": 215.44,
+      "prior_shot": "SPEAKER_A_SOLO",
+      "following_shot": "WIDE_TWO_SHOT",
+      "description": "Dr. Sweta Adatia solo cuts back to studio wide two-shot."
+    },
+    {
+      "cut_id": 24,
+      "frame_index": 5735,
+      "timestamp": 229.4,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Wide two-shot cuts to Dr. Sweta Adatia solo close-up."
+    },
+    {
+      "cut_id": 25,
+      "frame_index": 6328,
+      "timestamp": 253.12,
+      "prior_shot": "SPEAKER_A_SOLO",
+      "following_shot": "SPEAKER_B_SOLO",
+      "description": "Dr. Sweta Adatia solo cuts to Raj Shamani solo close-up."
+    },
+    {
+      "cut_id": 26,
+      "frame_index": 6536,
+      "timestamp": 261.44,
+      "prior_shot": "SPEAKER_B_SOLO",
+      "following_shot": "WIDE_TWO_SHOT",
+      "description": "Raj Shamani solo cuts back to studio wide two-shot."
+    },
+    {
+      "cut_id": 27,
+      "frame_index": 6662,
+      "timestamp": 266.48,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Wide two-shot cuts to Dr. Sweta Adatia solo close-up."
+    },
+    {
+      "cut_id": 28,
+      "frame_index": 6931,
+      "timestamp": 277.24,
+      "prior_shot": "SPEAKER_A_SOLO",
+      "following_shot": "SPEAKER_B_SOLO",
+      "description": "Dr. Sweta Adatia solo cuts to Raj Shamani solo close-up."
+    },
+    {
+      "cut_id": 29,
+      "frame_index": 7205,
+      "timestamp": 288.2,
+      "prior_shot": "SPEAKER_B_SOLO",
+      "following_shot": "WIDE_TWO_SHOT",
+      "description": "Raj Shamani solo cuts back to studio wide two-shot."
+    },
+    {
+      "cut_id": 30,
+      "frame_index": 7499,
+      "timestamp": 299.96,
+      "prior_shot": "WIDE_TWO_SHOT",
+      "following_shot": "SPEAKER_A_SOLO",
+      "description": "Wide two-shot cuts to Dr. Sweta Adatia solo close-up."
+    }
+  ],
+  "graphic_inserts": [
+    {
+      "insert_id": 1,
+      "start_frame": 464,
+      "start_sec": 18.56,
+      "end_frame": 476,
+      "end_sec": 19.04,
+      "duration_frames": 12,
+      "duration_sec": 0.48,
+      "type": "QUOTE_SLIDE_OVERLAY",
+      "description": "Quote slide overlay appears over Dr. Sweta Adatia close-up."
+    },
+    {
+      "insert_id": 2,
+      "start_frame": 1932,
+      "start_sec": 77.28,
+      "end_frame": 1954,
+      "end_sec": 78.16,
+      "duration_frames": 22,
+      "duration_sec": 0.88,
+      "type": "TOPIC_BANNER_OVERLAY",
+      "description": "Topic graphic overlay appears at start of Raj Shamani close-up."
+    },
+    {
+      "insert_id": 3,
+      "start_frame": 4558,
+      "start_sec": 182.32,
+      "end_frame": 4580,
+      "end_sec": 183.2,
+      "duration_frames": 22,
+      "duration_sec": 0.88,
+      "type": "CONCEPT_GRAPHIC_OVERLAY",
+      "description": "Concept graphic overlay appears in wide shot."
+    },
+    {
+      "insert_id": 4,
+      "start_frame": 4795,
+      "start_sec": 191.8,
+      "end_frame": 4796,
+      "end_sec": 191.84,
+      "duration_frames": 1,
+      "duration_sec": 0.04,
+      "type": "MICRO_FLASH_FRAME",
+      "description": "Single-frame digital glitch or flash."
+    }
+  ],
+  "summary_counts": {
+    "total_editorial_cuts_0_180": 21,
+    "total_editorial_cuts_180_300": 9,
+    "total_editorial_cuts_0_300": 30,
+    "total_graphic_inserts_0_300": 4
+  }
+}

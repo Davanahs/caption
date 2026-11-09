@@ -1,0 +1,26 @@
+                               Table "public.jobs"
+       Column        |           Type           | Collation | Nullable | Default 
+---------------------+--------------------------+-----------+----------+---------
+ id                  | character varying        |           | not null | 
+ video_id            | character varying        |           |          | 
+ source_url          | character varying(500)   |           |          | 
+ source_title        | character varying(500)   |           |          | 
+ status              | character varying(50)    |           | not null | 
+ progress            | integer                  |           | not null | 
+ current_step        | character varying(200)   |           |          | 
+ error_message       | text                     |           |          | 
+ celery_task_id      | character varying(200)   |           |          | 
+ created_at          | timestamp with time zone |           | not null | 
+ updated_at          | timestamp with time zone |           | not null | 
+ config              | text                     |           |          | 
+ pipeline_started_at | timestamp with time zone |           |          | 
+ completed_at        | timestamp with time zone |           |          | 
+ channel_id          | character varying(100)   |           |          | 
+ is_test             | boolean                  |           | not null | false
+Indexes:
+    "jobs_pkey" PRIMARY KEY, btree (id)
+    "ix_jobs_channel_id" btree (channel_id)
+    "ix_jobs_is_test" btree (is_test)
+Referenced by:
+    TABLE "task_executions" CONSTRAINT "task_executions_job_id_fkey" FOREIGN KEY (job_id) REFERENCES jobs(id)
+

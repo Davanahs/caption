@@ -1,0 +1,22 @@
+[Step 1] Creating synthetic multi-shot 1080p source video (7.0 seconds)...
+  Source created: C:\Users\CHINMA~1\AppData\Local\Temp\tmpiieqe0p1\podcast_multi_shot.mp4 (83773 bytes)
+
+[Step 2] Testing camera cut detection and shot schedule...
+  Detected cut intervals: [(0.0, 7.0)]
+
+Traceback (most recent call last):
+  File "d:\automation video clips\clipforge\backend\scripts\verify_advanced_podcast_real_render.py", line 202, in <module>
+    asyncio.run(main())
+  File "C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\Lib\asyncio\runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\Lib\asyncio\base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "d:\automation video clips\clipforge\backend\scripts\verify_advanced_podcast_real_render.py", line 94, in main
+    assert len(cuts) >= 4, f"Expected at least 4 shots, got {len(cuts)}: {cuts}"
+           ^^^^^^^^^^^^^^
+AssertionError: Expected at least 4 shots, got 1: [(0.0, 7.0)]

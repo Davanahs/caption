@@ -1,0 +1,11 @@
+{
+  "transnetv2_pytorch_pypi": true,
+  "transnetv2_pytorch_version": "1.0.5",
+  "transnetv2_official_repo": false,
+  "torch_available": true,
+  "torch_version": "2.12.1+cpu",
+  "cuda_available": false,
+  "notes": [
+    "TransNetV2 official repo not cloned"
+  ]
+}

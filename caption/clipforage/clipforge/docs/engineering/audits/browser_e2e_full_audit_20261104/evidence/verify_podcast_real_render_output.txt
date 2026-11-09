@@ -1,0 +1,25 @@
+[Step 1] Generating synthetic 1920x1080 test video with audio tone...
+  Source created: C:\Users\CHINMA~1\AppData\Local\Temp\tmp2_7eja0k\source_1080p.mp4 (108245 bytes)
+
+[Step 2] Defining podcast regions and building LayoutPlan...
+  LayoutPlan Mode: stacked_16_9
+  Region 0: crop=(96, 108, 806, 864), canvas=(x=0, y=0, w=1080, h=960)
+  Region 1: crop=(1018, 108, 806, 864), canvas=(x=0, y=960, w=1080, h=960)
+
+[Step 3] Rendering stacked vertical video via reframe_to_vertical...
+  Rendered output successfully: C:\Users\CHINMA~1\AppData\Local\Temp\tmp2_7eja0k\podcast_stacked_output.mp4 (230035 bytes)
+
+[Step 4] Running FFprobe verification on rendered output...
+  Video streams found: 1
+  Audio streams found: 1
+  Subtitle streams found: 0
+  Dimensions: 1080x1920
+  Video codec: h264
+  Audio codec: aac
+  Subtitle check: 0 subtitle streams (Invariant Verified)
+
+[Step 5] Testing single_region composition rendering and verification...
+  Single region output: podcast_single_output.mp4 (165977 bytes, 1080x1920 h264)
+
+=== ALL REAL VIDEO RENDERING ACCEPTANCE CRITERIA SATISFIED ===
+

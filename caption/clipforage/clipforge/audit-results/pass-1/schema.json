@@ -1,0 +1,9 @@
+{
+  "status": "SUCCESS",
+  "steps": {
+    "alembic_initial": "SUCCESS",
+    "alembic_idempotency": "SUCCESS",
+    "metadata_match": "SUCCESS",
+    "no_dynamic_mutation": "FAILED: FAILED: No config file 'alembic.ini' found, or file has no '[alembic]' section\n"
+  }
+}

@@ -1,0 +1,478 @@
+{
+  "audit_metadata": {
+    "title": "ClipForge Full Website Forensic Audit & Known Issues Evidence Manifest",
+    "timestamp": "2026-11-03T03:25:00Z",
+    "branch": "feature/layout",
+    "head": "68b9bcd7d3688c6bd8feb781d98df72d14351e97",
+    "verdict": "PARTIAL \u2014 CORE FIXES VERIFIED, REMAINING ITEMS BLOCKED/DEFERRED"
+  },
+  "modified_code_files": {
+    "frontend/lib/podcastCoordinates.ts": {
+      "size_bytes": 14659,
+      "sha256": "6a03f69aed80c901ad19343fd1211d3a25f7fd36bd226787f4c548d71498eb3c"
+    },
+    "frontend/components/PodcastSelectionModal.tsx": {
+      "size_bytes": 87882,
+      "sha256": "38d9c1d51537f601778d7e5125f5e595dd6bd3bdf910a36dca876f149e7e7d24"
+    },
+    "backend/services/advanced_podcast_engine.py": {
+      "size_bytes": 60102,
+      "sha256": "6ab192bfaddecf8d06be0f532b1087d183e701437f25f70a1c20032a015b9ce5"
+    },
+    "frontend/test/podcast_coordinates.test.mjs": {
+      "size_bytes": 11731,
+      "sha256": "f0f24f93e59274b1436aa80d5bcc3bdd12a424d480bdb88cbc17c29855ad6e2a"
+    },
+    "frontend/test/advanced_podcast.test.mjs": {
+      "size_bytes": 6861,
+      "sha256": "09d4b3cd30182e832264804bcddbfd7ef3fd42e160d6374133b659daec786e13"
+    },
+    "backend/tests/test_podcast_layout_features.py": {
+      "size_bytes": 43634,
+      "sha256": "ff2b7e53d91946050d339d748772a99f60652f83ff5bec4b8ad66b456b195a44"
+    },
+    "frontend/app/globals.css": {
+      "size_bytes": 19816,
+      "sha256": "23db890ad847d2be526e702215f473c4c5a20165a526bfebd80d4a15bb9940f5"
+    },
+    "frontend/app/podcasts/page.tsx": {
+      "size_bytes": 5529,
+      "sha256": "7dc7e464cea3a70ac615e711cfb309d5486e931e7c6571cab521c0b0d01592ed"
+    },
+    "frontend/app/publish/page.tsx": {
+      "size_bytes": 88564,
+      "sha256": "0c759653de8b5fa1a064e66c8d5703b7f44a1d3960afb5f6876c4183d8e541cc"
+    },
+    "frontend/app/youtube-channels/page.tsx": {
+      "size_bytes": 59318,
+      "sha256": "9222e53defa6d1cf9256cffef3c8b467cdf8027f267b6935f22dda8547812393"
+    },
+    "frontend/app/analytics/page.tsx": {
+      "size_bytes": 51794,
+      "sha256": "6039f4847a3aa8149ab1b99a4ee0c978937dcb33b22309d9b9062bea0118b044"
+    },
+    "frontend/app/automation/page.tsx": {
+      "size_bytes": 149249,
+      "sha256": "0e84c5afe6f197a31c8765e59901ed0d61245818a89289732105db2b6359615d"
+    }
+  },
+  "test_evidence": {
+    "frontend_unit_tests": {
+      "command": "npm test (in frontend/)",
+      "suites": 15,
+      "passed": 112,
+      "failed": 0
+    },
+    "backend_podcast_tests": {
+      "command": "pytest backend/tests/test_layout_engine.py backend/tests/test_podcast_layout_pipeline.py backend/tests/test_advanced_podcast.py backend/tests/test_podcast_layout_features.py -v",
+      "suites": 4,
+      "passed": 75,
+      "failed": 0
+    },
+    "backend_regression_tests": {
+      "command": "pytest backend/tests/test_equal_splits.py backend/tests/test_channel_batch_count.py backend/tests/test_publishing_privacy_hardening.py backend/tests/test_upload_studio_phase3_publishing.py backend/tests/test_automatic_channel_monitoring_and_decision_lifecycle.py backend/tests/test_source_seo_and_attribution.py backend/tests/test_publishing_cadence_governance.py -v",
+      "suites": 7,
+      "passed": 144,
+      "failed": 0
+    },
+    "typescript_typecheck": {
+      "command": "npx tsc --noEmit",
+      "exit_code": 0,
+      "errors": 0
+    }
+  },
+  "celery_worker_verification": {
+    "node": "celery@f7a2f51bf5db",
+    "task_registered": "analyze_podcast_shots_task",
+    "live_test_task_id": "4a905c3c-ad6b-4f8a-9319-5a57ece28204",
+    "live_test_status": "SUCCESS",
+    "execution_duration_sec": 2.228
+  },
+  "rendered_scenarios": {
+    "S1_standard_stacked_split.mp4": {
+      "path": "tmp/podcast_visual_acceptance/renders/S1_standard_stacked_split.mp4",
+      "size_bytes": 48124,
+      "sha256": "2157a51f30cd1f1445bbdceb08671d99bf6debf1c7e3d8f74c8610614641e1b6",
+      "resolution": "1080x1920",
+      "vcodec": "h264",
+      "acodec": "aac",
+      "subtitles": 0
+    },
+    "S2_standard_single_focus.mp4": {
+      "path": "tmp/podcast_visual_acceptance/renders/S2_standard_single_focus.mp4",
+      "size_bytes": 48171,
+      "sha256": "c4638d0ea4a54fa8e1c2cedfe5186908f9f3b6492b2c769f1ff71607aac1b6e4",
+      "resolution": "1080x1920",
+      "vcodec": "h264",
+      "acodec": "aac",
+      "subtitles": 0
+    },
+    "S3_fixed_two_person_normal.mp4": {
+      "path": "tmp/podcast_visual_acceptance/renders/S3_fixed_two_person_normal.mp4",
+      "size_bytes": 68736,
+      "sha256": "94a6c42d3ad2251a51949b3bdd13a99b5350e50f0447368bb7880ed13bce6360",
+      "resolution": "1080x1920",
+      "vcodec": "h264",
+      "acodec": "aac",
+      "subtitles": 0
+    },
+    "S4_fixed_two_person_wide.mp4": {
+      "path": "tmp/podcast_visual_acceptance/renders/S4_fixed_two_person_wide.mp4",
+      "size_bytes": 68019,
+      "sha256": "833d2f77fafe1ff3f1188d4f6b64d1782665da7feb16c2680821472657e64fff",
+      "resolution": "1080x1920",
+      "vcodec": "h264",
+      "acodec": "aac",
+      "subtitles": 0
+    },
+    "S5_visibility_a_only.mp4": {
+      "path": "tmp/podcast_visual_acceptance/renders/S5_visibility_a_only.mp4",
+      "size_bytes": 80430,
+      "sha256": "e3ce0369bd3ddfbc2f3c9804077d7e00d0642bcef2be13733c1fd1d4265dc496",
+      "resolution": "1080x1920",
+      "vcodec": "h264",
+      "acodec": "aac",
+      "subtitles": 0
+    },
+    "S6_visibility_b_only.mp4": {
+      "path": "tmp/podcast_visual_acceptance/renders/S6_visibility_b_only.mp4",
+      "size_bytes": 79575,
+      "sha256": "f6b4e39048d5152cb19067c52293e3c47fabbd08524ab35d92fc50cdf860177d",
+      "resolution": "1080x1920",
+      "vcodec": "h264",
+      "acodec": "aac",
+      "subtitles": 0
+    },
+    "S7_visibility_side_by_side.mp4": {
+      "path": "tmp/podcast_visual_acceptance/renders/S7_visibility_side_by_side.mp4",
+      "size_bytes": 68556,
+      "sha256": "86568e34a4baf1182525af36b229aba26d5fb91c83f48aee43a053bb0268abe4",
+      "resolution": "1080x1920",
+      "vcodec": "h264",
+      "acodec": "aac",
+      "subtitles": 0
+    },
+    "multi_cut_visibility_20s.mp4": {
+      "path": "tmp/podcast_visual_acceptance/renders/multi_cut_visibility_20s.mp4",
+      "size_bytes": 280922,
+      "sha256": "765b44bf62e3344bb4e0ddc4297fe6c1ad563b073a1b7a854e5fb4e45ac15937",
+      "resolution": "1080x1920",
+      "vcodec": "h264",
+      "acodec": "aac",
+      "subtitles": 0
+    }
+  },
+  "extracted_frames": {
+    "frame_11.9s_cut3_before_b_only.png": {
+      "path": "tmp/podcast_visual_acceptance/frames/frame_11.9s_cut3_before_b_only.png",
+      "size_bytes": 12815,
+      "sha256": "ce887d05ae6c736ced31f101c6394c6a5f8953ee5f6833dc19dfc6531f5f4db6"
+    },
+    "frame_12.1s_cut3_after_sbs.png": {
+      "path": "tmp/podcast_visual_acceptance/frames/frame_12.1s_cut3_after_sbs.png",
+      "size_bytes": 12423,
+      "sha256": "1747b8ddd4111e5ff980ac2ce4973e77bfdb3033a8bd27f6c87f8852dd75ea13"
+    },
+    "frame_15.9s_cut4_before_sbs.png": {
+      "path": "tmp/podcast_visual_acceptance/frames/frame_15.9s_cut4_before_sbs.png",
+      "size_bytes": 12465,
+      "sha256": "160a41b05d9988bbce6af7b82007e29a5216ed9e87dbbfa66addf236ecbff1f4"
+    },
+    "frame_16.1s_cut4_after_unknown_review.png": {
+      "path": "tmp/podcast_visual_acceptance/frames/frame_16.1s_cut4_after_unknown_review.png",
+      "size_bytes": 10495,
+      "sha256": "de7972b218dae94b01b5e3710b3ed412748af2ed774f88c2ba348fa73103738b"
+    },
+    "frame_3.9s_cut1_before_sbs.png": {
+      "path": "tmp/podcast_visual_acceptance/frames/frame_3.9s_cut1_before_sbs.png",
+      "size_bytes": 11804,
+      "sha256": "fa1816986228c6c2726e3ba182f479e074a17692a09c2670746cc7b7800e3e13"
+    },
+    "frame_4.1s_cut1_after_a_only.png": {
+      "path": "tmp/podcast_visual_acceptance/frames/frame_4.1s_cut1_after_a_only.png",
+      "size_bytes": 11799,
+      "sha256": "d4480e26085beb73ce1e574f171f5737d3413c65c64ad0d453e72896397ecbd4"
+    },
+    "frame_7.9s_cut2_before_a_only.png": {
+      "path": "tmp/podcast_visual_acceptance/frames/frame_7.9s_cut2_before_a_only.png",
+      "size_bytes": 11741,
+      "sha256": "edf64fcd8dacdc90921c17a39194f6d76d46f91d67317b05ce9d60ada84c36e1"
+    },
+    "frame_8.1s_cut2_after_b_only.png": {
+      "path": "tmp/podcast_visual_acceptance/frames/frame_8.1s_cut2_after_b_only.png",
+      "size_bytes": 13025,
+      "sha256": "61f4e4430f2fdd58a0230821cf48486f9a217d991ff126b11dbff9d7735236a1"
+    }
+  },
+  "website_walkthrough_screenshots": {
+    "page-01-dashboard_desktop.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-01-dashboard_desktop.png",
+      "size_bytes": 496307,
+      "sha256": "d0c223f7ab4df8c9e8c73153e260647f429e9626d7a0b9abbf0a3270e86fa8f2"
+    },
+    "page-01-dashboard_mobile.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-01-dashboard_mobile.png",
+      "size_bytes": 130070,
+      "sha256": "31cc412ba3f662b8ab54187f823644e790274e27c12e3e332534a91eaef58a71"
+    },
+    "page-02-podcasts_desktop.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-02-podcasts_desktop.png",
+      "size_bytes": 543383,
+      "sha256": "c51075c426462464e4fdd7e5aac3f77714b3858a50f6f599c0b5c1fdd9945830"
+    },
+    "page-02-podcasts_mobile.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-02-podcasts_mobile.png",
+      "size_bytes": 123401,
+      "sha256": "a54e2cfbefad3985bb559f27184b3ff9a065af840e407dab000f6a4daba17e6e"
+    },
+    "page-03-studio_desktop.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-03-studio_desktop.png",
+      "size_bytes": 656787,
+      "sha256": "17ba8e66fe4efda0937aea3a572818cffa22cd6d0e69969909ea5f2df2d68fd8"
+    },
+    "page-03-studio_mobile.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-03-studio_mobile.png",
+      "size_bytes": 193160,
+      "sha256": "accf18903eb80f8c4700dc0c682cc75fe0f20e66a7325a3396607dbaca75d593"
+    },
+    "page-04-clips_desktop.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-04-clips_desktop.png",
+      "size_bytes": 835456,
+      "sha256": "3c4742cb79fb1621efb8ce2b0ee5cefde3d48b957ee81572b87bdfedac25b1e8"
+    },
+    "page-04-clips_mobile.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-04-clips_mobile.png",
+      "size_bytes": 195536,
+      "sha256": "902eedf40b65e4824bfed408b2d944d5818f434bbc0e2c5fa693efc9c5e07ca7"
+    },
+    "page-05-analytics_desktop.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-05-analytics_desktop.png",
+      "size_bytes": 380286,
+      "sha256": "1f91ed90bd3edf45e939acb4c5ae8ccfd08554e4802edd3d19d332d0db292aec"
+    },
+    "page-05-analytics_mobile.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-05-analytics_mobile.png",
+      "size_bytes": 109811,
+      "sha256": "ce2c39a73ae878f4c51825095959c0b373b942234ddaee21b41a6866d457c4f1"
+    },
+    "page-06-automation_desktop.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-06-automation_desktop.png",
+      "size_bytes": 405823,
+      "sha256": "46777c15aaa1398ab0dd7362f4ed26e921486c72fd505640a0a8786054a9f252"
+    },
+    "page-06-automation_mobile.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-06-automation_mobile.png",
+      "size_bytes": 146207,
+      "sha256": "3fc2d0131a6005f28073e8392f3cec6c05a8f7e1dfac0fc8d0d311ab1c8436a5"
+    },
+    "page-07-channels_desktop.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-07-channels_desktop.png",
+      "size_bytes": 190636,
+      "sha256": "6341940a0c17ef067111759821913a174dac9c42798c43201a513994221d9e25"
+    },
+    "page-07-channels_mobile.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-07-channels_mobile.png",
+      "size_bytes": 64486,
+      "sha256": "185278df39ca73fcf03820fa06b1812d62813362fa7e02927eaf8d0043a966e2"
+    },
+    "page-08-publish_desktop.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-08-publish_desktop.png",
+      "size_bytes": 541117,
+      "sha256": "f544979970596dbbf7f37a81f60b6064e14bf143e3d37a8dd1360bb3a517e43e"
+    },
+    "page-08-publish_mobile.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-08-publish_mobile.png",
+      "size_bytes": 144368,
+      "sha256": "330223203161301aed7b622686208107cbd39fac291d0e338c602131483f235e"
+    },
+    "page-09-settings_desktop.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-09-settings_desktop.png",
+      "size_bytes": 380787,
+      "sha256": "4ae3e989079d669069857a7d60b3d767de098e08819dd8a1efa896979c6fa730"
+    },
+    "page-09-settings_mobile.png": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/page-09-settings_mobile.png",
+      "size_bytes": 100169,
+      "sha256": "252ddcb0f9b08249f4d337e6275c54ebb6d2b7524e698b3b07bc2f85004dfb64"
+    },
+    "walkthrough_manifest.json": {
+      "path": "tmp/podcast_visual_acceptance/website_walkthrough/walkthrough_manifest.json",
+      "size_bytes": 4424,
+      "sha256": "8b732827d2d6fc8ee1413340916e965f2d9873aa8d48c8bd9ced5ead42dfbd61"
+    }
+  },
+  "preview_inspection_screenshots": {
+    "advanced_fixed_two_person_1793646313062.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/advanced_fixed_two_person_1793646313062.png",
+      "size_bytes": 550223,
+      "sha256": "720f457b84e260bf3ff575744fc0cfa5a0f720044335006209f3b8662efb35be"
+    },
+    "advanced_visibility_analyzed_schedule_1793646423472.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/advanced_visibility_analyzed_schedule_1793646423472.png",
+      "size_bytes": 556920,
+      "sha256": "ba7b56652a8a42625b0eb978b9053904cc61bd2103e772c4dadf90e6d390f824"
+    },
+    "advanced_visibility_shot_selected_1793646449641.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/advanced_visibility_shot_selected_1793646449641.png",
+      "size_bytes": 551091,
+      "sha256": "57ed5f4e6d2ffc5e8a22cf8cddbe9c9f0169cdcd9256c5e7d53c19f390f67cf0"
+    },
+    "advanced_visibility_side_by_side_pre_analysis_1793646381247.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/advanced_visibility_side_by_side_pre_analysis_1793646381247.png",
+      "size_bytes": 552864,
+      "sha256": "b5daf4eb345fa55b738db518c3efaf8ca6f9dd61d5064b765b4f2843efd63244"
+    },
+    "back_to_manual_mode_1793646478590.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/back_to_manual_mode_1793646478590.png",
+      "size_bytes": 559035,
+      "sha256": "bb62dce1f6e9d1f6903b329105f4c1cc447bfac314f8fd6ee8a9b4496f8b173e"
+    },
+    "browser_01_standard_stacked_1793644904284.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_01_standard_stacked_1793644904284.png",
+      "size_bytes": 556483,
+      "sha256": "211d9d3f7fe3b541df263ca3ae5592c81d755394a0098a9b7f1560d284e2cfd1"
+    },
+    "browser_01_standard_stacked_split.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_01_standard_stacked_split.png",
+      "size_bytes": 305926,
+      "sha256": "1857c9a203d96895e5b8c7127147c3afcafd4e7c95d6823029a57dadbb4ac9c1"
+    },
+    "browser_02_standard_single_focus.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_02_standard_single_focus.png",
+      "size_bytes": 325998,
+      "sha256": "6ac01a468b5481e4f2b4eefc87f3f60cef990c937d95580b90303f7ca1f56eb1"
+    },
+    "browser_02_standard_single_focus_1793644936183.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_02_standard_single_focus_1793644936183.png",
+      "size_bytes": 553494,
+      "sha256": "add4c1a85947be205f7913f7967ecb5b4e2cd2ae27f57b998983604cbaddb842"
+    },
+    "browser_03_advanced_fixed_two_person.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_03_advanced_fixed_two_person.png",
+      "size_bytes": 562639,
+      "sha256": "1b4cdb4b7eab82a7ed90ae7e76b059f821ddd090ad5fb554cfc2741275bf699d"
+    },
+    "browser_03_advanced_fixed_two_person_1793644988074.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_03_advanced_fixed_two_person_1793644988074.png",
+      "size_bytes": 552103,
+      "sha256": "50b9887d024c890797e41f5f6e3cbb9b7de861c1371e89eb1493903e7ccdd1f1"
+    },
+    "browser_04_advanced_visibility_pre_analysis_1793645026135.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_04_advanced_visibility_pre_analysis_1793645026135.png",
+      "size_bytes": 560925,
+      "sha256": "237e50186f002cc19cb8c01549bc22361c0b1fb1d921fdbe08a13cb2ff19863e"
+    },
+    "browser_04_advanced_visibility_side_by_side_pre.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_04_advanced_visibility_side_by_side_pre.png",
+      "size_bytes": 542076,
+      "sha256": "30949238bc7b6af61176c5141192d153dfd0c2d9a7b08175b19076f39b8e7ae6"
+    },
+    "browser_05_visibility_a_only_1793645094515.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_05_visibility_a_only_1793645094515.png",
+      "size_bytes": 571148,
+      "sha256": "cbd6d12b9021a9bca7bfabf183aebf76c59da4369243d61e9fd3e297dd8e285d"
+    },
+    "browser_05_visibility_shot1_side_by_side.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_05_visibility_shot1_side_by_side.png",
+      "size_bytes": 393898,
+      "sha256": "8c5e6cfb7739a4c72189b7729d65c72fc2a1e3b01e1778a2fa2c0733cd76018d"
+    },
+    "browser_06_visibility_shot2_a_only.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_06_visibility_shot2_a_only.png",
+      "size_bytes": 392176,
+      "sha256": "dc2c71c1d8b157096c7066d4cc57061e8b0bdcf1747894cf7b05b6ec97046179"
+    },
+    "browser_07_visibility_shot3_b_only.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_07_visibility_shot3_b_only.png",
+      "size_bytes": 400225,
+      "sha256": "90dfb81f73ee24dfbf92ff0d1caf183232e33e5c1f79b6b9f30422b3f3f34020"
+    },
+    "browser_08_visibility_shot4_unknown_review.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_08_visibility_shot4_unknown_review.png",
+      "size_bytes": 403067,
+      "sha256": "96e12f7df22fe909cd219eac2f62c304d9bb35b3730498659d788c3429da1658"
+    },
+    "browser_09_back_to_manual_mode.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_09_back_to_manual_mode.png",
+      "size_bytes": 508316,
+      "sha256": "d6427a1f6a465622411823cf8af49b6f9ecf12e73636285b74bf4770d9370c19"
+    },
+    "browser_09_return_to_manual_1793645159534.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/browser_09_return_to_manual_1793645159534.png",
+      "size_bytes": 554506,
+      "sha256": "1b5354e98956e41d5b185a5e7cf276fedbc2d4b90aa2126991aba903621ace43"
+    },
+    "inspect_layout_1793646075993.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/inspect_layout_1793646075993.png",
+      "size_bytes": 565609,
+      "sha256": "5de9b1d90678402be6cb707823484b72091bc137e9e751ce103cd418b6435964"
+    },
+    "podcast_modal_opened_1793644878310.png": {
+      "path": "tmp/podcast_visual_acceptance/previews/podcast_modal_opened_1793644878310.png",
+      "size_bytes": 279342,
+      "sha256": "82b170ec93c36ce7808b7614607de9b548e02d90c7eddefa94c62024ce91e96b"
+    }
+  },
+  "responsive_audit_evidence": {
+    "before_overflow_json": {
+      "path": "tmp/clipforge_full_website_audit/overflow_analysis_before.json",
+      "size_bytes": 92595,
+      "sha256": "cb63b8532321f44bfd7e2a2bd41d09053a3dacc106d75d8a5893d730a41a0b66"
+    },
+    "after_overflow_json": {
+      "path": "tmp/clipforge_full_website_audit/overflow_analysis_after.json",
+      "size_bytes": 18848,
+      "sha256": "4d4eba9e17c0275009f1bb478eb40ed235d4b01172d486c9b1a883263134059c"
+    },
+    "dom_controls_reconciliation_json": {
+      "path": "tmp/clipforge_full_website_audit/dom_controls_reconciliation.json",
+      "size_bytes": 4654,
+      "sha256": "c35f9d67793581ac38d2c8f8ccb89792bf391c6a4691a7820ad03acda4f62599"
+    },
+    "screenshot_directory": "tmp/clipforge_full_website_audit/screenshots/overflow_after/",
+    "screenshot_count": 25,
+    "viewport_success_rate": "25/25 viewports with 0px overflow (100% PASS)"
+  },
+  "audit_reports": {
+    "docs/engineering/CLIPFORGE_FULL_WEBSITE_FORENSIC_ACCEPTANCE_REPORT.md": {
+      "size_bytes": 27355,
+      "sha256": "aca6194989420222a667ea3eba9b3d047bd7af10b8ebfe829f6368c64918dbe3"
+    },
+    "docs/engineering/CLIPFORGE_MINOR_FIX_LOG.md": {
+      "size_bytes": 9401,
+      "sha256": "da30415c765f9c5932e6cb033b6caec2a0d0bd3306c62ac66ff8b1de0e51ac63"
+    },
+    "docs/engineering/CLIPFORGE_FULL_FORENSIC_ISSUE_REGISTER.md": {
+      "size_bytes": 11729,
+      "sha256": "82e96c3c5e74c308820afbae82add65328117da21e3607de55154a199a88bab0"
+    },
+    "docs/engineering/CLIPFORGE_PERMISSION_REQUIRED_CHANGES.md": {
+      "size_bytes": 7727,
+      "sha256": "fa5336fee91daaaac7aa8be635df2078ad32264b7b302cb58f0041962d79e084"
+    },
+    "docs/engineering/CLIPFORGE_AUTONOMOUS_ORCHESTRATOR_EXECUTION_REPORT.md": {
+      "size_bytes": 18331,
+      "sha256": "b252ca52be865ad5eb467e6ba1a69e91ebdf8828cbb9bc5f065e253c0eab3ef9"
+    },
+    "docs/engineering/CLIPFORGE_PODCAST_VISUAL_ACCEPTANCE_REPORT.md": {
+      "size_bytes": 23020,
+      "sha256": "28c4816ba913882ce84b9590abec3fb442262fda5e9e6e49835738f3a7ecffc9"
+    },
+    "docs/engineering/PROJECT_CONTINUITY.md": {
+      "size_bytes": 147380,
+      "sha256": "4a707a70c8c6616e3e36123a09696dc71257de69339131daaacef6823a59b7f7"
+    },
+    "docs/engineering/IMPLEMENTATION_STATUS.md": {
+      "size_bytes": 137972,
+      "sha256": "3dcb478bab8bb23421f2bdfcb5cb5e1bb1c71b88782e09abf98a2f3f2d8866fb"
+    }
+  },
+  "timestamp_provenance_addendum": {
+    "audit_item": "AUDIT-TIMESTAMP-011",
+    "reconciliation_status": "RECONCILED",
+    "historical_timestamp_preserved": "2026-11-03T03:25:00Z",
+    "pre_addendum_sha256": "388783454280ebcee79955231b45d755b5a213766ee6e7ae0aca35999f3f5a42",
+    "investigation_finding": "The historical timestamp string '2026-11-03T03:25:00Z' represented local host time (03:25 AM IST, UTC+05:30) with an appended Zulu 'Z' indicator. Its true UTC value was 2026-11-02T21:55:00Z (2026-11-03T03:25:00+05:30), proving that the manifest was created contemporaneously with the crawl and was never future-dated in reality.",
+    "canonical_reconciliation_manifest": "docs/engineering/CLIPFORGE_AUDIT_TIMESTAMP_PROVENANCE_RECONCILIATION.json"
+  }
+}

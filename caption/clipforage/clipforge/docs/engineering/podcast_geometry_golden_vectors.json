@@ -1,0 +1,767 @@
+{
+  "version": "1.0.0",
+  "vectors": [
+    {
+      "id": "vector-01-full-frame",
+      "description": "Full-frame region [0.0, 0.0, 1.0, 1.0] on 1080p source",
+      "input": {
+        "region": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 0,
+        "y": 0,
+        "w": 1920,
+        "h": 1080,
+        "norm_x": 0.0,
+        "norm_y": 0.0,
+        "norm_w": 1.0,
+        "norm_h": 1.0,
+        "region_left": 0,
+        "region_right": 1920,
+        "user_region_width": 1920,
+        "aligned_crop_w": 1920,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 0.28125,
+        "scaled_w": 540,
+        "scaled_h": 304,
+        "pad_x": 0,
+        "pad_y": 808,
+        "ffmpeg_crop": "crop=1920:1080:0:0:exact=1",
+        "ffmpeg_filter": "crop=1920:1080:0:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-02-narrow-region",
+      "description": "Narrow region (width 0.05 = 96px) requiring expansion to min_fill_w (304px)",
+      "input": {
+        "region": {
+          "x": 0.45,
+          "y": 0.1,
+          "width": 0.05,
+          "height": 0.8
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 760,
+        "y": 0,
+        "w": 304,
+        "h": 1080,
+        "norm_x": 0.3958,
+        "norm_y": 0.0,
+        "norm_w": 0.1583,
+        "norm_h": 1.0,
+        "region_left": 864,
+        "region_right": 960,
+        "user_region_width": 96,
+        "aligned_crop_w": 304,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 1.776316,
+        "scaled_w": 540,
+        "scaled_h": 1918,
+        "pad_x": 0,
+        "pad_y": 1,
+        "ffmpeg_crop": "crop=304:1080:760:0:exact=1",
+        "ffmpeg_filter": "crop=304:1080:760:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-03-wide-region",
+      "description": "Wide region (width 0.80 = 1536px) exceeding min_fill_w",
+      "input": {
+        "region": {
+          "x": 0.1,
+          "y": 0.1,
+          "width": 0.8,
+          "height": 0.8
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 192,
+        "y": 0,
+        "w": 1536,
+        "h": 1080,
+        "norm_x": 0.1,
+        "norm_y": 0.0,
+        "norm_w": 0.8,
+        "norm_h": 1.0,
+        "region_left": 192,
+        "region_right": 1728,
+        "user_region_width": 1536,
+        "aligned_crop_w": 1536,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 0.351562,
+        "scaled_w": 540,
+        "scaled_h": 380,
+        "pad_x": 0,
+        "pad_y": 770,
+        "ffmpeg_crop": "crop=1536:1080:192:0:exact=1",
+        "ffmpeg_filter": "crop=1536:1080:192:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-04-fractional-coordinates",
+      "description": "High precision fractional coordinates testing outward rounding and subpixel precision",
+      "input": {
+        "region": {
+          "x": 0.123456,
+          "y": 0.234567,
+          "width": 0.345678,
+          "height": 0.56789
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 236,
+        "y": 0,
+        "w": 666,
+        "h": 1080,
+        "norm_x": 0.1229,
+        "norm_y": 0.0,
+        "norm_w": 0.3469,
+        "norm_h": 1.0,
+        "region_left": 237,
+        "region_right": 901,
+        "user_region_width": 664,
+        "aligned_crop_w": 666,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 0.810811,
+        "scaled_w": 540,
+        "scaled_h": 876,
+        "pad_x": 0,
+        "pad_y": 522,
+        "ffmpeg_crop": "crop=666:1080:236:0:exact=1",
+        "ffmpeg_filter": "crop=666:1080:236:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-05-tiny-box",
+      "description": "Extremely small box (width 0.001 = 2px) expanding safely to minimum panel fill width",
+      "input": {
+        "region": {
+          "x": 0.3,
+          "y": 0.4,
+          "width": 0.001,
+          "height": 0.001
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 424,
+        "y": 0,
+        "w": 304,
+        "h": 1080,
+        "norm_x": 0.2208,
+        "norm_y": 0.0,
+        "norm_w": 0.1583,
+        "norm_h": 1.0,
+        "region_left": 576,
+        "region_right": 578,
+        "user_region_width": 2,
+        "aligned_crop_w": 304,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 1.776316,
+        "scaled_w": 540,
+        "scaled_h": 1918,
+        "pad_x": 0,
+        "pad_y": 1,
+        "ffmpeg_crop": "crop=304:1080:424:0:exact=1",
+        "ffmpeg_filter": "crop=304:1080:424:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-06-touch-left-top",
+      "description": "Bounds touching left and top frame boundaries (x=0, y=0)",
+      "input": {
+        "region": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.2,
+          "height": 0.5
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 1080,
+        "norm_x": 0.0,
+        "norm_y": 0.0,
+        "norm_w": 0.2,
+        "norm_h": 1.0,
+        "region_left": 0,
+        "region_right": 384,
+        "user_region_width": 384,
+        "aligned_crop_w": 384,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 1.40625,
+        "scaled_w": 540,
+        "scaled_h": 1519,
+        "pad_x": 0,
+        "pad_y": 201,
+        "ffmpeg_crop": "crop=384:1080:0:0:exact=1",
+        "ffmpeg_filter": "crop=384:1080:0:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-07-touch-right-bottom",
+      "description": "Bounds touching right and bottom frame boundaries (x=0.8, y=0.5, right=1.0)",
+      "input": {
+        "region": {
+          "x": 0.8,
+          "y": 0.5,
+          "width": 0.2,
+          "height": 0.5
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 1536,
+        "y": 0,
+        "w": 384,
+        "h": 1080,
+        "norm_x": 0.8,
+        "norm_y": 0.0,
+        "norm_w": 0.2,
+        "norm_h": 1.0,
+        "region_left": 1536,
+        "region_right": 1920,
+        "user_region_width": 384,
+        "aligned_crop_w": 384,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 1.40625,
+        "scaled_w": 540,
+        "scaled_h": 1519,
+        "pad_x": 0,
+        "pad_y": 201,
+        "ffmpeg_crop": "crop=384:1080:1536:0:exact=1",
+        "ffmpeg_filter": "crop=384:1080:1536:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-08-out-of-range-negative",
+      "description": "Negative out-of-range coordinates clamped safely to frame edge",
+      "input": {
+        "region": {
+          "x": -0.2,
+          "y": -0.1,
+          "width": 0.4,
+          "height": 0.5
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 0,
+        "y": 0,
+        "w": 384,
+        "h": 1080,
+        "norm_x": 0.0,
+        "norm_y": 0.0,
+        "norm_w": 0.2,
+        "norm_h": 1.0,
+        "region_left": 0,
+        "region_right": 384,
+        "user_region_width": 384,
+        "aligned_crop_w": 384,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 1.40625,
+        "scaled_w": 540,
+        "scaled_h": 1519,
+        "pad_x": 0,
+        "pad_y": 201,
+        "ffmpeg_crop": "crop=384:1080:0:0:exact=1",
+        "ffmpeg_filter": "crop=384:1080:0:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-09-out-of-range-overflow",
+      "description": "Overflow coordinates extending past frame clamped safely",
+      "input": {
+        "region": {
+          "x": 0.8,
+          "y": 0.2,
+          "width": 0.5,
+          "height": 0.8
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 1536,
+        "y": 0,
+        "w": 384,
+        "h": 1080,
+        "norm_x": 0.8,
+        "norm_y": 0.0,
+        "norm_w": 0.2,
+        "norm_h": 1.0,
+        "region_left": 1536,
+        "region_right": 1920,
+        "user_region_width": 384,
+        "aligned_crop_w": 384,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 1.40625,
+        "scaled_w": 540,
+        "scaled_h": 1519,
+        "pad_x": 0,
+        "pad_y": 201,
+        "ffmpeg_crop": "crop=384:1080:1536:0:exact=1",
+        "ffmpeg_filter": "crop=384:1080:1536:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-10-high-res-4k",
+      "description": "High resolution 4K source (3840x2160)",
+      "input": {
+        "region": {
+          "x": 0.1,
+          "y": 0.1,
+          "width": 0.3,
+          "height": 0.8
+        },
+        "src_w": 3840,
+        "src_h": 2160,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 384,
+        "y": 0,
+        "w": 1152,
+        "h": 2160,
+        "norm_x": 0.1,
+        "norm_y": 0.0,
+        "norm_w": 0.3,
+        "norm_h": 1.0,
+        "region_left": 384,
+        "region_right": 1536,
+        "user_region_width": 1152,
+        "aligned_crop_w": 1152,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 0.46875,
+        "scaled_w": 540,
+        "scaled_h": 1013,
+        "pad_x": 0,
+        "pad_y": 454,
+        "ffmpeg_crop": "crop=1152:2160:384:0:exact=1",
+        "ffmpeg_filter": "crop=1152:2160:384:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-11-720p-source",
+      "description": "Standard 720p source (1280x720)",
+      "input": {
+        "region": {
+          "x": 0.1,
+          "y": 0.1,
+          "width": 0.3,
+          "height": 0.8
+        },
+        "src_w": 1280,
+        "src_h": 720,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 128,
+        "y": 0,
+        "w": 384,
+        "h": 720,
+        "norm_x": 0.1,
+        "norm_y": 0.0,
+        "norm_w": 0.3,
+        "norm_h": 1.0,
+        "region_left": 128,
+        "region_right": 512,
+        "user_region_width": 384,
+        "aligned_crop_w": 384,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 1.40625,
+        "scaled_w": 540,
+        "scaled_h": 1013,
+        "pad_x": 0,
+        "pad_y": 454,
+        "ffmpeg_crop": "crop=384:720:128:0:exact=1",
+        "ffmpeg_filter": "crop=384:720:128:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-12-non-even-source",
+      "description": "Non-even source dimensions (1921x1081) enforcing even-pixel alignment",
+      "input": {
+        "region": {
+          "x": 0.1,
+          "y": 0.1,
+          "width": 0.3,
+          "height": 0.8
+        },
+        "src_w": 1921,
+        "src_h": 1081,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 192,
+        "y": 0,
+        "w": 576,
+        "h": 1080,
+        "norm_x": 0.0999,
+        "norm_y": 0.0,
+        "norm_w": 0.2998,
+        "norm_h": 0.9991,
+        "region_left": 192,
+        "region_right": 768,
+        "user_region_width": 576,
+        "aligned_crop_w": 576,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 0.9375,
+        "scaled_w": 540,
+        "scaled_h": 1013,
+        "pad_x": 0,
+        "pad_y": 454,
+        "ffmpeg_crop": "crop=576:1080:192:0:exact=1",
+        "ffmpeg_filter": "crop=576:1080:192:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-13-crop-wider-than-source",
+      "description": "Requested region wider than source frame width (width 1.5) clamped to source width",
+      "input": {
+        "region": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.5,
+          "height": 1.0
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 0,
+        "y": 0,
+        "w": 1920,
+        "h": 1080,
+        "norm_x": 0.0,
+        "norm_y": 0.0,
+        "norm_w": 1.0,
+        "norm_h": 1.0,
+        "region_left": 0,
+        "region_right": 1920,
+        "user_region_width": 1920,
+        "aligned_crop_w": 1920,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 0.28125,
+        "scaled_w": 540,
+        "scaled_h": 304,
+        "pad_x": 0,
+        "pad_y": 808,
+        "ffmpeg_crop": "crop=1920:1080:0:0:exact=1",
+        "ffmpeg_filter": "crop=1920:1080:0:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-14-face-inside-region",
+      "description": "Face center inside selected region used for horizontal centering",
+      "input": {
+        "region": {
+          "x": 0.2,
+          "y": 0.1,
+          "width": 0.4,
+          "height": 0.8
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": {
+          "x": 0.25,
+          "width": 0.1
+        },
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 384,
+        "y": 0,
+        "w": 770,
+        "h": 1080,
+        "norm_x": 0.2,
+        "norm_y": 0.0,
+        "norm_w": 0.401,
+        "norm_h": 1.0,
+        "region_left": 384,
+        "region_right": 1153,
+        "user_region_width": 769,
+        "aligned_crop_w": 770,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 0.701299,
+        "scaled_w": 540,
+        "scaled_h": 757,
+        "pad_x": 0,
+        "pad_y": 582,
+        "ffmpeg_crop": "crop=770:1080:384:0:exact=1",
+        "ffmpeg_filter": "crop=770:1080:384:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-15-face-outside-region",
+      "description": "Face center outside selected region rejected in favor of region center",
+      "input": {
+        "region": {
+          "x": 0.2,
+          "y": 0.1,
+          "width": 0.4,
+          "height": 0.8
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": {
+          "x": 0.7,
+          "width": 0.1
+        },
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 384,
+        "y": 0,
+        "w": 770,
+        "h": 1080,
+        "norm_x": 0.2,
+        "norm_y": 0.0,
+        "norm_w": 0.401,
+        "norm_h": 1.0,
+        "region_left": 384,
+        "region_right": 1153,
+        "user_region_width": 769,
+        "aligned_crop_w": 770,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 0.701299,
+        "scaled_w": 540,
+        "scaled_h": 757,
+        "pad_x": 0,
+        "pad_y": 582,
+        "ffmpeg_crop": "crop=770:1080:384:0:exact=1",
+        "ffmpeg_filter": "crop=770:1080:384:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-16-clamp-left",
+      "description": "Selected region near left frame edge clamped to x=0",
+      "input": {
+        "region": {
+          "x": 0.01,
+          "y": 0.1,
+          "width": 0.05,
+          "height": 0.8
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 0,
+        "y": 0,
+        "w": 304,
+        "h": 1080,
+        "norm_x": 0.0,
+        "norm_y": 0.0,
+        "norm_w": 0.1583,
+        "norm_h": 1.0,
+        "region_left": 19,
+        "region_right": 116,
+        "user_region_width": 97,
+        "aligned_crop_w": 304,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 1.776316,
+        "scaled_w": 540,
+        "scaled_h": 1918,
+        "pad_x": 0,
+        "pad_y": 1,
+        "ffmpeg_crop": "crop=304:1080:0:0:exact=1",
+        "ffmpeg_filter": "crop=304:1080:0:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-17-clamp-right",
+      "description": "Selected region near right frame edge clamped to right edge (x+w=src_w)",
+      "input": {
+        "region": {
+          "x": 0.94,
+          "y": 0.1,
+          "width": 0.05,
+          "height": 0.8
+        },
+        "src_w": 1920,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 1616,
+        "y": 0,
+        "w": 304,
+        "h": 1080,
+        "norm_x": 0.8417,
+        "norm_y": 0.0,
+        "norm_w": 0.1583,
+        "norm_h": 1.0,
+        "region_left": 1804,
+        "region_right": 1901,
+        "user_region_width": 97,
+        "aligned_crop_w": 304,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 1.776316,
+        "scaled_w": 540,
+        "scaled_h": 1918,
+        "pad_x": 0,
+        "pad_y": 1,
+        "ffmpeg_crop": "crop=304:1080:1616:0:exact=1",
+        "ffmpeg_filter": "crop=304:1080:1616:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    },
+    {
+      "id": "vector-18-aspect-ratio-4-3",
+      "description": "Non-16:9 source aspect ratio (4:3 1440x1080)",
+      "input": {
+        "region": {
+          "x": 0.1,
+          "y": 0.1,
+          "width": 0.4,
+          "height": 0.8
+        },
+        "src_w": 1440,
+        "src_h": 1080,
+        "face_box": null,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920
+      },
+      "expected": {
+        "x": 144,
+        "y": 0,
+        "w": 576,
+        "h": 1080,
+        "norm_x": 0.1,
+        "norm_y": 0.0,
+        "norm_w": 0.4,
+        "norm_h": 1.0,
+        "region_left": 144,
+        "region_right": 720,
+        "user_region_width": 576,
+        "aligned_crop_w": 576,
+        "dest_panel_w": 540,
+        "dest_panel_h": 1920,
+        "scale_factor": 0.9375,
+        "scaled_w": 540,
+        "scaled_h": 1013,
+        "pad_x": 0,
+        "pad_y": 454,
+        "ffmpeg_crop": "crop=576:1080:144:0:exact=1",
+        "ffmpeg_filter": "crop=576:1080:144:0:exact=1,scale=540:1920:force_original_aspect_ratio=decrease,pad=540:1920:(ow-iw)/2:(oh-ih)/2:color=black,setsar=1",
+        "vertical_crop_used": false,
+        "vertical_crop_note": "Vertical crop fields are 0 and full source height (crop_y=0, crop_h=max_src_h) as full height is preserved and scaled proportionally with black padding."
+      }
+    }
+  ]
+}

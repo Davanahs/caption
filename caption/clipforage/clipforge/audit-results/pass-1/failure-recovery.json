@@ -1,0 +1,7 @@
+{
+  "status": "SUCCESS",
+  "steps": {
+    "transaction_rollback": "SUCCESS",
+    "server_recovery": "SUCCESS"
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClipForge Authentic Podcast Acceptance Manifest",
+  "version": "1.1.0",
+  "work_item": "PODCAST-AUTHENTIC-VALIDATION-012",
+  "logic_domain": "L7",
+  "status": "COMPLETED (EVALUATION EXECUTED)",
+  "disposition": "AUTHENTIC VALIDATION EXECUTED (GATE OUTCOME: FAIL)",
+  "timestamp_utc": "2026-11-03T07:46:00Z",
+  "authoritative_rule": "Master Engineering Rulebook Rule 15 (Zero Synthetic Substitution for Empirical Proof)",
+  "source_provenance": {
+    "source_url": "https://youtu.be/0GjbIOS9Q90?si=iHxemPakjjvU1RoX",
+    "video_id": "0GjbIOS9Q90",
+    "title": "The Morning Routine That Can Change Your Life | Dr. Sweta Adatia | Raj Shamani Clips",
+    "channel": "Raj Shamani Clips",
+    "duration_total_sec": 981.08,
+    "evaluated_duration_sec": 180.0,
+    "dimensions": "1920x1080",
+    "framerate": 25.0,
+    "video_codec": "h264 (avc1.640028)",
+    "audio_codec": "aac (mp4a.40.2)",
+    "nb_streams": 2,
+    "subtitle_streams": 0,
+    "acquisition_tool": "yt-dlp 2026.08.19",
+    "acquisition_timestamp_utc": "2026-11-03T07:32:35Z"
+  },
+  "invariant_enforcements": {
+    "subtitles": {
+      "prohibited": true,
+      "subtitle_streams_expected": 0,
+      "ffmpeg_flag": "-sn",
+      "burned_captions_allowed": false,
+      "actual_subtitle_streams_observed": 0,
+      "status": "COMPLIANT"
+    },
+    "geometry": {
+      "target_canvas": "1080x1920",
+      "aspect_ratio": "9:16",
+      "split_panel_dims": "540x1920",
+      "actual_rendered_geometry": "1080x1920",
+      "status": "COMPLIANT"
+    },
+    "ambiguity_fallback": {
+      "state": "UNKNOWN_REVIEW",
+      "requires_manual_flag": true,
+      "actual_unknown_review_observed": true,
+      "status": "COMPLIANT"
+    }
+  },
+  "acceptance_thresholds": {
+    "shot_precision_min": 0.95,
+    "shot_recall_min": 0.90,
+    "active_speaker_accuracy_min": 0.92,
+    "false_switch_rate_max_switches_per_sec": 0.05,
+    "crop_jitter_rms_max_px_per_frame": 2.5,
+    "manual_review_rate_max": 0.08
+  },
+  "asset_inventory": {
+    "media_path": "uploads/authentic_podcast_test.mp4",
+    "media_exists": true,
+    "media_size_bytes": 243392976,
+    "media_sha256": "8144a74a30ddebbbdb1946c43bbddd018e4b7891aedd31ddcb846d326ff7e4c0",
+    "ground_truth_path": "uploads/authentic_podcast_ground_truth.json",
+    "ground_truth_exists": true,
+    "ground_truth_sha256": "8fc7f98a579b7df25dadc02025c95d6cd1391c3aee61958a483fafe1b452867b",
+    "synthetic_substitution_allowed": false,
+    "is_authorized": true
+  },
+  "rendered_output": {
+    "output_path": "outputs/authentic_podcast_acceptance_rendered.mp4",
+    "file_size_bytes": 41328687,
+    "sha256": "fb3e72892a7901de5774fa51c116ffb4ddc7a514e5381c58bdd5406b1e0abf96",
+    "width": 1080,
+    "height": 1920,
+    "aspect_ratio": "9:16",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "subtitle_stream_count": 0,
+    "zero_subtitles_verified": true
+  },
+  "empirical_evaluation_results": {
+    "overall_verdict": "FAIL",
+    "duration_evaluated_sec": 180.0,
+    "metrics": {
+      "shot_precision": {
+        "value": 0.0,
+        "threshold": ">= 0.95",
+        "passed": false
+      },
+      "shot_recall": {
+        "value": 0.0,
+        "threshold": ">= 0.90",
+        "passed": false
+      },
+      "active_speaker_accuracy": {
+        "value": 0.475,
+        "threshold": ">= 0.92",
+        "passed": false
+      },
+      "false_switch_rate": {
+        "value": 0.0,
+        "threshold": "<= 0.05 switches/s",
+        "passed": true
+      },
+      "crop_jitter_rms_px": {
+        "value": 1.75,
+        "threshold": "<= 2.5 px/frame",
+        "passed": true
+      },
+      "manual_review_rate": {
+        "value": 0.4878,
+        "threshold": "<= 0.08",
+        "passed": false
+      }
+    },
+    "root_cause_analysis": "Frozen production function detect_camera_cuts in L7 relies on whole-frame HSV histogram correlation with cut_threshold=0.40. In studio broadcasts where background illumination and acoustic acoustic walls remain constant, camera cuts between wide two-shot and close-up views have correlation >= 0.65, causing the detector to miss camera cuts within the interview and cluster 341.2s into a single shot."
+  },
+  "harness": {
+    "script_path": "backend/scripts/run_authentic_podcast_acceptance.py",
+    "benchmark_path": "backend/benchmarks/benchmark_authentic_podcast.py",
+    "results_output_path": "backend/benchmarks/benchmark_results.json",
+    "exit_codes": {
+      "0": "PASS - All thresholds satisfied",
+      "1": "FAIL - Thresholds breached",
+      "2": "BLOCKED / NOT TESTED - Asset unavailable or synthetic rejected"
+    }
+  }
+}

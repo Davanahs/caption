@@ -1,0 +1,47 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: d:\automation video clips\clipforge\backend
+configfile: pytest.ini
+plugins: anyio-4.13.0, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 10 items / 9 deselected / 1 selected
+
+backend\tests\test_upload_studio_phase2_processing.py::test_p2_10_zero_captions_subtitles_invariant PASSED [100%]
+
+============================== warnings summary ===============================
+backend\core\config.py:5
+  D:\automation video clips\clipforge\backend\core\config.py:5: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Settings(BaseSettings):
+
+backend\models\layout.py:100
+  D:\automation video clips\clipforge\backend\models\layout.py:100: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    regions: List[RegionModel] = Field(min_items=1)
+
+backend\api\routes\studio.py:77
+  D:\automation video clips\clipforge\backend\api\routes\studio.py:77: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    item_ids: List[str] = Field(..., min_items=1)
+
+backend\api\routes\studio.py:80
+  D:\automation video clips\clipforge\backend\api\routes\studio.py:80: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class VideoItemResponse(BaseModel):
+
+backend\api\routes\studio.py:108
+  D:\automation video clips\clipforge\backend\api\routes\studio.py:108: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class BatchResponse(BaseModel):
+
+C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\_python_package_support.py:206
+  C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\_python_package_support.py:206: FutureWarning: Package google.api_core depends on grpcio, currently installed at version 1.80.0. grpcio < 1.83.0 does not support Post-Quantum Cryptography (PQC). Support for non-PQC environments is deprecated. In October 2026, Google Cloud Python packages will raise their minimum requirements (including google-api-core, grpcio, and grpcio-status) to enforce grpcio >= 1.83.0. For more details on Google Cloud's post-quantum security migration, visit: https://cloud.google.com/security/resources/post-quantum-cryptography
+    warnings.warn(
+
+tests/test_upload_studio_phase2_processing.py::test_p2_10_zero_captions_subtitles_invariant
+  D:\automation video clips\clipforge\backend\alembic\versions\f4c5d6e7f8a9_add_channel_profiles_and_video_decisions.py:22: SADeprecationWarning: The from_engine() method on Inspector is deprecated and will be removed in a future release.  Please use the sqlalchemy.inspect() function on an Engine or Connection in order to acquire an Inspector. (deprecated since: 1.4)
+    inspector = Inspector.from_engine(bind)
+
+tests/test_upload_studio_phase2_processing.py::test_p2_10_zero_captions_subtitles_invariant
+  D:\automation video clips\clipforge\backend\alembic\versions\a1b2c3d4e5f6_add_is_test_to_jobs.py:22: SADeprecationWarning: The from_engine() method on Inspector is deprecated and will be removed in a future release.  Please use the sqlalchemy.inspect() function on an Engine or Connection in order to acquire an Inspector. (deprecated since: 1.4)
+    inspector = Inspector.from_engine(bind)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================ 1 passed, 9 deselected, 8 warnings in 20.08s =================
+

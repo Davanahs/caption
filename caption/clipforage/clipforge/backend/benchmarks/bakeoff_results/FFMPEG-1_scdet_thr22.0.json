@@ -1,0 +1,112 @@
+{
+  "candidate_id": "FFMPEG-1_scdet_thr22.0",
+  "elapsed_seconds": 17.491,
+  "video_duration_s": 981.11,
+  "processing_fps": 56.09,
+  "detected_cuts": [
+    2.24,
+    97.84,
+    253.12,
+    341.08,
+    397.56,
+    408.08,
+    415.12,
+    568.68,
+    642.68,
+    648.32,
+    650.04,
+    784.48,
+    791.76,
+    926.28
+  ],
+  "detected_cut_count": 14,
+  "extra_info": {
+    "description": "FFmpeg scdet filter (threshold=22.0)",
+    "parameters": {
+      "threshold": 22.0,
+      "filter": "scdet"
+    },
+    "ffmpeg_version": "N-123074-g4e32fb4c2a-20260228",
+    "license": "GPL-2.0 (FFmpeg)"
+  },
+  "windows": {
+    "0-180s": {
+      "exact": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 19,
+        "precision": 1.0,
+        "recall": 0.0952,
+        "F1": 0.1739,
+        "MATE_s": 0.0,
+        "predicted_count": 2,
+        "gt_count": 21
+      },
+      "tol_250ms": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 19,
+        "precision": 1.0,
+        "recall": 0.0952,
+        "F1": 0.1739,
+        "MATE_s": 0.0,
+        "predicted_count": 2,
+        "gt_count": 21
+      },
+      "tol_500ms": {
+        "TP": 2,
+        "FP": 0,
+        "FN": 19,
+        "precision": 1.0,
+        "recall": 0.0952,
+        "F1": 0.1739,
+        "MATE_s": 0.0,
+        "predicted_count": 2,
+        "gt_count": 21
+      }
+    },
+    "0-300s": {
+      "exact": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 26,
+        "precision": 1.0,
+        "recall": 0.1034,
+        "F1": 0.1875,
+        "MATE_s": 0.0,
+        "predicted_count": 3,
+        "gt_count": 29
+      },
+      "tol_250ms": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 26,
+        "precision": 1.0,
+        "recall": 0.1034,
+        "F1": 0.1875,
+        "MATE_s": 0.0,
+        "predicted_count": 3,
+        "gt_count": 29
+      },
+      "tol_500ms": {
+        "TP": 3,
+        "FP": 0,
+        "FN": 26,
+        "precision": 1.0,
+        "recall": 0.1034,
+        "F1": 0.1875,
+        "MATE_s": 0.0,
+        "predicted_count": 3,
+        "gt_count": 29
+      }
+    }
+  },
+  "acceptance_gate": {
+    "precision": 1.0,
+    "recall": 0.0952,
+    "F1": 0.1739,
+    "pass_precision": true,
+    "pass_recall": false,
+    "gate_result": "FAIL"
+  }
+}

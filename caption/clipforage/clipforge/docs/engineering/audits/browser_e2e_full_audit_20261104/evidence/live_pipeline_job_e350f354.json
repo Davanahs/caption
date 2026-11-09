@@ -1,0 +1,38 @@
+{
+  "job_api_response": {
+    "id": "e350f354-1c58-4c7c-a099-d3d280b00249",
+    "video_id": "d34750ad-f9e8-44ce-bbc3-2941c91073dd",
+    "source_url": "synthetic_test_fixture.mp4",
+    "source_title": "synthetic_test_fixture.mp4",
+    "status": "completed",
+    "progress": 100,
+    "current_step": "All clips processed successfully",
+    "error_message": null,
+    "celery_task_id": "e350f354-1c58-4c7c-a099-d3d280b00249",
+    "config": {
+      "reframe_mode": "blur",
+      "clip_mode": "equal_split",
+      "max_clip_duration": null,
+      "enable_broll": false,
+      "enable_hook": false,
+      "target_language": null,
+      "clips_count": null,
+      "publish_destination_id": null,
+      "target_duration": 20.0,
+      "segmentation_strategy": "equal_splits",
+      "source_type": "local",
+      "local_path": "/app/uploads/0a60ffed-4cf0-41cb-aa19-d3b312a6691b/video.mp4"
+    },
+    "pipeline_started_at": "2026-11-04T10:17:02.891604+00:00",
+    "completed_at": "2026-11-04T10:17:37.652159+00:00",
+    "is_test": false,
+    "thumbnail_url": null,
+    "created_at": "2026-11-04T10:17:01.052231+00:00",
+    "created_at_ist": "04 Nov 2026, 03:47:01 PM IST",
+    "updated_at": "2026-11-04T10:17:37.652635+00:00",
+    "updated_at_ist": "04 Nov 2026, 03:47:37 PM IST"
+  },
+  "postgres_job": "                  id                  |               video_id               |  status   | progress |           current_step           |            celery_task_id            |      pipeline_started_at      |         completed_at          \n--------------------------------------+--------------------------------------+-----------+----------+----------------------------------+--------------------------------------+-------------------------------+-------------------------------\n e350f354-1c58-4c7c-a099-d3d280b00249 | d34750ad-f9e8-44ce-bbc3-2941c91073dd | completed |      100 | All clips processed successfully | e350f354-1c58-4c7c-a099-d3d280b00249 | 2026-11-04 10:17:02.891604+00 | 2026-11-04 10:17:37.652159+00\n(1 row)\n\n",
+  "postgres_clips": "                  id                  |               video_id               |    title    | duration | score |  status   |                                            output_path                                            |                                           thumbnail_path                                            | publish_status \n--------------------------------------+--------------------------------------+-------------+----------+-------+-----------+---------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+----------------\n 43691cd8-bd54-4d90-a871-b06b743b9949 | d34750ad-f9e8-44ce-bbc3-2941c91073dd | Part 1 of 1 |       20 |     1 | completed | outputs/d34750ad-f9e8-44ce-bbc3-2941c91073dd/clips/43691cd8-bd54-4d90-a871-b06b743b9949/final.mp4 | outputs/d34750ad-f9e8-44ce-bbc3-2941c91073dd/clips/43691cd8-bd54-4d90-a871-b06b743b9949/thumb_a.jpg | draft\n(1 row)\n\n",
+  "postgres_task_executions": "                  id                  |               task_id                |                job_id                | operation |  status   | attempt |          started_at           |         completed_at          \n--------------------------------------+--------------------------------------+--------------------------------------+-----------+-----------+---------+-------------------------------+-------------------------------\n b1daceff-f8b0-43d4-9952-7299f91cca1d | b1daceff-f8b0-43d4-9952-7299f91cca1d | e350f354-1c58-4c7c-a099-d3d280b00249 | reframe   | succeeded |       1 | 2026-11-04 10:17:16.88139+00  | 2026-11-04 10:17:35.032419+00\n 5ac9a766-eaa8-499b-b85c-f576e190fc2f | 5ac9a766-eaa8-499b-b85c-f576e190fc2f | e350f354-1c58-4c7c-a099-d3d280b00249 | render    | succeeded |       1 | 2026-11-04 10:17:35.067299+00 | 2026-11-04 10:17:37.232186+00\n c04e5d81-a0c2-4e75-ba5f-e62934fd1438 | c04e5d81-a0c2-4e75-ba5f-e62934fd1438 | e350f354-1c58-4c7c-a099-d3d280b00249 | publish   | running   |       1 | 2026-11-04 10:17:37.519935+00 | \n(3 rows)\n\n"
+}

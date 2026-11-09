@@ -1,0 +1,3614 @@
+[
+  {
+    "position": 1,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 2,
+    "reference": "whether",
+    "whisper_base": "whether",
+    "cactus_whistle": "whether",
+    "result": "Both correct"
+  },
+  {
+    "position": 3,
+    "reference": "youve",
+    "whisper_base": "youve",
+    "cactus_whistle": "you",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 4,
+    "reference": "landed",
+    "whisper_base": "landed",
+    "cactus_whistle": "landed",
+    "result": "Both correct"
+  },
+  {
+    "position": 5,
+    "reference": "on",
+    "whisper_base": "on",
+    "cactus_whistle": "on",
+    "result": "Both correct"
+  },
+  {
+    "position": 6,
+    "reference": "this",
+    "whisper_base": "this",
+    "cactus_whistle": "this",
+    "result": "Both correct"
+  },
+  {
+    "position": 7,
+    "reference": "video",
+    "whisper_base": "video",
+    "cactus_whistle": "video",
+    "result": "Both correct"
+  },
+  {
+    "position": 8,
+    "reference": "because",
+    "whisper_base": "because",
+    "cactus_whistle": "because",
+    "result": "Both correct"
+  },
+  {
+    "position": 9,
+    "reference": "someone",
+    "whisper_base": "someone",
+    "cactus_whistle": "someone",
+    "result": "Both correct"
+  },
+  {
+    "position": 10,
+    "reference": "suggested",
+    "whisper_base": "suggested",
+    "cactus_whistle": "suggested",
+    "result": "Both correct"
+  },
+  {
+    "position": 11,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 12,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 13,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 14,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 15,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 16,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 17,
+    "reference": "werent",
+    "whisper_base": "work",
+    "cactus_whistle": "were",
+    "result": "Both incorrect"
+  },
+  {
+    "position": 18,
+    "reference": "quite",
+    "whisper_base": "quite",
+    "cactus_whistle": "quite",
+    "result": "Both correct"
+  },
+  {
+    "position": 19,
+    "reference": "sure",
+    "whisper_base": "sure",
+    "cactus_whistle": "sure",
+    "result": "Both correct"
+  },
+  {
+    "position": 20,
+    "reference": "what",
+    "whisper_base": "what",
+    "cactus_whistle": "what",
+    "result": "Both correct"
+  },
+  {
+    "position": 21,
+    "reference": "they",
+    "whisper_base": "they",
+    "cactus_whistle": "they",
+    "result": "Both correct"
+  },
+  {
+    "position": 22,
+    "reference": "were",
+    "whisper_base": "were",
+    "cactus_whistle": "were",
+    "result": "Both correct"
+  },
+  {
+    "position": 23,
+    "reference": "talking",
+    "whisper_base": "talking",
+    "cactus_whistle": "talking",
+    "result": "Both correct"
+  },
+  {
+    "position": 24,
+    "reference": "about",
+    "whisper_base": "about",
+    "cactus_whistle": "about",
+    "result": "Both correct"
+  },
+  {
+    "position": 25,
+    "reference": "or",
+    "whisper_base": "or",
+    "cactus_whistle": "or",
+    "result": "Both correct"
+  },
+  {
+    "position": 26,
+    "reference": "youve",
+    "whisper_base": "youve",
+    "cactus_whistle": "youve",
+    "result": "Both correct"
+  },
+  {
+    "position": 27,
+    "reference": "heard",
+    "whisper_base": "heard",
+    "cactus_whistle": "heard",
+    "result": "Both correct"
+  },
+  {
+    "position": 28,
+    "reference": "about",
+    "whisper_base": "about",
+    "cactus_whistle": "about",
+    "result": "Both correct"
+  },
+  {
+    "position": 29,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "autonomy",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 30,
+    "reference": "ton",
+    "whisper_base": "ton",
+    "cactus_whistle": "<eps>",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 31,
+    "reference": "of",
+    "whisper_base": "of",
+    "cactus_whistle": "<eps>",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 32,
+    "reference": "people",
+    "whisper_base": "people",
+    "cactus_whistle": "people",
+    "result": "Both correct"
+  },
+  {
+    "position": 33,
+    "reference": "starting",
+    "whisper_base": "starting",
+    "cactus_whistle": "starting",
+    "result": "Both correct"
+  },
+  {
+    "position": 34,
+    "reference": "podcasts",
+    "whisper_base": "podcasts",
+    "cactus_whistle": "podcasts",
+    "result": "Both correct"
+  },
+  {
+    "position": 35,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 36,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 37,
+    "reference": "want",
+    "whisper_base": "want",
+    "cactus_whistle": "want",
+    "result": "Both correct"
+  },
+  {
+    "position": 38,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 39,
+    "reference": "know",
+    "whisper_base": "know",
+    "cactus_whistle": "know",
+    "result": "Both correct"
+  },
+  {
+    "position": 40,
+    "reference": "if",
+    "whisper_base": "if",
+    "cactus_whistle": "if",
+    "result": "Both correct"
+  },
+  {
+    "position": 41,
+    "reference": "thats",
+    "whisper_base": "thats",
+    "cactus_whistle": "thats",
+    "result": "Both correct"
+  },
+  {
+    "position": 42,
+    "reference": "something",
+    "whisper_base": "something",
+    "cactus_whistle": "something",
+    "result": "Both correct"
+  },
+  {
+    "position": 43,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 44,
+    "reference": "youd",
+    "whisper_base": "youd",
+    "cactus_whistle": "youd",
+    "result": "Both correct"
+  },
+  {
+    "position": 45,
+    "reference": "be",
+    "whisper_base": "be",
+    "cactus_whistle": "be",
+    "result": "Both correct"
+  },
+  {
+    "position": 46,
+    "reference": "into",
+    "whisper_base": "into",
+    "cactus_whistle": "into",
+    "result": "Both correct"
+  },
+  {
+    "position": 47,
+    "reference": "whatever",
+    "whisper_base": "but",
+    "cactus_whistle": "whatever",
+    "result": "Whistle correct"
+  },
+  {
+    "position": 48,
+    "reference": "your",
+    "whisper_base": "every",
+    "cactus_whistle": "your",
+    "result": "Whistle correct"
+  },
+  {
+    "position": 49,
+    "reference": "reason",
+    "whisper_base": "reason",
+    "cactus_whistle": "reason",
+    "result": "Both correct"
+  },
+  {
+    "position": 50,
+    "reference": "welcome",
+    "whisper_base": "welcome",
+    "cactus_whistle": "welcome",
+    "result": "Both correct"
+  },
+  {
+    "position": 51,
+    "reference": "wed",
+    "whisper_base": "wed",
+    "cactus_whistle": "wed",
+    "result": "Both correct"
+  },
+  {
+    "position": 52,
+    "reference": "love",
+    "whisper_base": "love",
+    "cactus_whistle": "love",
+    "result": "Both correct"
+  },
+  {
+    "position": 53,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 54,
+    "reference": "help",
+    "whisper_base": "help",
+    "cactus_whistle": "help",
+    "result": "Both correct"
+  },
+  {
+    "position": 55,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 56,
+    "reference": "understand",
+    "whisper_base": "understand",
+    "cactus_whistle": "understand",
+    "result": "Both correct"
+  },
+  {
+    "position": 57,
+    "reference": "what",
+    "whisper_base": "what",
+    "cactus_whistle": "what",
+    "result": "Both correct"
+  },
+  {
+    "position": 58,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 59,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 60,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 61,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 62,
+    "reference": "how",
+    "whisper_base": "how",
+    "cactus_whistle": "how",
+    "result": "Both correct"
+  },
+  {
+    "position": 63,
+    "reference": "they",
+    "whisper_base": "they",
+    "cactus_whistle": "they",
+    "result": "Both correct"
+  },
+  {
+    "position": 64,
+    "reference": "work",
+    "whisper_base": "work",
+    "cactus_whistle": "work",
+    "result": "Both correct"
+  },
+  {
+    "position": 65,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 66,
+    "reference": "what",
+    "whisper_base": "what",
+    "cactus_whistle": "what",
+    "result": "Both correct"
+  },
+  {
+    "position": 67,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 68,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 69,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 70,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 71,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 72,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 73,
+    "reference": "essentially",
+    "whisper_base": "essentially",
+    "cactus_whistle": "essentially",
+    "result": "Both correct"
+  },
+  {
+    "position": 74,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 75,
+    "reference": "series",
+    "whisper_base": "series",
+    "cactus_whistle": "series",
+    "result": "Both correct"
+  },
+  {
+    "position": 76,
+    "reference": "or",
+    "whisper_base": "or",
+    "cactus_whistle": "or",
+    "result": "Both correct"
+  },
+  {
+    "position": 77,
+    "reference": "collection",
+    "whisper_base": "collection",
+    "cactus_whistle": "collection",
+    "result": "Both correct"
+  },
+  {
+    "position": 78,
+    "reference": "of",
+    "whisper_base": "of",
+    "cactus_whistle": "of",
+    "result": "Both correct"
+  },
+  {
+    "position": 79,
+    "reference": "digital",
+    "whisper_base": "digital",
+    "cactus_whistle": "digital",
+    "result": "Both correct"
+  },
+  {
+    "position": 80,
+    "reference": "audio",
+    "whisper_base": "audio",
+    "cactus_whistle": "audio",
+    "result": "Both correct"
+  },
+  {
+    "position": 81,
+    "reference": "files",
+    "whisper_base": "files",
+    "cactus_whistle": "files",
+    "result": "Both correct"
+  },
+  {
+    "position": 82,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 83,
+    "reference": "are",
+    "whisper_base": "are",
+    "cactus_whistle": "are",
+    "result": "Both correct"
+  },
+  {
+    "position": 84,
+    "reference": "made",
+    "whisper_base": "made",
+    "cactus_whistle": "made",
+    "result": "Both correct"
+  },
+  {
+    "position": 85,
+    "reference": "available",
+    "whisper_base": "available",
+    "cactus_whistle": "available",
+    "result": "Both correct"
+  },
+  {
+    "position": 86,
+    "reference": "for",
+    "whisper_base": "for",
+    "cactus_whistle": "for",
+    "result": "Both correct"
+  },
+  {
+    "position": 87,
+    "reference": "listening",
+    "whisper_base": "listening",
+    "cactus_whistle": "listening",
+    "result": "Both correct"
+  },
+  {
+    "position": 88,
+    "reference": "or",
+    "whisper_base": "or",
+    "cactus_whistle": "or",
+    "result": "Both correct"
+  },
+  {
+    "position": 89,
+    "reference": "downloading",
+    "whisper_base": "downloading",
+    "cactus_whistle": "downloading",
+    "result": "Both correct"
+  },
+  {
+    "position": 90,
+    "reference": "via",
+    "whisper_base": "via",
+    "cactus_whistle": "via",
+    "result": "Both correct"
+  },
+  {
+    "position": 91,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 92,
+    "reference": "internet",
+    "whisper_base": "internet",
+    "cactus_whistle": "internet",
+    "result": "Both correct"
+  },
+  {
+    "position": 93,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 94,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 95,
+    "reference": "could",
+    "whisper_base": "could",
+    "cactus_whistle": "could",
+    "result": "Both correct"
+  },
+  {
+    "position": 96,
+    "reference": "be",
+    "whisper_base": "be",
+    "cactus_whistle": "be",
+    "result": "Both correct"
+  },
+  {
+    "position": 97,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 98,
+    "reference": "website",
+    "whisper_base": "website",
+    "cactus_whistle": "website",
+    "result": "Both correct"
+  },
+  {
+    "position": 99,
+    "reference": "it",
+    "whisper_base": "it",
+    "cactus_whistle": "it",
+    "result": "Both correct"
+  },
+  {
+    "position": 100,
+    "reference": "could",
+    "whisper_base": "could",
+    "cactus_whistle": "could",
+    "result": "Both correct"
+  },
+  {
+    "position": 101,
+    "reference": "be",
+    "whisper_base": "be",
+    "cactus_whistle": "be",
+    "result": "Both correct"
+  },
+  {
+    "position": 102,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 103,
+    "reference": "listening",
+    "whisper_base": "listening",
+    "cactus_whistle": "listening",
+    "result": "Both correct"
+  },
+  {
+    "position": 104,
+    "reference": "app",
+    "whisper_base": "app",
+    "cactus_whistle": "app",
+    "result": "Both correct"
+  },
+  {
+    "position": 105,
+    "reference": "what",
+    "whisper_base": "what",
+    "cactus_whistle": "what",
+    "result": "Both correct"
+  },
+  {
+    "position": 106,
+    "reference": "have",
+    "whisper_base": "have",
+    "cactus_whistle": "had",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 107,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 108,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 109,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 110,
+    "reference": "each",
+    "whisper_base": "each",
+    "cactus_whistle": "each",
+    "result": "Both correct"
+  },
+  {
+    "position": 111,
+    "reference": "individual",
+    "whisper_base": "individual",
+    "cactus_whistle": "individual",
+    "result": "Both correct"
+  },
+  {
+    "position": 112,
+    "reference": "audio",
+    "whisper_base": "audio",
+    "cactus_whistle": "audio",
+    "result": "Both correct"
+  },
+  {
+    "position": 113,
+    "reference": "file",
+    "whisper_base": "file",
+    "cactus_whistle": "file",
+    "result": "Both correct"
+  },
+  {
+    "position": 114,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 115,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 116,
+    "reference": "uploaded",
+    "whisper_base": "uploaded",
+    "cactus_whistle": "uploaded",
+    "result": "Both correct"
+  },
+  {
+    "position": 117,
+    "reference": "would",
+    "whisper_base": "would",
+    "cactus_whistle": "would",
+    "result": "Both correct"
+  },
+  {
+    "position": 118,
+    "reference": "be",
+    "whisper_base": "be",
+    "cactus_whistle": "be",
+    "result": "Both correct"
+  },
+  {
+    "position": 119,
+    "reference": "considered",
+    "whisper_base": "considered",
+    "cactus_whistle": "considered",
+    "result": "Both correct"
+  },
+  {
+    "position": 120,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 121,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 122,
+    "reference": "episode",
+    "whisper_base": "episode",
+    "cactus_whistle": "episode",
+    "result": "Both correct"
+  },
+  {
+    "position": 123,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 124,
+    "reference": "podcasts",
+    "whisper_base": "podcasts",
+    "cactus_whistle": "podcasts",
+    "result": "Both correct"
+  },
+  {
+    "position": 125,
+    "reference": "are",
+    "whisper_base": "are",
+    "cactus_whistle": "are",
+    "result": "Both correct"
+  },
+  {
+    "position": 126,
+    "reference": "typically",
+    "whisper_base": "typically",
+    "cactus_whistle": "typically",
+    "result": "Both correct"
+  },
+  {
+    "position": 127,
+    "reference": "hosted",
+    "whisper_base": "hosted",
+    "cactus_whistle": "hosted",
+    "result": "Both correct"
+  },
+  {
+    "position": 128,
+    "reference": "by",
+    "whisper_base": "by",
+    "cactus_whistle": "by",
+    "result": "Both correct"
+  },
+  {
+    "position": 129,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 130,
+    "reference": "person",
+    "whisper_base": "person",
+    "cactus_whistle": "person",
+    "result": "Both correct"
+  },
+  {
+    "position": 131,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 132,
+    "reference": "leads",
+    "whisper_base": "leads",
+    "cactus_whistle": "leads",
+    "result": "Both correct"
+  },
+  {
+    "position": 133,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 134,
+    "reference": "conversation",
+    "whisper_base": "conversation",
+    "cactus_whistle": "conversation",
+    "result": "Both correct"
+  },
+  {
+    "position": 135,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 136,
+    "reference": "will",
+    "whisper_base": "will",
+    "cactus_whistle": "will",
+    "result": "Both correct"
+  },
+  {
+    "position": 137,
+    "reference": "tell",
+    "whisper_base": "tell",
+    "cactus_whistle": "tell",
+    "result": "Both correct"
+  },
+  {
+    "position": 138,
+    "reference": "stories",
+    "whisper_base": "stories",
+    "cactus_whistle": "stories",
+    "result": "Both correct"
+  },
+  {
+    "position": 139,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 140,
+    "reference": "may",
+    "whisper_base": "may",
+    "cactus_whistle": "may",
+    "result": "Both correct"
+  },
+  {
+    "position": 141,
+    "reference": "report",
+    "whisper_base": "report",
+    "cactus_whistle": "report",
+    "result": "Both correct"
+  },
+  {
+    "position": 142,
+    "reference": "on",
+    "whisper_base": "on",
+    "cactus_whistle": "on",
+    "result": "Both correct"
+  },
+  {
+    "position": 143,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 144,
+    "reference": "news",
+    "whisper_base": "news",
+    "cactus_whistle": "news",
+    "result": "Both correct"
+  },
+  {
+    "position": 145,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 146,
+    "reference": "they",
+    "whisper_base": "they",
+    "cactus_whistle": "they",
+    "result": "Both correct"
+  },
+  {
+    "position": 147,
+    "reference": "are",
+    "whisper_base": "are",
+    "cactus_whistle": "are",
+    "result": "Both correct"
+  },
+  {
+    "position": 148,
+    "reference": "called",
+    "whisper_base": "called",
+    "cactus_whistle": "called",
+    "result": "Both correct"
+  },
+  {
+    "position": 149,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 150,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 151,
+    "reference": "host",
+    "whisper_base": "host",
+    "cactus_whistle": "host",
+    "result": "Both correct"
+  },
+  {
+    "position": 152,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 153,
+    "reference": "person",
+    "whisper_base": "person",
+    "cactus_whistle": "person",
+    "result": "Both correct"
+  },
+  {
+    "position": 154,
+    "reference": "who",
+    "whisper_base": "who",
+    "cactus_whistle": "who",
+    "result": "Both correct"
+  },
+  {
+    "position": 155,
+    "reference": "creates",
+    "whisper_base": "creates",
+    "cactus_whistle": "creates",
+    "result": "Both correct"
+  },
+  {
+    "position": 156,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 157,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 158,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 159,
+    "reference": "called",
+    "whisper_base": "called",
+    "cactus_whistle": "called",
+    "result": "Both correct"
+  },
+  {
+    "position": 160,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 161,
+    "reference": "podcaster",
+    "whisper_base": "podcaster",
+    "cactus_whistle": "podcaster",
+    "result": "Both correct"
+  },
+  {
+    "position": 162,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 163,
+    "reference": "best",
+    "whisper_base": "best",
+    "cactus_whistle": "best",
+    "result": "Both correct"
+  },
+  {
+    "position": 164,
+    "reference": "way",
+    "whisper_base": "way",
+    "cactus_whistle": "way",
+    "result": "Both correct"
+  },
+  {
+    "position": 165,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 166,
+    "reference": "think",
+    "whisper_base": "think",
+    "cactus_whistle": "think",
+    "result": "Both correct"
+  },
+  {
+    "position": 167,
+    "reference": "of",
+    "whisper_base": "of",
+    "cactus_whistle": "of",
+    "result": "Both correct"
+  },
+  {
+    "position": 168,
+    "reference": "podcasting",
+    "whisper_base": "podcasting",
+    "cactus_whistle": "podcasting",
+    "result": "Both correct"
+  },
+  {
+    "position": 169,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 170,
+    "reference": "kind",
+    "whisper_base": "kind",
+    "cactus_whistle": "kind",
+    "result": "Both correct"
+  },
+  {
+    "position": 171,
+    "reference": "of",
+    "whisper_base": "of",
+    "cactus_whistle": "of",
+    "result": "Both correct"
+  },
+  {
+    "position": 172,
+    "reference": "like",
+    "whisper_base": "like",
+    "cactus_whistle": "like",
+    "result": "Both correct"
+  },
+  {
+    "position": 173,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 174,
+    "reference": "netflix",
+    "whisper_base": "netflix",
+    "cactus_whistle": "netflix",
+    "result": "Both correct"
+  },
+  {
+    "position": 175,
+    "reference": "of",
+    "whisper_base": "of",
+    "cactus_whistle": "of",
+    "result": "Both correct"
+  },
+  {
+    "position": 176,
+    "reference": "audio",
+    "whisper_base": "audio",
+    "cactus_whistle": "audio",
+    "result": "Both correct"
+  },
+  {
+    "position": 177,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 178,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 179,
+    "reference": "know",
+    "whisper_base": "know",
+    "cactus_whistle": "know",
+    "result": "Both correct"
+  },
+  {
+    "position": 180,
+    "reference": "how",
+    "whisper_base": "how",
+    "cactus_whistle": "<eps>",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 181,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 182,
+    "reference": "can",
+    "whisper_base": "can",
+    "cactus_whistle": "can",
+    "result": "Both correct"
+  },
+  {
+    "position": 183,
+    "reference": "pick",
+    "whisper_base": "pick",
+    "cactus_whistle": "pick",
+    "result": "Both correct"
+  },
+  {
+    "position": 184,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 185,
+    "reference": "show",
+    "whisper_base": "show",
+    "cactus_whistle": "show",
+    "result": "Both correct"
+  },
+  {
+    "position": 186,
+    "reference": "on",
+    "whisper_base": "on",
+    "cactus_whistle": "on",
+    "result": "Both correct"
+  },
+  {
+    "position": 187,
+    "reference": "netflix",
+    "whisper_base": "netflix",
+    "cactus_whistle": "netflix",
+    "result": "Both correct"
+  },
+  {
+    "position": 188,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 189,
+    "reference": "just",
+    "whisper_base": "just",
+    "cactus_whistle": "just",
+    "result": "Both correct"
+  },
+  {
+    "position": 190,
+    "reference": "watch",
+    "whisper_base": "watch",
+    "cactus_whistle": "watch",
+    "result": "Both correct"
+  },
+  {
+    "position": 191,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 192,
+    "reference": "whole",
+    "whisper_base": "whole",
+    "cactus_whistle": "whole",
+    "result": "Both correct"
+  },
+  {
+    "position": 193,
+    "reference": "show",
+    "whisper_base": "show",
+    "cactus_whistle": "show",
+    "result": "Both correct"
+  },
+  {
+    "position": 194,
+    "reference": "or",
+    "whisper_base": "or",
+    "cactus_whistle": "or",
+    "result": "Both correct"
+  },
+  {
+    "position": 195,
+    "reference": "just",
+    "whisper_base": "just",
+    "cactus_whistle": "just",
+    "result": "Both correct"
+  },
+  {
+    "position": 196,
+    "reference": "watch",
+    "whisper_base": "watch",
+    "cactus_whistle": "watch",
+    "result": "Both correct"
+  },
+  {
+    "position": 197,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 198,
+    "reference": "few",
+    "whisper_base": "few",
+    "cactus_whistle": "few",
+    "result": "Both correct"
+  },
+  {
+    "position": 199,
+    "reference": "episodes",
+    "whisper_base": "episodes",
+    "cactus_whistle": "episodes",
+    "result": "Both correct"
+  },
+  {
+    "position": 200,
+    "reference": "podcasting",
+    "whisper_base": "podcasting",
+    "cactus_whistle": "podcasting",
+    "result": "Both correct"
+  },
+  {
+    "position": 201,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 202,
+    "reference": "very",
+    "whisper_base": "very",
+    "cactus_whistle": "very",
+    "result": "Both correct"
+  },
+  {
+    "position": 203,
+    "reference": "similar",
+    "whisper_base": "similar",
+    "cactus_whistle": "similar",
+    "result": "Both correct"
+  },
+  {
+    "position": 204,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 205,
+    "reference": "can",
+    "whisper_base": "can",
+    "cactus_whistle": "can",
+    "result": "Both correct"
+  },
+  {
+    "position": 206,
+    "reference": "pick",
+    "whisper_base": "pick",
+    "cactus_whistle": "pick",
+    "result": "Both correct"
+  },
+  {
+    "position": 207,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 208,
+    "reference": "show",
+    "whisper_base": "show",
+    "cactus_whistle": "show",
+    "result": "Both correct"
+  },
+  {
+    "position": 209,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 210,
+    "reference": "decide",
+    "whisper_base": "decide",
+    "cactus_whistle": "decide",
+    "result": "Both correct"
+  },
+  {
+    "position": 211,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 212,
+    "reference": "want",
+    "whisper_base": "want",
+    "cactus_whistle": "want",
+    "result": "Both correct"
+  },
+  {
+    "position": 213,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 214,
+    "reference": "listen",
+    "whisper_base": "listen",
+    "cactus_whistle": "listen",
+    "result": "Both correct"
+  },
+  {
+    "position": 215,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 216,
+    "reference": "all",
+    "whisper_base": "all",
+    "cactus_whistle": "all",
+    "result": "Both correct"
+  },
+  {
+    "position": 217,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 218,
+    "reference": "episodes",
+    "whisper_base": "episodes",
+    "cactus_whistle": "episodes",
+    "result": "Both correct"
+  },
+  {
+    "position": 219,
+    "reference": "they",
+    "whisper_base": "they",
+    "cactus_whistle": "they",
+    "result": "Both correct"
+  },
+  {
+    "position": 220,
+    "reference": "have",
+    "whisper_base": "have",
+    "cactus_whistle": "have",
+    "result": "Both correct"
+  },
+  {
+    "position": 221,
+    "reference": "available",
+    "whisper_base": "available",
+    "cactus_whistle": "available",
+    "result": "Both correct"
+  },
+  {
+    "position": 222,
+    "reference": "or",
+    "whisper_base": "or",
+    "cactus_whistle": "or",
+    "result": "Both correct"
+  },
+  {
+    "position": 223,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 224,
+    "reference": "can",
+    "whisper_base": "can",
+    "cactus_whistle": "can",
+    "result": "Both correct"
+  },
+  {
+    "position": 225,
+    "reference": "just",
+    "whisper_base": "just",
+    "cactus_whistle": "just",
+    "result": "Both correct"
+  },
+  {
+    "position": 226,
+    "reference": "listen",
+    "whisper_base": "listen",
+    "cactus_whistle": "listen",
+    "result": "Both correct"
+  },
+  {
+    "position": 227,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 228,
+    "reference": "one",
+    "whisper_base": "one",
+    "cactus_whistle": "one",
+    "result": "Both correct"
+  },
+  {
+    "position": 229,
+    "reference": "or",
+    "whisper_base": "or",
+    "cactus_whistle": "or",
+    "result": "Both correct"
+  },
+  {
+    "position": 230,
+    "reference": "two",
+    "whisper_base": "two",
+    "cactus_whistle": "two",
+    "result": "Both correct"
+  },
+  {
+    "position": 231,
+    "reference": "of",
+    "whisper_base": "of",
+    "cactus_whistle": "of",
+    "result": "Both correct"
+  },
+  {
+    "position": 232,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 233,
+    "reference": "episodes",
+    "whisper_base": "episodes",
+    "cactus_whistle": "episodes",
+    "result": "Both correct"
+  },
+  {
+    "position": 234,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 235,
+    "reference": "they",
+    "whisper_base": "they",
+    "cactus_whistle": "they",
+    "result": "Both correct"
+  },
+  {
+    "position": 236,
+    "reference": "have",
+    "whisper_base": "have",
+    "cactus_whistle": "have",
+    "result": "Both correct"
+  },
+  {
+    "position": 237,
+    "reference": "available",
+    "whisper_base": "available",
+    "cactus_whistle": "available",
+    "result": "Both correct"
+  },
+  {
+    "position": 238,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 239,
+    "reference": "thing",
+    "whisper_base": "thing",
+    "cactus_whistle": "thing",
+    "result": "Both correct"
+  },
+  {
+    "position": 240,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 241,
+    "reference": "this",
+    "whisper_base": "this",
+    "cactus_whistle": "this",
+    "result": "Both correct"
+  },
+  {
+    "position": 242,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 243,
+    "reference": "audio",
+    "whisper_base": "audio",
+    "cactus_whistle": "audio",
+    "result": "Both correct"
+  },
+  {
+    "position": 244,
+    "reference": "on",
+    "whisper_base": "on",
+    "cactus_whistle": "on",
+    "result": "Both correct"
+  },
+  {
+    "position": 245,
+    "reference": "your",
+    "whisper_base": "your",
+    "cactus_whistle": "your",
+    "result": "Both correct"
+  },
+  {
+    "position": 246,
+    "reference": "time",
+    "whisper_base": "time",
+    "cactus_whistle": "time",
+    "result": "Both correct"
+  },
+  {
+    "position": 247,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 248,
+    "reference": "how",
+    "whisper_base": "how",
+    "cactus_whistle": "how",
+    "result": "Both correct"
+  },
+  {
+    "position": 249,
+    "reference": "do",
+    "whisper_base": "do",
+    "cactus_whistle": "do",
+    "result": "Both correct"
+  },
+  {
+    "position": 250,
+    "reference": "podcasts",
+    "whisper_base": "podcasts",
+    "cactus_whistle": "podcasts",
+    "result": "Both correct"
+  },
+  {
+    "position": 251,
+    "reference": "work",
+    "whisper_base": "work",
+    "cactus_whistle": "work",
+    "result": "Both correct"
+  },
+  {
+    "position": 252,
+    "reference": "well",
+    "whisper_base": "well",
+    "cactus_whistle": "well",
+    "result": "Both correct"
+  },
+  {
+    "position": 253,
+    "reference": "if",
+    "whisper_base": "if",
+    "cactus_whistle": "if",
+    "result": "Both correct"
+  },
+  {
+    "position": 254,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 255,
+    "reference": "were",
+    "whisper_base": "were",
+    "cactus_whistle": "were",
+    "result": "Both correct"
+  },
+  {
+    "position": 256,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 257,
+    "reference": "create",
+    "whisper_base": "create",
+    "cactus_whistle": "create",
+    "result": "Both correct"
+  },
+  {
+    "position": 258,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 259,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 260,
+    "reference": "youd",
+    "whisper_base": "youd",
+    "cactus_whistle": "youd",
+    "result": "Both correct"
+  },
+  {
+    "position": 261,
+    "reference": "upload",
+    "whisper_base": "upload",
+    "cactus_whistle": "upload",
+    "result": "Both correct"
+  },
+  {
+    "position": 262,
+    "reference": "audio",
+    "whisper_base": "audio",
+    "cactus_whistle": "audio",
+    "result": "Both correct"
+  },
+  {
+    "position": 263,
+    "reference": "get",
+    "whisper_base": "get",
+    "cactus_whistle": "get",
+    "result": "Both correct"
+  },
+  {
+    "position": 264,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 265,
+    "reference": "hosting",
+    "whisper_base": "hosting",
+    "cactus_whistle": "hosting",
+    "result": "Both correct"
+  },
+  {
+    "position": 266,
+    "reference": "site",
+    "whisper_base": "site",
+    "cactus_whistle": "site",
+    "result": "Both correct"
+  },
+  {
+    "position": 267,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 268,
+    "reference": "make",
+    "whisper_base": "make",
+    "cactus_whistle": "make",
+    "result": "Both correct"
+  },
+  {
+    "position": 269,
+    "reference": "it",
+    "whisper_base": "it",
+    "cactus_whistle": "it",
+    "result": "Both correct"
+  },
+  {
+    "position": 270,
+    "reference": "available",
+    "whisper_base": "available",
+    "cactus_whistle": "available",
+    "result": "Both correct"
+  },
+  {
+    "position": 271,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 272,
+    "reference": "when",
+    "whisper_base": "when",
+    "cactus_whistle": "when",
+    "result": "Both correct"
+  },
+  {
+    "position": 273,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 274,
+    "reference": "do",
+    "whisper_base": "do",
+    "cactus_whistle": "do",
+    "result": "Both correct"
+  },
+  {
+    "position": 275,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 276,
+    "reference": "your",
+    "whisper_base": "your",
+    "cactus_whistle": "your",
+    "result": "Both correct"
+  },
+  {
+    "position": 277,
+    "reference": "hosting",
+    "whisper_base": "hosting",
+    "cactus_whistle": "hosting",
+    "result": "Both correct"
+  },
+  {
+    "position": 278,
+    "reference": "site",
+    "whisper_base": "site",
+    "cactus_whistle": "site",
+    "result": "Both correct"
+  },
+  {
+    "position": 279,
+    "reference": "would",
+    "whisper_base": "would",
+    "cactus_whistle": "would",
+    "result": "Both correct"
+  },
+  {
+    "position": 280,
+    "reference": "create",
+    "whisper_base": "create",
+    "cactus_whistle": "create",
+    "result": "Both correct"
+  },
+  {
+    "position": 281,
+    "reference": "an",
+    "whisper_base": "an",
+    "cactus_whistle": "a",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 282,
+    "reference": "rss",
+    "whisper_base": "rss",
+    "cactus_whistle": "forest",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 283,
+    "reference": "feed",
+    "whisper_base": "feed",
+    "cactus_whistle": "feed",
+    "result": "Both correct"
+  },
+  {
+    "position": 284,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 285,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 286,
+    "reference": "just",
+    "whisper_base": "just",
+    "cactus_whistle": "just",
+    "result": "Both correct"
+  },
+  {
+    "position": 287,
+    "reference": "stands",
+    "whisper_base": "stands",
+    "cactus_whistle": "stands",
+    "result": "Both correct"
+  },
+  {
+    "position": 288,
+    "reference": "for",
+    "whisper_base": "for",
+    "cactus_whistle": "for",
+    "result": "Both correct"
+  },
+  {
+    "position": 289,
+    "reference": "real",
+    "whisper_base": "real",
+    "cactus_whistle": "real",
+    "result": "Both correct"
+  },
+  {
+    "position": 290,
+    "reference": "simple",
+    "whisper_base": "simple",
+    "cactus_whistle": "simple",
+    "result": "Both correct"
+  },
+  {
+    "position": 291,
+    "reference": "syndication",
+    "whisper_base": "syndication",
+    "cactus_whistle": "syndication",
+    "result": "Both correct"
+  },
+  {
+    "position": 292,
+    "reference": "all",
+    "whisper_base": "all",
+    "cactus_whistle": "all",
+    "result": "Both correct"
+  },
+  {
+    "position": 293,
+    "reference": "this",
+    "whisper_base": "this",
+    "cactus_whistle": "this",
+    "result": "Both correct"
+  },
+  {
+    "position": 294,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 295,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 296,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 297,
+    "reference": "page",
+    "whisper_base": "page",
+    "cactus_whistle": "page",
+    "result": "Both correct"
+  },
+  {
+    "position": 298,
+    "reference": "of",
+    "whisper_base": "of",
+    "cactus_whistle": "of",
+    "result": "Both correct"
+  },
+  {
+    "position": 299,
+    "reference": "raw",
+    "whisper_base": "raw",
+    "cactus_whistle": "raw",
+    "result": "Both correct"
+  },
+  {
+    "position": 300,
+    "reference": "data",
+    "whisper_base": "data",
+    "cactus_whistle": "data",
+    "result": "Both correct"
+  },
+  {
+    "position": 301,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 302,
+    "reference": "holds",
+    "whisper_base": "holds",
+    "cactus_whistle": "holds",
+    "result": "Both correct"
+  },
+  {
+    "position": 303,
+    "reference": "all",
+    "whisper_base": "all",
+    "cactus_whistle": "all",
+    "result": "Both correct"
+  },
+  {
+    "position": 304,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 305,
+    "reference": "information",
+    "whisper_base": "information",
+    "cactus_whistle": "information",
+    "result": "Both correct"
+  },
+  {
+    "position": 306,
+    "reference": "about",
+    "whisper_base": "about",
+    "cactus_whistle": "about",
+    "result": "Both correct"
+  },
+  {
+    "position": 307,
+    "reference": "your",
+    "whisper_base": "your",
+    "cactus_whistle": "your",
+    "result": "Both correct"
+  },
+  {
+    "position": 308,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 309,
+    "reference": "its",
+    "whisper_base": "its",
+    "cactus_whistle": "its",
+    "result": "Both correct"
+  },
+  {
+    "position": 310,
+    "reference": "title",
+    "whisper_base": "title",
+    "cactus_whistle": "title",
+    "result": "Both correct"
+  },
+  {
+    "position": 311,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "<eps>",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 312,
+    "reference": "cover",
+    "whisper_base": "cover",
+    "cactus_whistle": "cover",
+    "result": "Both correct"
+  },
+  {
+    "position": 313,
+    "reference": "art",
+    "whisper_base": "art",
+    "cactus_whistle": "art",
+    "result": "Both correct"
+  },
+  {
+    "position": 314,
+    "reference": "how",
+    "whisper_base": "how",
+    "cactus_whistle": "how",
+    "result": "Both correct"
+  },
+  {
+    "position": 315,
+    "reference": "many",
+    "whisper_base": "many",
+    "cactus_whistle": "many",
+    "result": "Both correct"
+  },
+  {
+    "position": 316,
+    "reference": "episodes",
+    "whisper_base": "episodes",
+    "cactus_whistle": "episodes",
+    "result": "Both correct"
+  },
+  {
+    "position": 317,
+    "reference": "title",
+    "whisper_base": "title",
+    "cactus_whistle": "title",
+    "result": "Both correct"
+  },
+  {
+    "position": 318,
+    "reference": "episodes",
+    "whisper_base": "episodes",
+    "cactus_whistle": "episodes",
+    "result": "Both correct"
+  },
+  {
+    "position": 319,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 320,
+    "reference": "whole",
+    "whisper_base": "whole",
+    "cactus_whistle": "whole",
+    "result": "Both correct"
+  },
+  {
+    "position": 321,
+    "reference": "shebang",
+    "whisper_base": "shebang",
+    "cactus_whistle": "shooting",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 322,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 323,
+    "reference": "where",
+    "whisper_base": "where",
+    "cactus_whistle": "where",
+    "result": "Both correct"
+  },
+  {
+    "position": 324,
+    "reference": "can",
+    "whisper_base": "can",
+    "cactus_whistle": "can",
+    "result": "Both correct"
+  },
+  {
+    "position": 325,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 326,
+    "reference": "listen",
+    "whisper_base": "listen",
+    "cactus_whistle": "listen",
+    "result": "Both correct"
+  },
+  {
+    "position": 327,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 328,
+    "reference": "these",
+    "whisper_base": "these",
+    "cactus_whistle": "these",
+    "result": "Both correct"
+  },
+  {
+    "position": 329,
+    "reference": "things",
+    "whisper_base": "things",
+    "cactus_whistle": "things",
+    "result": "Both correct"
+  },
+  {
+    "position": 330,
+    "reference": "podcasts",
+    "whisper_base": "podcasts",
+    "cactus_whistle": "podcasts",
+    "result": "Both correct"
+  },
+  {
+    "position": 331,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "speaking",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 332,
+    "reference": "can",
+    "whisper_base": "can",
+    "cactus_whistle": "<eps>",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 333,
+    "reference": "listen",
+    "whisper_base": "listen",
+    "cactus_whistle": "listen",
+    "result": "Both correct"
+  },
+  {
+    "position": 334,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 335,
+    "reference": "podcasts",
+    "whisper_base": "podcasts",
+    "cactus_whistle": "podcasts",
+    "result": "Both correct"
+  },
+  {
+    "position": 336,
+    "reference": "in",
+    "whisper_base": "in",
+    "cactus_whistle": "in",
+    "result": "Both correct"
+  },
+  {
+    "position": 337,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 338,
+    "reference": "couple",
+    "whisper_base": "couple",
+    "cactus_whistle": "couple",
+    "result": "Both correct"
+  },
+  {
+    "position": 339,
+    "reference": "of",
+    "whisper_base": "of",
+    "cactus_whistle": "<eps>",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 340,
+    "reference": "different",
+    "whisper_base": "different",
+    "cactus_whistle": "different",
+    "result": "Both correct"
+  },
+  {
+    "position": 341,
+    "reference": "places",
+    "whisper_base": "places",
+    "cactus_whistle": "places",
+    "result": "Both correct"
+  },
+  {
+    "position": 342,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 343,
+    "reference": "there",
+    "whisper_base": "there",
+    "cactus_whistle": "there",
+    "result": "Both correct"
+  },
+  {
+    "position": 344,
+    "reference": "are",
+    "whisper_base": "are",
+    "cactus_whistle": "are",
+    "result": "Both correct"
+  },
+  {
+    "position": 345,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcasts",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 346,
+    "reference": "listening",
+    "whisper_base": "listening",
+    "cactus_whistle": "listening",
+    "result": "Both correct"
+  },
+  {
+    "position": 347,
+    "reference": "apps",
+    "whisper_base": "apps",
+    "cactus_whistle": "apps",
+    "result": "Both correct"
+  },
+  {
+    "position": 348,
+    "reference": "we",
+    "whisper_base": "we",
+    "cactus_whistle": "we",
+    "result": "Both correct"
+  },
+  {
+    "position": 349,
+    "reference": "like",
+    "whisper_base": "like",
+    "cactus_whistle": "like",
+    "result": "Both correct"
+  },
+  {
+    "position": 350,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 351,
+    "reference": "call",
+    "whisper_base": "call",
+    "cactus_whistle": "call",
+    "result": "Both correct"
+  },
+  {
+    "position": 352,
+    "reference": "some",
+    "whisper_base": "some",
+    "cactus_whistle": "some",
+    "result": "Both correct"
+  },
+  {
+    "position": 353,
+    "reference": "of",
+    "whisper_base": "of",
+    "cactus_whistle": "of",
+    "result": "Both correct"
+  },
+  {
+    "position": 354,
+    "reference": "them",
+    "whisper_base": "them",
+    "cactus_whistle": "them",
+    "result": "Both correct"
+  },
+  {
+    "position": 355,
+    "reference": "directories",
+    "whisper_base": "directories",
+    "cactus_whistle": "directories",
+    "result": "Both correct"
+  },
+  {
+    "position": 356,
+    "reference": "apple",
+    "whisper_base": "apple",
+    "cactus_whistle": "apple",
+    "result": "Both correct"
+  },
+  {
+    "position": 357,
+    "reference": "podcasts",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both incorrect"
+  },
+  {
+    "position": 358,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 359,
+    "reference": "one",
+    "whisper_base": "one",
+    "cactus_whistle": "one",
+    "result": "Both correct"
+  },
+  {
+    "position": 360,
+    "reference": "such",
+    "whisper_base": "such",
+    "cactus_whistle": "such",
+    "result": "Both correct"
+  },
+  {
+    "position": 361,
+    "reference": "google",
+    "whisper_base": "google",
+    "cactus_whistle": "google",
+    "result": "Both correct"
+  },
+  {
+    "position": 362,
+    "reference": "podcasts",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both incorrect"
+  },
+  {
+    "position": 363,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 364,
+    "reference": "another",
+    "whisper_base": "another",
+    "cactus_whistle": "another",
+    "result": "Both correct"
+  },
+  {
+    "position": 365,
+    "reference": "directory",
+    "whisper_base": "directory",
+    "cactus_whistle": "directory",
+    "result": "Both correct"
+  },
+  {
+    "position": 366,
+    "reference": "but",
+    "whisper_base": "but",
+    "cactus_whistle": "but",
+    "result": "Both correct"
+  },
+  {
+    "position": 367,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 368,
+    "reference": "can",
+    "whisper_base": "can",
+    "cactus_whistle": "can",
+    "result": "Both correct"
+  },
+  {
+    "position": 369,
+    "reference": "also",
+    "whisper_base": "also",
+    "cactus_whistle": "also",
+    "result": "Both correct"
+  },
+  {
+    "position": 370,
+    "reference": "listen",
+    "whisper_base": "listen",
+    "cactus_whistle": "listen",
+    "result": "Both correct"
+  },
+  {
+    "position": 371,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 372,
+    "reference": "podcasts",
+    "whisper_base": "podcasts",
+    "cactus_whistle": "podcasts",
+    "result": "Both correct"
+  },
+  {
+    "position": 373,
+    "reference": "in",
+    "whisper_base": "and",
+    "cactus_whistle": "in",
+    "result": "Whistle correct"
+  },
+  {
+    "position": 374,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 375,
+    "reference": "lot",
+    "whisper_base": "lot",
+    "cactus_whistle": "lot",
+    "result": "Both correct"
+  },
+  {
+    "position": 376,
+    "reference": "of",
+    "whisper_base": "of",
+    "cactus_whistle": "of",
+    "result": "Both correct"
+  },
+  {
+    "position": 377,
+    "reference": "music",
+    "whisper_base": "music",
+    "cactus_whistle": "music",
+    "result": "Both correct"
+  },
+  {
+    "position": 378,
+    "reference": "listening",
+    "whisper_base": "listening",
+    "cactus_whistle": "listening",
+    "result": "Both correct"
+  },
+  {
+    "position": 379,
+    "reference": "apps",
+    "whisper_base": "apps",
+    "cactus_whistle": "apps",
+    "result": "Both correct"
+  },
+  {
+    "position": 380,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 381,
+    "reference": "spotify",
+    "whisper_base": "spotify",
+    "cactus_whistle": "spotify",
+    "result": "Both correct"
+  },
+  {
+    "position": 382,
+    "reference": "has",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both incorrect"
+  },
+  {
+    "position": 383,
+    "reference": "made",
+    "whisper_base": "made",
+    "cactus_whistle": "made",
+    "result": "Both correct"
+  },
+  {
+    "position": 384,
+    "reference": "podcasts",
+    "whisper_base": "podcasts",
+    "cactus_whistle": "podcasts",
+    "result": "Both correct"
+  },
+  {
+    "position": 385,
+    "reference": "available",
+    "whisper_base": "available",
+    "cactus_whistle": "available",
+    "result": "Both correct"
+  },
+  {
+    "position": 386,
+    "reference": "in",
+    "whisper_base": "in",
+    "cactus_whistle": "and",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 387,
+    "reference": "their",
+    "whisper_base": "their",
+    "cactus_whistle": "their",
+    "result": "Both correct"
+  },
+  {
+    "position": 388,
+    "reference": "app",
+    "whisper_base": "app",
+    "cactus_whistle": "app",
+    "result": "Both correct"
+  },
+  {
+    "position": 389,
+    "reference": "amazon",
+    "whisper_base": "amazon",
+    "cactus_whistle": "amazon",
+    "result": "Both correct"
+  },
+  {
+    "position": 390,
+    "reference": "stitcher",
+    "whisper_base": "stitcher",
+    "cactus_whistle": "stitcher",
+    "result": "Both correct"
+  },
+  {
+    "position": 391,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 392,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 393,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 394,
+    "reference": "specific",
+    "whisper_base": "specific",
+    "cactus_whistle": "specific",
+    "result": "Both correct"
+  },
+  {
+    "position": 395,
+    "reference": "app",
+    "whisper_base": "app",
+    "cactus_whistle": "app",
+    "result": "Both correct"
+  },
+  {
+    "position": 396,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 397,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 398,
+    "reference": "can",
+    "whisper_base": "can",
+    "cactus_whistle": "can",
+    "result": "Both correct"
+  },
+  {
+    "position": 399,
+    "reference": "listen",
+    "whisper_base": "listen",
+    "cactus_whistle": "listen",
+    "result": "Both correct"
+  },
+  {
+    "position": 400,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 401,
+    "reference": "podcasts",
+    "whisper_base": "podcasts",
+    "cactus_whistle": "podcasts",
+    "result": "Both correct"
+  },
+  {
+    "position": 402,
+    "reference": "on",
+    "whisper_base": "on",
+    "cactus_whistle": "on",
+    "result": "Both correct"
+  },
+  {
+    "position": 403,
+    "reference": "some",
+    "whisper_base": "some",
+    "cactus_whistle": "some",
+    "result": "Both correct"
+  },
+  {
+    "position": 404,
+    "reference": "people",
+    "whisper_base": "people",
+    "cactus_whistle": "people",
+    "result": "Both correct"
+  },
+  {
+    "position": 405,
+    "reference": "even",
+    "whisper_base": "even",
+    "cactus_whistle": "even",
+    "result": "Both correct"
+  },
+  {
+    "position": 406,
+    "reference": "have",
+    "whisper_base": "have",
+    "cactus_whistle": "have",
+    "result": "Both correct"
+  },
+  {
+    "position": 407,
+    "reference": "their",
+    "whisper_base": "their",
+    "cactus_whistle": "their",
+    "result": "Both correct"
+  },
+  {
+    "position": 408,
+    "reference": "podcasts",
+    "whisper_base": "podcasts",
+    "cactus_whistle": "podcasts",
+    "result": "Both correct"
+  },
+  {
+    "position": 409,
+    "reference": "embedded",
+    "whisper_base": "embedded",
+    "cactus_whistle": "embedded",
+    "result": "Both correct"
+  },
+  {
+    "position": 410,
+    "reference": "on",
+    "whisper_base": "on",
+    "cactus_whistle": "on",
+    "result": "Both correct"
+  },
+  {
+    "position": 411,
+    "reference": "their",
+    "whisper_base": "their",
+    "cactus_whistle": "their",
+    "result": "Both correct"
+  },
+  {
+    "position": 412,
+    "reference": "website",
+    "whisper_base": "website",
+    "cactus_whistle": "website",
+    "result": "Both correct"
+  },
+  {
+    "position": 413,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 414,
+    "reference": "there",
+    "whisper_base": "there",
+    "cactus_whistle": "there",
+    "result": "Both correct"
+  },
+  {
+    "position": 415,
+    "reference": "are",
+    "whisper_base": "are",
+    "cactus_whistle": "are",
+    "result": "Both correct"
+  },
+  {
+    "position": 416,
+    "reference": "embedded",
+    "whisper_base": "embedded",
+    "cactus_whistle": "embedded",
+    "result": "Both correct"
+  },
+  {
+    "position": 417,
+    "reference": "players",
+    "whisper_base": "players",
+    "cactus_whistle": "players",
+    "result": "Both correct"
+  },
+  {
+    "position": 418,
+    "reference": "where",
+    "whisper_base": "where",
+    "cactus_whistle": "where",
+    "result": "Both correct"
+  },
+  {
+    "position": 419,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 420,
+    "reference": "can",
+    "whisper_base": "can",
+    "cactus_whistle": "can",
+    "result": "Both correct"
+  },
+  {
+    "position": 421,
+    "reference": "listen",
+    "whisper_base": "listen",
+    "cactus_whistle": "listen",
+    "result": "Both correct"
+  },
+  {
+    "position": 422,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 423,
+    "reference": "podcasts",
+    "whisper_base": "podcasts",
+    "cactus_whistle": "podcasts",
+    "result": "Both correct"
+  },
+  {
+    "position": 424,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 425,
+    "reference": "arent",
+    "whisper_base": "arent",
+    "cactus_whistle": "arent",
+    "result": "Both correct"
+  },
+  {
+    "position": 426,
+    "reference": "necessarily",
+    "whisper_base": "necessarily",
+    "cactus_whistle": "necessarily",
+    "result": "Both correct"
+  },
+  {
+    "position": 427,
+    "reference": "in",
+    "whisper_base": "in",
+    "cactus_whistle": "in",
+    "result": "Both correct"
+  },
+  {
+    "position": 428,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 429,
+    "reference": "directory",
+    "whisper_base": "directory",
+    "cactus_whistle": "directory",
+    "result": "Both correct"
+  },
+  {
+    "position": 430,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 431,
+    "reference": "if",
+    "whisper_base": "if",
+    "cactus_whistle": "if",
+    "result": "Both correct"
+  },
+  {
+    "position": 432,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 433,
+    "reference": "are",
+    "whisper_base": "are",
+    "cactus_whistle": "are",
+    "result": "Both correct"
+  },
+  {
+    "position": 434,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 435,
+    "reference": "buzzsprout",
+    "whisper_base": "bus",
+    "cactus_whistle": "bus",
+    "result": "Both incorrect"
+  },
+  {
+    "position": 436,
+    "reference": "user",
+    "whisper_base": "user",
+    "cactus_whistle": "user",
+    "result": "Both correct"
+  },
+  {
+    "position": 437,
+    "reference": "we",
+    "whisper_base": "we",
+    "cactus_whistle": "we",
+    "result": "Both correct"
+  },
+  {
+    "position": 438,
+    "reference": "actually",
+    "whisper_base": "actually",
+    "cactus_whistle": "actually",
+    "result": "Both correct"
+  },
+  {
+    "position": 439,
+    "reference": "give",
+    "whisper_base": "give",
+    "cactus_whistle": "give",
+    "result": "Both correct"
+  },
+  {
+    "position": 440,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 441,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 442,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 443,
+    "reference": "listening",
+    "whisper_base": "listening",
+    "cactus_whistle": "listening",
+    "result": "Both correct"
+  },
+  {
+    "position": 444,
+    "reference": "website",
+    "whisper_base": "website",
+    "cactus_whistle": "website",
+    "result": "Both correct"
+  },
+  {
+    "position": 445,
+    "reference": "all",
+    "whisper_base": "all",
+    "cactus_whistle": "all",
+    "result": "Both correct"
+  },
+  {
+    "position": 446,
+    "reference": "your",
+    "whisper_base": "your",
+    "cactus_whistle": "your",
+    "result": "Both correct"
+  },
+  {
+    "position": 447,
+    "reference": "own",
+    "whisper_base": "own",
+    "cactus_whistle": "own",
+    "result": "Both correct"
+  },
+  {
+    "position": 448,
+    "reference": "for",
+    "whisper_base": "for",
+    "cactus_whistle": "for",
+    "result": "Both correct"
+  },
+  {
+    "position": 449,
+    "reference": "your",
+    "whisper_base": "your",
+    "cactus_whistle": "your",
+    "result": "Both correct"
+  },
+  {
+    "position": 450,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 451,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 452,
+    "reference": "people",
+    "whisper_base": "people",
+    "cactus_whistle": "people",
+    "result": "Both correct"
+  },
+  {
+    "position": 453,
+    "reference": "can",
+    "whisper_base": "can",
+    "cactus_whistle": "can",
+    "result": "Both correct"
+  },
+  {
+    "position": 454,
+    "reference": "listen",
+    "whisper_base": "listen",
+    "cactus_whistle": "listen",
+    "result": "Both correct"
+  },
+  {
+    "position": 455,
+    "reference": "there",
+    "whisper_base": "there",
+    "cactus_whistle": "there",
+    "result": "Both correct"
+  },
+  {
+    "position": 456,
+    "reference": "as",
+    "whisper_base": "as",
+    "cactus_whistle": "as",
+    "result": "Both correct"
+  },
+  {
+    "position": 457,
+    "reference": "well",
+    "whisper_base": "well",
+    "cactus_whistle": "well",
+    "result": "Both correct"
+  },
+  {
+    "position": 458,
+    "reference": "so",
+    "whisper_base": "so",
+    "cactus_whistle": "so",
+    "result": "Both correct"
+  },
+  {
+    "position": 459,
+    "reference": "now",
+    "whisper_base": "now",
+    "cactus_whistle": "now",
+    "result": "Both correct"
+  },
+  {
+    "position": 460,
+    "reference": "that",
+    "whisper_base": "lets",
+    "cactus_whistle": "its",
+    "result": "Both incorrect"
+  },
+  {
+    "position": 461,
+    "reference": "you",
+    "whisper_base": "<eps>",
+    "cactus_whistle": "known",
+    "result": "Both incorrect"
+  },
+  {
+    "position": 462,
+    "reference": "know",
+    "whisper_base": "know",
+    "cactus_whistle": "to",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 463,
+    "reference": "what",
+    "whisper_base": "what",
+    "cactus_whistle": "podcasts",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 464,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "<eps>",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 465,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "<eps>",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 466,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "<eps>",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 467,
+    "reference": "if",
+    "whisper_base": "if",
+    "cactus_whistle": "if",
+    "result": "Both correct"
+  },
+  {
+    "position": 468,
+    "reference": "youre",
+    "whisper_base": "youre",
+    "cactus_whistle": "youre",
+    "result": "Both correct"
+  },
+  {
+    "position": 469,
+    "reference": "interested",
+    "whisper_base": "interested",
+    "cactus_whistle": "interested",
+    "result": "Both correct"
+  },
+  {
+    "position": 470,
+    "reference": "in",
+    "whisper_base": "in",
+    "cactus_whistle": "in",
+    "result": "Both correct"
+  },
+  {
+    "position": 471,
+    "reference": "starting",
+    "whisper_base": "starting",
+    "cactus_whistle": "starting",
+    "result": "Both correct"
+  },
+  {
+    "position": 472,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 473,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 474,
+    "reference": "check",
+    "whisper_base": "check",
+    "cactus_whistle": "check",
+    "result": "Both correct"
+  },
+  {
+    "position": 475,
+    "reference": "this",
+    "whisper_base": "this",
+    "cactus_whistle": "this",
+    "result": "Both correct"
+  },
+  {
+    "position": 476,
+    "reference": "video",
+    "whisper_base": "video",
+    "cactus_whistle": "video",
+    "result": "Both correct"
+  },
+  {
+    "position": 477,
+    "reference": "out",
+    "whisper_base": "out",
+    "cactus_whistle": "out",
+    "result": "Both correct"
+  },
+  {
+    "position": 478,
+    "reference": "over",
+    "whisper_base": "over",
+    "cactus_whistle": "over",
+    "result": "Both correct"
+  },
+  {
+    "position": 479,
+    "reference": "here",
+    "whisper_base": "here",
+    "cactus_whistle": "here",
+    "result": "Both correct"
+  },
+  {
+    "position": 480,
+    "reference": "thats",
+    "whisper_base": "thats",
+    "cactus_whistle": "thats",
+    "result": "Both correct"
+  },
+  {
+    "position": 481,
+    "reference": "going",
+    "whisper_base": "going",
+    "cactus_whistle": "going",
+    "result": "Both correct"
+  },
+  {
+    "position": 482,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 483,
+    "reference": "give",
+    "whisper_base": "give",
+    "cactus_whistle": "give",
+    "result": "Both correct"
+  },
+  {
+    "position": 484,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 485,
+    "reference": "all",
+    "whisper_base": "all",
+    "cactus_whistle": "all",
+    "result": "Both correct"
+  },
+  {
+    "position": 486,
+    "reference": "the",
+    "whisper_base": "the",
+    "cactus_whistle": "the",
+    "result": "Both correct"
+  },
+  {
+    "position": 487,
+    "reference": "information",
+    "whisper_base": "information",
+    "cactus_whistle": "information",
+    "result": "Both correct"
+  },
+  {
+    "position": 488,
+    "reference": "that",
+    "whisper_base": "that",
+    "cactus_whistle": "that",
+    "result": "Both correct"
+  },
+  {
+    "position": 489,
+    "reference": "you",
+    "whisper_base": "you",
+    "cactus_whistle": "you",
+    "result": "Both correct"
+  },
+  {
+    "position": 490,
+    "reference": "need",
+    "whisper_base": "need",
+    "cactus_whistle": "need",
+    "result": "Both correct"
+  },
+  {
+    "position": 491,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 492,
+    "reference": "know",
+    "whisper_base": "know",
+    "cactus_whistle": "know",
+    "result": "Both correct"
+  },
+  {
+    "position": 493,
+    "reference": "to",
+    "whisper_base": "to",
+    "cactus_whistle": "to",
+    "result": "Both correct"
+  },
+  {
+    "position": 494,
+    "reference": "start",
+    "whisper_base": "start",
+    "cactus_whistle": "start",
+    "result": "Both correct"
+  },
+  {
+    "position": 495,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "<eps>",
+    "result": "Whisper correct"
+  },
+  {
+    "position": 496,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 497,
+    "reference": "we",
+    "whisper_base": "we",
+    "cactus_whistle": "we",
+    "result": "Both correct"
+  },
+  {
+    "position": 498,
+    "reference": "hope",
+    "whisper_base": "hope",
+    "cactus_whistle": "hope",
+    "result": "Both correct"
+  },
+  {
+    "position": 499,
+    "reference": "this",
+    "whisper_base": "this",
+    "cactus_whistle": "this",
+    "result": "Both correct"
+  },
+  {
+    "position": 500,
+    "reference": "video",
+    "whisper_base": "video",
+    "cactus_whistle": "video",
+    "result": "Both correct"
+  },
+  {
+    "position": 501,
+    "reference": "answered",
+    "whisper_base": "answered",
+    "cactus_whistle": "answered",
+    "result": "Both correct"
+  },
+  {
+    "position": 502,
+    "reference": "your",
+    "whisper_base": "your",
+    "cactus_whistle": "your",
+    "result": "Both correct"
+  },
+  {
+    "position": 503,
+    "reference": "questions",
+    "whisper_base": "questions",
+    "cactus_whistle": "questions",
+    "result": "Both correct"
+  },
+  {
+    "position": 504,
+    "reference": "about",
+    "whisper_base": "about",
+    "cactus_whistle": "about",
+    "result": "Both correct"
+  },
+  {
+    "position": 505,
+    "reference": "what",
+    "whisper_base": "what",
+    "cactus_whistle": "what",
+    "result": "Both correct"
+  },
+  {
+    "position": 506,
+    "reference": "a",
+    "whisper_base": "a",
+    "cactus_whistle": "a",
+    "result": "Both correct"
+  },
+  {
+    "position": 507,
+    "reference": "podcast",
+    "whisper_base": "podcast",
+    "cactus_whistle": "podcast",
+    "result": "Both correct"
+  },
+  {
+    "position": 508,
+    "reference": "is",
+    "whisper_base": "is",
+    "cactus_whistle": "is",
+    "result": "Both correct"
+  },
+  {
+    "position": 509,
+    "reference": "as",
+    "whisper_base": "as",
+    "cactus_whistle": "as",
+    "result": "Both correct"
+  },
+  {
+    "position": 510,
+    "reference": "always",
+    "whisper_base": "always",
+    "cactus_whistle": "always",
+    "result": "Both correct"
+  },
+  {
+    "position": 511,
+    "reference": "thanks",
+    "whisper_base": "thanks",
+    "cactus_whistle": "thanks",
+    "result": "Both correct"
+  },
+  {
+    "position": 512,
+    "reference": "for",
+    "whisper_base": "for",
+    "cactus_whistle": "for",
+    "result": "Both correct"
+  },
+  {
+    "position": 513,
+    "reference": "watching",
+    "whisper_base": "watching",
+    "cactus_whistle": "watching",
+    "result": "Both correct"
+  },
+  {
+    "position": 514,
+    "reference": "and",
+    "whisper_base": "and",
+    "cactus_whistle": "and",
+    "result": "Both correct"
+  },
+  {
+    "position": 515,
+    "reference": "keep",
+    "whisper_base": "keep",
+    "cactus_whistle": "keep",
+    "result": "Both correct"
+  },
+  {
+    "position": 516,
+    "reference": "podcasting",
+    "whisper_base": "podcasting",
+    "cactus_whistle": "podcasting",
+    "result": "Both correct"
+  }
+]

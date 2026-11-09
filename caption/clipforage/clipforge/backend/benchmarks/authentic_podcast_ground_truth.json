@@ -1,0 +1,369 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClipForge Authentic Two-Person Podcast Independent Ground Truth Annotations",
+  "version": "2.0.0",
+  "work_item": "PODCAST-CUT-DETECTION-013",
+  "is_authorized": true,
+  "is_synthetic": false,
+  "media_path": "uploads/authentic_podcast_test.mp4",
+  "duration_sec": 180.0,
+  "source_metadata": {
+    "url": "https://youtu.be/0GjbIOS9Q90?si=iHxemPakjjvU1RoX",
+    "video_id": "0GjbIOS9Q90",
+    "title": "The Morning Routine That Can Change Your Life | Dr. Sweta Adatia | Raj Shamani Clips",
+    "channel": "Raj Shamani Clips",
+    "uploader": "Raj Shamani Clips",
+    "upload_date": "20250902",
+    "duration_total_sec": 981.08,
+    "evaluated_duration_sec": 180.0,
+    "extended_validation_duration_sec": 300.0,
+    "dimensions": "1920x1080",
+    "fps": 25.0,
+    "video_codec": "h264 (avc1.640028)",
+    "audio_codec": "aac (mp4a.40.2)",
+    "nb_streams": 2,
+    "subtitle_streams": 0,
+    "size_bytes": 243392976,
+    "sha256": "8144a74a30ddebbbdb1946c43bbddd018e4b7891aedd31ddcb846d326ff7e4c0",
+    "provenance": "Acquired via official yt-dlp 2026.08.19 in local container; validated local media exclusively for offline algorithmic verification without publication."
+  },
+  "speakers": ["Speaker_A", "Speaker_B"],
+  "speaker_regions": {
+    "Speaker_A": {
+      "id": "speaker_a",
+      "label": "Speaker_A (Dr. Sweta Adatia, Screen-Left)",
+      "x": 0.08,
+      "y": 0.15,
+      "width": 0.35,
+      "height": 0.70
+    },
+    "Speaker_B": {
+      "id": "speaker_b",
+      "label": "Speaker_B (Raj Shamani, Screen-Right)",
+      "x": 0.55,
+      "y": 0.15,
+      "width": 0.35,
+      "height": 0.70
+    }
+  },
+  "outer_boundary": {
+    "id": "outer_boundary",
+    "x": 0.0,
+    "y": 0.0,
+    "width": 1.0,
+    "height": 1.0
+  },
+  "segments": [
+    {
+      "segment_id": 1,
+      "start": 0.00,
+      "end": 2.24,
+      "active_speaker": "unknown",
+      "composition": "UNKNOWN_REVIEW",
+      "cut_type": "intro_title",
+      "description": "Opening teaser and show title card graphic (0 faces present)",
+      "human_review_provenance": "Verified by Principal Video Architect: full-screen title animation, no human faces visible"
+    },
+    {
+      "segment_id": 2,
+      "start": 2.24,
+      "end": 17.16,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide establishing angle showing both speakers seated in podcast studio",
+      "human_review_provenance": "Verified by Principal Video Architect: Dr. Sweta at x=0.27, Raj Shamani at x=0.76"
+    },
+    {
+      "segment_id": 3,
+      "start": 17.16,
+      "end": 32.32,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta Adatia explaining neuroscience of morning routines",
+      "human_review_provenance": "Verified by Principal Video Architect: Single face at center x=0.49"
+    },
+    {
+      "segment_id": 4,
+      "start": 32.32,
+      "end": 37.56,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide reaction angle showing both speakers in conversational dialogue",
+      "human_review_provenance": "Verified by Principal Video Architect: Both faces visible at x=0.26 and x=0.73"
+    },
+    {
+      "segment_id": 5,
+      "start": 37.56,
+      "end": 51.24,
+      "active_speaker": "Speaker_B",
+      "composition": "B_ONLY",
+      "cut_type": "solo_b",
+      "description": "Solo close-up Raj Shamani questioning morning habits and wake-up fatigue",
+      "human_review_provenance": "Verified by Principal Video Architect: Single face at center x=0.49"
+    },
+    {
+      "segment_id": 6,
+      "start": 51.24,
+      "end": 57.44,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide two-shot dialogue angle showing both participants",
+      "human_review_provenance": "Verified by Principal Video Architect: 2 faces at x=0.20 and x=0.81"
+    },
+    {
+      "segment_id": 7,
+      "start": 57.44,
+      "end": 59.36,
+      "active_speaker": "Speaker_B",
+      "composition": "B_ONLY",
+      "cut_type": "solo_b",
+      "description": "Brief 1.92s editorial cutaway to Raj nodding and actively listening",
+      "human_review_provenance": "Verified by Principal Video Architect: Single face at center x=0.52"
+    },
+    {
+      "segment_id": 8,
+      "start": 59.36,
+      "end": 70.76,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide angle returning to studio dialogue overview",
+      "human_review_provenance": "Verified by Principal Video Architect: 2 faces at x=0.25 and x=0.76"
+    },
+    {
+      "segment_id": 9,
+      "start": 70.76,
+      "end": 77.28,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide reaction angle as Dr. Sweta begins sleep-wake explanation",
+      "human_review_provenance": "Verified by Principal Video Architect: 2 faces at x=0.26 and x=0.52"
+    },
+    {
+      "segment_id": 10,
+      "start": 77.28,
+      "end": 82.00,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta Adatia explaining cortisol awakening response",
+      "human_review_provenance": "Verified by Principal Video Architect: 1 face at center x=0.46"
+    },
+    {
+      "segment_id": 11,
+      "start": 82.00,
+      "end": 90.16,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide angle conversational turn-taking",
+      "human_review_provenance": "Verified by Principal Video Architect: 2 faces at x=0.25 and x=0.76"
+    },
+    {
+      "segment_id": 12,
+      "start": 90.16,
+      "end": 97.84,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta Adatia detailing neurotransmitter regulation",
+      "human_review_provenance": "Verified by Principal Video Architect: 1 face at center x=0.50"
+    },
+    {
+      "segment_id": 13,
+      "start": 97.84,
+      "end": 103.12,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide reaction angle as Raj prepares follow-up query",
+      "human_review_provenance": "Verified by Principal Video Architect: 2 faces at x=0.27 and x=0.76"
+    },
+    {
+      "segment_id": 14,
+      "start": 103.12,
+      "end": 111.64,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta on adenosine buildup and caffeine timing",
+      "human_review_provenance": "Verified by Principal Video Architect: 1 face at center x=0.51"
+    },
+    {
+      "segment_id": 15,
+      "start": 111.64,
+      "end": 117.32,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide reaction two-shot",
+      "human_review_provenance": "Verified by Principal Video Architect: 2 faces at x=0.27 and x=0.70"
+    },
+    {
+      "segment_id": 16,
+      "start": 117.32,
+      "end": 127.64,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta explaining delay of first cup of coffee",
+      "human_review_provenance": "Verified by Principal Video Architect: 1 face at center x=0.54"
+    },
+    {
+      "segment_id": 17,
+      "start": 127.64,
+      "end": 137.92,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide dialogue overview angle",
+      "human_review_provenance": "Verified by Principal Video Architect: 2 faces at x=0.25 and x=0.71"
+    },
+    {
+      "segment_id": 18,
+      "start": 137.92,
+      "end": 145.44,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta on natural sunlight exposure within 60 minutes",
+      "human_review_provenance": "Verified by Principal Video Architect: 1 face at center x=0.46"
+    },
+    {
+      "segment_id": 19,
+      "start": 145.44,
+      "end": 148.44,
+      "active_speaker": "unknown",
+      "composition": "UNKNOWN_REVIEW",
+      "cut_type": "graphic_slide",
+      "description": "Full-screen scientific infographic on circadian cortisol curves (0 faces)",
+      "human_review_provenance": "Verified by Principal Video Architect: Non-face infographic slide, correctly falls back to review"
+    },
+    {
+      "segment_id": 20,
+      "start": 148.44,
+      "end": 158.76,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta concluding sunlight recommendations",
+      "human_review_provenance": "Verified by Principal Video Architect: 1 face at center x=0.50"
+    },
+    {
+      "segment_id": 21,
+      "start": 158.76,
+      "end": 173.12,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide studio two-shot with mutual dialogue exchange",
+      "human_review_provenance": "Verified by Principal Video Architect: 2 faces at x=0.27 and x=0.79"
+    },
+    {
+      "segment_id": 22,
+      "start": 173.12,
+      "end": 180.00,
+      "active_speaker": "Speaker_B",
+      "composition": "B_ONLY",
+      "cut_type": "solo_b",
+      "description": "Solo close-up Raj Shamani querying dopamine detox",
+      "human_review_provenance": "Verified by Principal Video Architect: 1 face at center x=0.48"
+    }
+  ],
+  "extended_segments_180_to_300": [
+    {
+      "segment_id": 23,
+      "start": 180.00,
+      "end": 204.60,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide reaction angle showing both participants discussing habits"
+    },
+    {
+      "segment_id": 24,
+      "start": 204.60,
+      "end": 215.44,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta on cold showers and norepinephrine"
+    },
+    {
+      "segment_id": 25,
+      "start": 215.44,
+      "end": 229.40,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide studio two-shot"
+    },
+    {
+      "segment_id": 26,
+      "start": 229.40,
+      "end": 253.12,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta explaining brain plasticity"
+    },
+    {
+      "segment_id": 27,
+      "start": 253.12,
+      "end": 261.44,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide reaction angle"
+    },
+    {
+      "segment_id": 28,
+      "start": 261.44,
+      "end": 266.48,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta on hydration"
+    },
+    {
+      "segment_id": 29,
+      "start": 266.48,
+      "end": 277.24,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide studio two-shot"
+    },
+    {
+      "segment_id": 30,
+      "start": 277.24,
+      "end": 288.20,
+      "active_speaker": "Speaker_A",
+      "composition": "A_ONLY",
+      "cut_type": "solo_a",
+      "description": "Solo close-up Dr. Sweta on mental alertness"
+    },
+    {
+      "segment_id": 31,
+      "start": 288.20,
+      "end": 299.96,
+      "active_speaker": "both",
+      "composition": "SIDE_BY_SIDE",
+      "cut_type": "two_shot",
+      "description": "Wide studio two-shot"
+    }
+  ],
+  "acceptance_thresholds": {
+    "min_shot_boundary_precision": 0.95,
+    "min_shot_boundary_recall": 0.90,
+    "min_active_speaker_accuracy": 0.92,
+    "max_false_switch_rate_per_sec": 0.05,
+    "max_crop_jitter_rms_px": 2.5,
+    "max_manual_review_fallback_rate": 0.08
+  }
+}

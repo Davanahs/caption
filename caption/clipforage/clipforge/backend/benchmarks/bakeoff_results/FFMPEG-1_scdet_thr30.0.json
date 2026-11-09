@@ -1,0 +1,100 @@
+{
+  "candidate_id": "FFMPEG-1_scdet_thr30.0",
+  "elapsed_seconds": 16.631,
+  "video_duration_s": 981.11,
+  "processing_fps": 58.99,
+  "detected_cuts": [
+    648.32,
+    650.04
+  ],
+  "detected_cut_count": 2,
+  "extra_info": {
+    "description": "FFmpeg scdet filter (threshold=30.0)",
+    "parameters": {
+      "threshold": 30.0,
+      "filter": "scdet"
+    },
+    "ffmpeg_version": "N-123074-g4e32fb4c2a-20260228",
+    "license": "GPL-2.0 (FFmpeg)"
+  },
+  "windows": {
+    "0-180s": {
+      "exact": {
+        "TP": 0,
+        "FP": 0,
+        "FN": 21,
+        "precision": 0.0,
+        "recall": 0.0,
+        "F1": 0.0,
+        "MATE_s": null,
+        "predicted_count": 0,
+        "gt_count": 21
+      },
+      "tol_250ms": {
+        "TP": 0,
+        "FP": 0,
+        "FN": 21,
+        "precision": 0.0,
+        "recall": 0.0,
+        "F1": 0.0,
+        "MATE_s": null,
+        "predicted_count": 0,
+        "gt_count": 21
+      },
+      "tol_500ms": {
+        "TP": 0,
+        "FP": 0,
+        "FN": 21,
+        "precision": 0.0,
+        "recall": 0.0,
+        "F1": 0.0,
+        "MATE_s": null,
+        "predicted_count": 0,
+        "gt_count": 21
+      }
+    },
+    "0-300s": {
+      "exact": {
+        "TP": 0,
+        "FP": 0,
+        "FN": 29,
+        "precision": 0.0,
+        "recall": 0.0,
+        "F1": 0.0,
+        "MATE_s": null,
+        "predicted_count": 0,
+        "gt_count": 29
+      },
+      "tol_250ms": {
+        "TP": 0,
+        "FP": 0,
+        "FN": 29,
+        "precision": 0.0,
+        "recall": 0.0,
+        "F1": 0.0,
+        "MATE_s": null,
+        "predicted_count": 0,
+        "gt_count": 29
+      },
+      "tol_500ms": {
+        "TP": 0,
+        "FP": 0,
+        "FN": 29,
+        "precision": 0.0,
+        "recall": 0.0,
+        "F1": 0.0,
+        "MATE_s": null,
+        "predicted_count": 0,
+        "gt_count": 29
+      }
+    }
+  },
+  "acceptance_gate": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "F1": 0.0,
+    "pass_precision": false,
+    "pass_recall": false,
+    "gate_result": "FAIL"
+  }
+}

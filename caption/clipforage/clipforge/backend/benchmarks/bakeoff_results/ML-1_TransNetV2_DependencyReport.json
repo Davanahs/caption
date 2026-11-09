@@ -1,0 +1,48 @@
+{
+  "candidate_id": "ML-1_TransNetV2_DependencyReport",
+  "status": "DEPENDENCY_AUDIT_ONLY",
+  "reason": "transnetv2-pytorch not installable or incompatible in current host environment",
+  "official_repository": {
+    "url": "https://github.com/soCzech/TransNetV2",
+    "license": "MIT",
+    "paper": "https://arxiv.org/abs/2008.04838",
+    "inference_available": true,
+    "training_required": false
+  },
+  "pypi_package": {
+    "name": "transnetv2-pytorch",
+    "url": "https://pypi.org/project/transnetv2-pytorch/",
+    "type": "third-party PyPI reimplementation",
+    "license": "Needs independent audit \u2014 not same as official MIT repo",
+    "weight_provenance": "Must verify checksum and source before production use"
+  },
+  "compatibility_analysis": {
+    "python_version_required": ">=3.8",
+    "pytorch_required": true,
+    "pytorch_minimum": ">=1.9.0",
+    "host_python": "3.12.10",
+    "host_torch_available": false,
+    "cuda_optional": true,
+    "memory_estimate_cpu_mb": "~200-400 MB for full video inference",
+    "processing_time_estimate_cpu": "Approx 2-5x realtime for full 981s video",
+    "docker_production_risk": "MEDIUM \u2014 adds model weights, new dependency, must not modify Python 3.11.16 runtime"
+  },
+  "published_benchmark_results": {
+    "ClipShots": {
+      "F1": 77.9
+    },
+    "BBC_Planet_Earth": {
+      "F1": 96.2
+    },
+    "RAI": {
+      "F1": 93.9
+    },
+    "WARNING": "These are author-reported results on different datasets \u2014 NOT ClipForge podcast footage results. Do not treat as proof of performance on authentic_podcast_test.mp4."
+  },
+  "integration_recommendation": {
+    "isolation_required": true,
+    "venv_or_container": "Isolated venv or Docker sidecar strongly recommended",
+    "production_selection_gate": "Must measure on authentic podcast hold-out before any L7 production change",
+    "freeze_exception_required": true
+  }
+}

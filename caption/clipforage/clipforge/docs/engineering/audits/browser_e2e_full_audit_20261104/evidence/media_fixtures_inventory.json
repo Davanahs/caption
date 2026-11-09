@@ -1,0 +1,172 @@
+[
+  {
+    "path": "d:\\automation video clips\\clipforge\\uploads\\synthetic_test_fixture.mp4",
+    "name": "synthetic_test_fixture.mp4",
+    "exists": true,
+    "size_bytes": 317936,
+    "sha256": "0705329F6433AB657A924B03E2F1FE415EDF69E5ED03565B801A96DF106E60F6",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 640,
+          "height": 360,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "30/1"
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "format": {
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "duration": "20.000000",
+        "size": "317936",
+        "bit_rate": "127174"
+      }
+    }
+  },
+  {
+    "path": "d:\\automation video clips\\clipforge\\uploads\\authentic_podcast_test.mp4",
+    "name": "authentic_podcast_test.mp4",
+    "exists": true,
+    "size_bytes": 243392976,
+    "sha256": "8144A74A30DDEBBBDB1946C43BBDDD018E4B7891AEDD31DDCB846D326FF7E4C0",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "25/1"
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "format": {
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "duration": "981.112744",
+        "size": "243392976",
+        "bit_rate": "1984627"
+      }
+    }
+  },
+  {
+    "path": "d:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\video2_podcast.mp4",
+    "name": "video2_podcast.mp4",
+    "exists": true,
+    "size_bytes": 7195773,
+    "sha256": "BFCD3465DADF2D9D2348E178D45B09CE9E19FF80E61C3E2BF67378FE9DD1B6FD",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 640,
+          "height": 360,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "2997/100"
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "format": {
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "duration": "138.158730",
+        "size": "7195773",
+        "bit_rate": "416667"
+      }
+    }
+  },
+  {
+    "path": "d:\\automation video clips\\clipforge\\tmp\\podcast_visual_acceptance\\fixtures\\synthetic_movement_8s.mp4",
+    "name": "synthetic_movement_8s.mp4",
+    "exists": true,
+    "size_bytes": 94216,
+    "sha256": "7C5AED578420663C7C791B258ED7862C8BABC3BA491B03A3434474EE40640C80",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "25/1"
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "format": {
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "duration": "8.000000",
+        "size": "94216",
+        "bit_rate": "94216"
+      }
+    }
+  },
+  {
+    "path": "d:\\automation video clips\\clipforge\\tmp\\podcast_visual_acceptance\\fixtures\\synthetic_visibility_20s.mp4",
+    "name": "synthetic_visibility_20s.mp4",
+    "exists": true,
+    "size_bytes": 229382,
+    "sha256": "388CDD7F3A14055134BF7EADF46D417E67F766177FD26A8ACDF27B5437CDB43D",
+    "probe": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_type": "video",
+          "width": 1920,
+          "height": 1080,
+          "pix_fmt": "yuv420p",
+          "r_frame_rate": "25/1"
+        },
+        {
+          "index": 1,
+          "codec_name": "aac",
+          "codec_type": "audio",
+          "r_frame_rate": "0/0"
+        }
+      ],
+      "format": {
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "duration": "20.000000",
+        "size": "229382",
+        "bit_rate": "91752"
+      }
+    }
+  }
+]

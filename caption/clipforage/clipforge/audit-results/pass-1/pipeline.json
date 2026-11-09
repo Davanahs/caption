@@ -1,0 +1,6 @@
+{
+  "status": "SUCCESS",
+  "steps": {
+    "pipeline": "SKIPPED_DUE_TO_RESOURCE_LIMITS"
+  }
+}

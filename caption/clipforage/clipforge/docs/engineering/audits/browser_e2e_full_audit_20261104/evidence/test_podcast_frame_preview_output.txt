@@ -1,0 +1,46 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: d:\automation video clips\clipforge\backend
+configfile: pytest.ini
+plugins: anyio-4.13.0, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 8 items
+
+backend\tests\test_podcast_frame_preview.py::test_frame_preview_invalid_video_id_rejected PASSED [ 12%]
+backend\tests\test_podcast_frame_preview.py::test_frame_preview_invalid_timestamp_rejected PASSED [ 25%]
+backend\tests\test_podcast_frame_preview.py::test_frame_preview_nonexistent_asset_returns_404 PASSED [ 37%]
+backend\tests\test_podcast_frame_preview.py::test_frame_preview_extraction_and_caching PASSED [ 50%]
+backend\tests\test_podcast_frame_preview.py::test_frame_preview_respects_db_video_duration PASSED [ 62%]
+backend\tests\test_podcast_frame_preview.py::test_frame_preview_exact_start_boundary PASSED [ 75%]
+backend\tests\test_podcast_frame_preview.py::test_frame_preview_remote_url_rejected_as_id PASSED [ 87%]
+backend\tests\test_podcast_frame_preview.py::test_frame_preview_temp_cleanup PASSED [100%]
+
+============================== warnings summary ===============================
+backend\core\config.py:5
+  d:\automation video clips\clipforge\backend\core\config.py:5: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Settings(BaseSettings):
+
+backend\models\layout.py:100
+  d:\automation video clips\clipforge\backend\models\layout.py:100: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    regions: List[RegionModel] = Field(min_items=1)
+
+backend\api\routes\studio.py:77
+  d:\automation video clips\clipforge\backend\api\routes\studio.py:77: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    item_ids: List[str] = Field(..., min_items=1)
+
+backend\api\routes\studio.py:80
+  d:\automation video clips\clipforge\backend\api\routes\studio.py:80: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class VideoItemResponse(BaseModel):
+
+backend\api\routes\studio.py:108
+  d:\automation video clips\clipforge\backend\api\routes\studio.py:108: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class BatchResponse(BaseModel):
+
+C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\_python_package_support.py:206
+  C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\_python_package_support.py:206: FutureWarning: Package google.api_core depends on grpcio, currently installed at version 1.80.0. grpcio < 1.83.0 does not support Post-Quantum Cryptography (PQC). Support for non-PQC environments is deprecated. In October 2026, Google Cloud Python packages will raise their minimum requirements (including google-api-core, grpcio, and grpcio-status) to enforce grpcio >= 1.83.0. For more details on Google Cloud's post-quantum security migration, visit: https://cloud.google.com/security/resources/post-quantum-cryptography
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 8 passed, 6 warnings in 7.31s ========================
+

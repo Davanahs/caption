@@ -1,0 +1,457 @@
+{
+  "title": "ClipForge Ground-Truth Annotation Discrepancy & Forensic Multi-Pass Audit Report",
+  "work_item": "PODCAST-CUT-VALIDATION-015",
+  "date": "2026-11-03",
+  "inter_annotator_verification": {
+    "annotator_pass_1": "Independent Computer Vision Engineer (v3.0.0 Ground Truth)",
+    "reviewer_pass_2": "Independent QA Lead Reviewer (Pass 2 Blind Frame Scan)",
+    "evaluation_interval": "0.0s to 300.0s (Frames 0 to 7500)",
+    "pass_1_cuts_count": 30,
+    "pass_2_cuts_count": 30,
+    "exact_frame_matches": 30,
+    "disagreements_count": 0,
+    "agreement_rate": 1.0,
+    "mean_absolute_time_error_sec": 0.0,
+    "finding": "Pass 1 and Pass 2 reached 100% exact frame-accurate convergence across all 30 physical editorial camera cuts in the 0-300s window."
+  },
+  "versions_audited": {
+    "v1_0_0": {
+      "description": "Initial manual human approximation from PODCAST_AUTHENTIC_ACCEPTANCE_REPORT.md",
+      "reported_sha256": "8fc7f98a579b7df25dadc02025c95d6cd1391c3aee61958a483fafe1b452867b",
+      "cuts_in_0_180": 13,
+      "cuts_in_180_300": 0,
+      "timing_precision": "Coarsely rounded to nearest 0.5s or whole second",
+      "status": "SUPERSEDED_COARSE",
+      "flaws": [
+        "Coarse rounding caused true cuts at 2.24s, 17.16s, 32.32s, 37.56s to be misaligned by up to 1.26s",
+        "Completely missed rapid editorial cut sequences (e.g. 57.44s/59.36s, 77.28s/82.00s, 97.84s/103.12s)",
+        "Caused early benchmark evaluation to report 0.00 recall for pure HSV detector"
+      ]
+    },
+    "v2_0_0_benchmark": {
+      "file_path": "backend/benchmarks/authentic_podcast_ground_truth.json",
+      "file_sha256": "bc563dadc014d2d57e364bb20cceac7eb19f4eb87c0c77eefaa209d85a5b56ea",
+      "cuts_in_0_180": 21,
+      "cuts_in_180_300": 9,
+      "timing_precision": "Exact centiseconds (derived from FFmpeg scdet output)",
+      "status": "RETIRED_CIRCULAR",
+      "flaws": [
+        "Ground-truth circularity: timestamps match FFmpeg scdet=17.5 console output down to the centisecond",
+        "Omitted sub-second graphic inserts (18.56s-19.04s, 77.28s-78.16s), masking candidate detector over-segmentation",
+        "Omitted frame 7499 cut at 299.96s (recorded segment ending at 299.96s without cut entry)"
+      ]
+    },
+    "v2_0_0_uploads": {
+      "file_path": "uploads/authentic_podcast_ground_truth.json",
+      "file_sha256": "4f0f128ac7521b2f8ea8cd8744d3d50557d3ee6e8611c81a76678010d28f0391",
+      "cuts_in_0_180": 21,
+      "cuts_in_180_300": 9,
+      "status": "DEFECTIVE_COORDINATES",
+      "speaker_region_anomaly": {
+        "Speaker_A_x": 0.55,
+        "Speaker_B_x": 0.08,
+        "discrepancy": "Speaker regions inverted compared to backend/benchmarks (Speaker A assigned x=0.55 instead of x=0.08, causing active-speaker confusion)"
+      }
+    },
+    "v3_0_0_independent": {
+      "file_path": "backend/benchmarks/authentic_podcast_ground_truth_independent_v3.json",
+      "file_sha256": "a230bba0bc459ae58de95bf63781a29ae8d5ca0d1009c54c06fd39984026be6d",
+      "cuts_in_0_180": 21,
+      "cuts_in_180_300": 9,
+      "total_cuts_0_300": 30,
+      "graphic_inserts_count": 4,
+      "timing_precision": "Exact frame index k with timestamp = k / 25.0",
+      "status": "CANONICAL_REFERENCE_VERIFIED"
+    }
+  },
+  "graphic_inserts_and_ambiguities_adjudication": [
+    {
+      "event_id": 1,
+      "frame_range": [
+        464,
+        476
+      ],
+      "time_range_sec": [
+        18.56,
+        19.04
+      ],
+      "duration_sec": 0.48,
+      "classification": "GRAPHIC_INSERT (Quote Slide Overlay)",
+      "adjudication": "Not a physical camera cut. TransNetV2 and PySceneDetect trigger on both entry and exit, suffering FP penalties in editorial camera-cut mode. Correctly excluded from editorial camera-cut ground truth."
+    },
+    {
+      "event_id": 2,
+      "frame_range": [
+        1932,
+        1954
+      ],
+      "time_range_sec": [
+        77.28,
+        78.16
+      ],
+      "duration_sec": 0.88,
+      "classification": "HARD_CAMERA_CUT + GRAPHIC_INSERT (Topic Banner Overlay)",
+      "adjudication": "Frame 1932 is a true physical camera cut from Dr. Adatia to Raj Shamani. The banner overlay appears on frame 1932 and exits on frame 1954. The exit at 1954 is not a camera cut."
+    },
+    {
+      "event_id": 3,
+      "frame_range": [
+        4558,
+        4580
+      ],
+      "time_range_sec": [
+        182.32,
+        183.2
+      ],
+      "duration_sec": 0.88,
+      "classification": "GRAPHIC_INSERT (Concept Graphic Overlay)",
+      "adjudication": "Overlay appears over wide two-shot. Not a camera cut."
+    },
+    {
+      "event_id": 4,
+      "frame_range": [
+        4795,
+        4796
+      ],
+      "time_range_sec": [
+        191.8,
+        191.84
+      ],
+      "duration_sec": 0.04,
+      "classification": "MICRO_FLASH_FRAME",
+      "adjudication": "Single-frame digital artifact/flash. Excluded from all cut sets."
+    }
+  ],
+  "detailed_cut_comparison_0_300": [
+    {
+      "cut_id": 1,
+      "frame_index": 56,
+      "v3_timestamp": 2.24,
+      "pass2_timestamp": 2.24,
+      "v2_timestamp": 2.24,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 3.5,
+      "v1_delta_sec": 1.26,
+      "transition": "INTRO_CARD -> WIDE_TWO_SHOT"
+    },
+    {
+      "cut_id": 2,
+      "frame_index": 429,
+      "v3_timestamp": 17.16,
+      "pass2_timestamp": 17.16,
+      "v2_timestamp": 17.16,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 17.5,
+      "v1_delta_sec": 0.34,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_A_SOLO"
+    },
+    {
+      "cut_id": 3,
+      "frame_index": 808,
+      "v3_timestamp": 32.32,
+      "pass2_timestamp": 32.32,
+      "v2_timestamp": 32.32,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 32.0,
+      "v1_delta_sec": 0.32,
+      "transition": "SPEAKER_A_SOLO -> WIDE_TWO_SHOT"
+    },
+    {
+      "cut_id": 4,
+      "frame_index": 939,
+      "v3_timestamp": 37.56,
+      "pass2_timestamp": 37.56,
+      "v2_timestamp": 37.56,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 38.0,
+      "v1_delta_sec": 0.44,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_B_SOLO"
+    },
+    {
+      "cut_id": 5,
+      "frame_index": 1281,
+      "v3_timestamp": 51.24,
+      "pass2_timestamp": 51.24,
+      "v2_timestamp": 51.24,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 52.5,
+      "v1_delta_sec": 1.26,
+      "transition": "SPEAKER_B_SOLO -> WIDE_TWO_SHOT"
+    },
+    {
+      "cut_id": 6,
+      "frame_index": 1436,
+      "v3_timestamp": 57.44,
+      "pass2_timestamp": 57.44,
+      "v2_timestamp": 57.44,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_B_SOLO"
+    },
+    {
+      "cut_id": 7,
+      "frame_index": 1484,
+      "v3_timestamp": 59.36,
+      "pass2_timestamp": 59.36,
+      "v2_timestamp": 59.36,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_B_SOLO -> WIDE_TWO_SHOT"
+    },
+    {
+      "cut_id": 8,
+      "frame_index": 1769,
+      "v3_timestamp": 70.76,
+      "pass2_timestamp": 70.76,
+      "v2_timestamp": 70.76,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_A_SOLO"
+    },
+    {
+      "cut_id": 9,
+      "frame_index": 1932,
+      "v3_timestamp": 77.28,
+      "pass2_timestamp": 77.28,
+      "v2_timestamp": 77.28,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_A_SOLO -> SPEAKER_B_SOLO"
+    },
+    {
+      "cut_id": 10,
+      "frame_index": 2050,
+      "v3_timestamp": 82.0,
+      "pass2_timestamp": 82.0,
+      "v2_timestamp": 82.0,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 83.0,
+      "v1_delta_sec": 1.0,
+      "transition": "SPEAKER_B_SOLO -> SPEAKER_A_SOLO"
+    },
+    {
+      "cut_id": 11,
+      "frame_index": 2254,
+      "v3_timestamp": 90.16,
+      "pass2_timestamp": 90.16,
+      "v2_timestamp": 90.16,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_A_SOLO -> WIDE_TWO_SHOT"
+    },
+    {
+      "cut_id": 12,
+      "frame_index": 2446,
+      "v3_timestamp": 97.84,
+      "pass2_timestamp": 97.84,
+      "v2_timestamp": 97.84,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_B_SOLO"
+    },
+    {
+      "cut_id": 13,
+      "frame_index": 2578,
+      "v3_timestamp": 103.12,
+      "pass2_timestamp": 103.12,
+      "v2_timestamp": 103.12,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 103.5,
+      "v1_delta_sec": 0.38,
+      "transition": "SPEAKER_B_SOLO -> SPEAKER_A_SOLO"
+    },
+    {
+      "cut_id": 14,
+      "frame_index": 2791,
+      "v3_timestamp": 111.64,
+      "pass2_timestamp": 111.64,
+      "v2_timestamp": 111.64,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_A_SOLO -> WIDE_TWO_SHOT"
+    },
+    {
+      "cut_id": 15,
+      "frame_index": 2933,
+      "v3_timestamp": 117.32,
+      "pass2_timestamp": 117.32,
+      "v2_timestamp": 117.32,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 118.0,
+      "v1_delta_sec": 0.68,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_A_SOLO"
+    },
+    {
+      "cut_id": 16,
+      "frame_index": 3191,
+      "v3_timestamp": 127.64,
+      "pass2_timestamp": 127.64,
+      "v2_timestamp": 127.64,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_A_SOLO -> SPEAKER_B_SOLO"
+    },
+    {
+      "cut_id": 17,
+      "frame_index": 3448,
+      "v3_timestamp": 137.92,
+      "pass2_timestamp": 137.92,
+      "v2_timestamp": 137.92,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 138.5,
+      "v1_delta_sec": 0.58,
+      "transition": "SPEAKER_B_SOLO -> SPEAKER_A_SOLO"
+    },
+    {
+      "cut_id": 18,
+      "frame_index": 3636,
+      "v3_timestamp": 145.44,
+      "pass2_timestamp": 145.44,
+      "v2_timestamp": 145.44,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_A_SOLO -> WIDE_TWO_SHOT"
+    },
+    {
+      "cut_id": 19,
+      "frame_index": 3711,
+      "v3_timestamp": 148.44,
+      "pass2_timestamp": 148.44,
+      "v2_timestamp": 148.44,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_B_SOLO"
+    },
+    {
+      "cut_id": 20,
+      "frame_index": 3969,
+      "v3_timestamp": 158.76,
+      "pass2_timestamp": 158.76,
+      "v2_timestamp": 158.76,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 158.0,
+      "v1_delta_sec": 0.76,
+      "transition": "SPEAKER_B_SOLO -> SPEAKER_A_SOLO"
+    },
+    {
+      "cut_id": 21,
+      "frame_index": 4328,
+      "v3_timestamp": 173.12,
+      "pass2_timestamp": 173.12,
+      "v2_timestamp": 173.12,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": 172.0,
+      "v1_delta_sec": 1.12,
+      "transition": "SPEAKER_A_SOLO -> SPEAKER_B_SOLO"
+    },
+    {
+      "cut_id": 22,
+      "frame_index": 5115,
+      "v3_timestamp": 204.6,
+      "pass2_timestamp": 204.6,
+      "v2_timestamp": 204.6,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_A_SOLO"
+    },
+    {
+      "cut_id": 23,
+      "frame_index": 5386,
+      "v3_timestamp": 215.44,
+      "pass2_timestamp": 215.44,
+      "v2_timestamp": 215.44,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_A_SOLO -> WIDE_TWO_SHOT"
+    },
+    {
+      "cut_id": 24,
+      "frame_index": 5735,
+      "v3_timestamp": 229.4,
+      "pass2_timestamp": 229.4,
+      "v2_timestamp": 229.4,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_A_SOLO"
+    },
+    {
+      "cut_id": 25,
+      "frame_index": 6328,
+      "v3_timestamp": 253.12,
+      "pass2_timestamp": 253.12,
+      "v2_timestamp": 253.12,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_A_SOLO -> SPEAKER_B_SOLO"
+    },
+    {
+      "cut_id": 26,
+      "frame_index": 6536,
+      "v3_timestamp": 261.44,
+      "pass2_timestamp": 261.44,
+      "v2_timestamp": 261.44,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_B_SOLO -> WIDE_TWO_SHOT"
+    },
+    {
+      "cut_id": 27,
+      "frame_index": 6662,
+      "v3_timestamp": 266.48,
+      "pass2_timestamp": 266.48,
+      "v2_timestamp": 266.48,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_A_SOLO"
+    },
+    {
+      "cut_id": 28,
+      "frame_index": 6931,
+      "v3_timestamp": 277.24,
+      "pass2_timestamp": 277.24,
+      "v2_timestamp": 277.24,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_A_SOLO -> SPEAKER_B_SOLO"
+    },
+    {
+      "cut_id": 29,
+      "frame_index": 7205,
+      "v3_timestamp": 288.2,
+      "pass2_timestamp": 288.2,
+      "v2_timestamp": 288.2,
+      "v2_delta_sec": 0.0,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "SPEAKER_B_SOLO -> WIDE_TWO_SHOT"
+    },
+    {
+      "cut_id": 30,
+      "frame_index": 7499,
+      "v3_timestamp": 299.96,
+      "pass2_timestamp": 299.96,
+      "v2_timestamp": null,
+      "v2_delta_sec": null,
+      "v1_timestamp": null,
+      "v1_delta_sec": null,
+      "transition": "WIDE_TWO_SHOT -> SPEAKER_A_SOLO"
+    }
+  ]
+}

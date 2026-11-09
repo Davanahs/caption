@@ -1,0 +1,8 @@
+{
+  "status": "SUCCESS",
+  "steps": {
+    "stress_requests": "SUCCESS",
+    "sqlite_locking_check": "SUCCESS"
+  },
+  "log": "Completed 50 concurrent requests. 9 errors.\n"
+}

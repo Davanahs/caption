@@ -1,0 +1,23 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: d:\automation video clips\clipforge\backend
+configfile: pytest.ini
+plugins: anyio-4.13.0, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 5 items
+
+backend\tests\test_phase_1_2_execution_and_failure_handling.py::test_controlled_worker_failure_handling PASSED [ 20%]
+backend\tests\test_phase_1_2_execution_and_failure_handling.py::test_dispatch_failure_marks_job_as_failed PASSED [ 40%]
+backend\tests\test_phase_1_2_execution_and_failure_handling.py::test_parent_child_clip_aggregation_partial_failure PASSED [ 60%]
+backend\tests\test_phase_1_2_execution_and_failure_handling.py::test_parent_child_clip_aggregation_all_failed PASSED [ 80%]
+backend\tests\test_phase_1_2_execution_and_failure_handling.py::test_stale_recovery_task_transitions_dead_tasks PASSED [100%]
+
+============================== warnings summary ===============================
+backend\core\config.py:5
+  d:\automation video clips\clipforge\backend\core\config.py:5: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Settings(BaseSettings):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 5 passed, 1 warning in 2.14s =========================
+

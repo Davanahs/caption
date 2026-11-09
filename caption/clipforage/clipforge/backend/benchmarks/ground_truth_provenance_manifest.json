@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClipForge Camera-Cut Ground Truth Provenance & Cryptographic Manifest",
+  "work_item": "PODCAST-CUT-VALIDATION-015",
+  "generated_date": "2026-11-03",
+  "repository": {
+    "root": "D:\\automation video clips\\clipforge",
+    "git_commit": "68b9bcd7d3688c6bd8feb781d98df72d14351e97",
+    "git_branch": "feature/layout",
+    "active_domain": "L7"
+  },
+  "source_media": {
+    "relative_path": "uploads/authentic_podcast_test.mp4",
+    "file_bytes": 243392976,
+    "sha256": "8144a74a30ddebbbdb1946c43bbddd018e4b7891aedd31ddcb846d326ff7e4c0",
+    "duration_sec": 981.08,
+    "fps": 25.0,
+    "frame_count": 24527,
+    "source_url": "https://youtu.be/0GjbIOS9Q90?si=iHxemPakjjvU1RoX",
+    "title": "The Morning Routine That Can Change Your Life | Dr. Sweta Adatia | Raj Shamani Clips"
+  },
+  "ground_truth_artifacts": {
+    "v3_0_0_independent_ground_truth": {
+      "file_path": "backend/benchmarks/authentic_podcast_ground_truth_independent_v3.json",
+      "file_bytes": 11246,
+      "sha256": "a230bba0bc459ae58de95bf63781a29ae8d5ca0d1009c54c06fd39984026be6d",
+      "status": "CANONICAL_REFERENCE",
+      "provenance": "Independent manual frame inspection, free of detector calibration circularity"
+    },
+    "pass_2_reviewer_blind_annotations": {
+      "file_path": "backend/benchmarks/independent_reviewer_pass2_annotations.json",
+      "file_bytes": 24975,
+      "sha256": "82bf50ef0f40551a4ce4095438390523d6565f9e920440be897bec35f2b2b2b8",
+      "status": "BLIND_REVIEWER_PASS_VERIFIED",
+      "provenance": "Blind multi-signal pixel difference scan across frames 0-7500 without prior access to detector outputs"
+    },
+    "annotation_protocol": {
+      "file_path": "backend/benchmarks/annotation_protocol.md",
+      "file_bytes": 8134,
+      "sha256": "5b800b2f26a4a98fd1e18dd8c19f3df2093539ef032a78e1071f7ead4fb72bb4",
+      "status": "GOVERNING_SPECIFICATION"
+    },
+    "annotation_discrepancy_report": {
+      "file_path": "backend/benchmarks/annotation_discrepancy_report.json",
+      "file_bytes": 14041,
+      "sha256": "1e2fc107ea7bc4138e37bcefca75273653640283b96c72a692bfedbb191eab09",
+      "status": "FORENSIC_AUDIT"
+    },
+    "evaluation_harness": {
+      "file_path": "backend/benchmarks/evaluate_independent_camera_cuts.py",
+      "file_bytes": 9156,
+      "sha256": "d1e20cf684779bac2d71ac4d9561fc4ea486664425d6479ca37a0f4e7b82d6c7",
+      "status": "VERIFIED_HARNESS"
+    },
+    "unit_tests_benchmark": {
+      "file_path": "backend/benchmarks/test_independent_camera_cuts.py",
+      "file_bytes": 10359,
+      "sha256": "8c36f7f108f0b7e711f9294c67d1047a4bc7d25ee9dd433cb83c28fed671c48b",
+      "status": "VERIFIED_TEST_SUITE"
+    },
+    "unit_tests_tests": {
+      "file_path": "backend/tests/test_independent_camera_cuts.py",
+      "file_bytes": 10359,
+      "sha256": "8c36f7f108f0b7e711f9294c67d1047a4bc7d25ee9dd433cb83c28fed671c48b",
+      "status": "VERIFIED_TEST_SUITE"
+    },
+    "benchmark_results": {
+      "file_path": "backend/benchmarks/independent_camera_cut_benchmark_results.json",
+      "file_bytes": 708134,
+      "sha256": "919cc6e56e197c8dfc053ad5350a02a8a2b8519ef8fc9abfd4e30142c687e716",
+      "status": "REPRODUCED_BENCHMARK_RESULTS"
+    },
+    "historical_v2_0_0_benchmark_ground_truth": {
+      "file_path": "backend/benchmarks/authentic_podcast_ground_truth.json",
+      "file_bytes": 12348,
+      "sha256": "bc563dadc014d2d57e364bb20cceac7eb19f4eb87c0c77eefaa209d85a5b56ea",
+      "status": "RETIRED_CIRCULAR",
+      "notes": "Reverse-calibrated against FFmpeg scdet=17.5 console outputs"
+    },
+    "historical_v2_0_0_uploads_ground_truth": {
+      "file_path": "uploads/authentic_podcast_ground_truth.json",
+      "file_bytes": 12414,
+      "sha256": "4f0f128ac7521b2f8ea8cd8744d3d50557d3ee6e8611c81a76678010d28f0391",
+      "status": "DEFECTIVE_COORDINATES",
+      "notes": "Contains inverted speaker coordinates (Speaker A at x=0.55 instead of x=0.08)"
+    },
+    "historical_v1_0_0_acceptance_report_ground_truth": {
+      "reported_sha256": "8fc7f98a579b7df25dadc02025c95d6cd1391c3aee61958a483fafe1b452867b",
+      "status": "SUPERSEDED_COARSE",
+      "notes": "Coarse human approximations rounded to whole/half seconds"
+    }
+  },
+  "evaluation_coverage_attestation": {
+    "window_1_primary_0_180": {
+      "status": "VERIFIED_ACCURATE",
+      "editorial_cuts": 21,
+      "graphic_inserts": 2,
+      "coverage_pct": 18.35
+    },
+    "window_2_secondary_180_300": {
+      "status": "VERIFIED_ACCURATE",
+      "editorial_cuts": 9,
+      "graphic_inserts": 2,
+      "coverage_pct": 12.23
+    },
+    "window_certified_combined_0_300": {
+      "status": "VERIFIED_ACCURATE",
+      "editorial_cuts": 30,
+      "graphic_inserts": 4,
+      "coverage_pct": 30.58
+    },
+    "window_3_extended_300_981": {
+      "status": "UNANNOTATED_OPEN",
+      "coverage_pct": 69.42,
+      "notes": "681.08 seconds (69.4% of asset) is unannotated. Not evaluated to avoid false claims of complete 981s validation."
+    }
+  },
+  "compliance_declarations": {
+    "rule_15_synthetic_substitution": "PASSED (100% authentic human footage used; zero synthetic frames substituted)",
+    "ground_truth_independence": "PASSED (Two independent passes converged on identical 30 cuts without detector back-calibration)",
+    "production_freeze_domain_l7": "PASSED (advanced_podcast_engine.py preserved without modifications)"
+  }
+}

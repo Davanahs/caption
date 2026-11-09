@@ -1,0 +1,355 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "audit_item": "AUDIT-COVERAGE-010",
+  "title": "ClipForge Audit Coverage & Test Totals Forensic Reconciliation",
+  "generated_at": "2026-11-03T06:45:00Z",
+  "git_branch": "feature/layout",
+  "git_head": "68b9bcd7d3688c6bd8feb781d98df72d14351e97",
+  "asgi_route_reconciliation": {
+    "historical_audit_state": {
+      "total_asgi_route_objects": 122,
+      "breakdown_mutually_exclusive": {
+        "standard_http_api_routes_APIRoute": 114,
+        "storage_quarantine_defense_APIRoute": 1,
+        "websocket_api_routes_APIWebSocketRoute": 1,
+        "documentation_and_openapi_Route": 4,
+        "static_filesystem_mounts_Mount": 2
+      },
+      "sum_verification": "114 + 1 + 1 + 4 + 2 = 122",
+      "explanation_of_122_vs_123_discrepancy": "In historical notes, authors described 116 API endpoints (115 HTTP + 1 WebSocket), 4 docs, 2 mounts, and 1 quarantine route, which arithmetically sums to 123 (115 + 1 + 4 + 2 + 1 = 123). This discrepancy is definitively explained: the quarantine route (/outputs/.storage_quarantine/{rest:path}) is an APIRoute and was already counted as one of the 115 HTTP APIRoutes. Counting it both as an HTTP APIRoute and as a separate quarantine route double-counted it by +1."
+    },
+    "current_live_runtime_state": {
+      "total_asgi_route_objects": 131,
+      "breakdown_mutually_exclusive": {
+        "standard_http_api_routes_APIRoute": 123,
+        "storage_quarantine_defense_APIRoute": 1,
+        "websocket_api_routes_APIWebSocketRoute": 1,
+        "documentation_and_openapi_Route": 4,
+        "static_filesystem_mounts_Mount": 2
+      },
+      "sum_verification": "123 + 1 + 1 + 4 + 2 = 131",
+      "recent_route_additions": [
+        "GET /api/videos/{video_id}/frame (PODCAST-PREVIEW-FRAME-002)",
+        "GET /api/clips/{clip_id}/variants (Variant management)",
+        "GET /api/clips/{clip_id}/variants/{variant_id}/download (Variant download)",
+        "GET /api/channels/{channel_id}/videos (Monitored videos with sort/scan_depth)",
+        "POST /api/channels/{channel_id}/process-batch (Batch processing)",
+        "POST /api/studio/batches/{batch_id}/process (Studio batch processing)"
+      ]
+    }
+  },
+  "test_totals_and_overlap_reconciliation": {
+    "historical_claim_analysis": {
+      "claimed_metric": "331 tests executed / 331 passed / 0 failed",
+      "exact_components": {
+        "frontend_unit_suites": {
+          "suites_count": 15,
+          "tests_count": 112,
+          "command": "npm test (in frontend/)"
+        },
+        "backend_podcast_suites": {
+          "suites_count": 4,
+          "tests_count": 75,
+          "command": "pytest backend/tests/test_layout_engine.py backend/tests/test_podcast_layout_pipeline.py backend/tests/test_advanced_podcast.py backend/tests/test_podcast_layout_features.py -v"
+        },
+        "backend_broader_regression_suites": {
+          "suites_count": 7,
+          "tests_count": 144,
+          "command": "pytest backend/tests/test_equal_splits.py backend/tests/test_channel_batch_count.py backend/tests/test_publishing_privacy_hardening.py backend/tests/test_upload_studio_phase3_publishing.py backend/tests/test_automatic_channel_monitoring_and_decision_lifecycle.py backend/tests/test_source_seo_and_attribution.py backend/tests/test_publishing_cadence_governance.py -v"
+        }
+      },
+      "sum_derivation": "112 + 75 + 144 = 331",
+      "overlap_count": 0,
+      "overclaim_correction": "The 331 test count was the mechanical sum of 15 frontend unit suites and 11 specifically selected backend regression suites. It was NOT full repository coverage. Total collected backend tests in backend/tests/ number 724 unique test cases across 42 test files. Running 219 backend tests exercised approximately 30.2% of backend tests. Frontend 112/114 tests represent isolated unit modules, not live browser workflows. Calling 331 tests full repository coverage or proof that all features work was an overclaim."
+    },
+    "current_live_test_counts": {
+      "frontend_unit_suite": {
+        "suites_count": 15,
+        "tests_count": 114,
+        "passes": 114,
+        "fails": 0,
+        "status": "PASS (added 2 tests in PODCAST-PREVIEW-FRAME-002)"
+      },
+      "backend_podcast_suite": {
+        "suites_count": 4,
+        "tests_count": 75,
+        "passes": 75,
+        "fails": 0,
+        "status": "PASS"
+      },
+      "backend_broader_regression_suite": {
+        "suites_count": 7,
+        "tests_count": 144,
+        "passes": 144,
+        "fails": 0,
+        "status": "PASS"
+      },
+      "backend_total_repository_collected_tests": 724
+    }
+  },
+  "browser_smoke_and_visual_evidence_limits": {
+    "http_200_and_console_errors_limitations": "A 200 OK HTTP response and 0 console errors proves solely that the initial Next.js page shell rendered without an unhandled JavaScript exception during mount. It does not constitute evidence that buttons, form submissions, WebSocket connections, or Celery task workflows are functional.",
+    "screenshot_evidence_catalog": {
+      "total_screenshots": 42,
+      "responsive_viewports_count": 36,
+      "modal_states_count": 6,
+      "limitation": "Screenshots capture visual layout appearance at static points in time and prove absence of layout clipping/overflow. They do not simulate end-to-end backend processing or live task state transitions.",
+      "responsive_screenshots": [
+        {
+          "filename": "page-01-dashboard_desktop_1920x1080.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-01-dashboard_desktop_1920x1080.png",
+          "size_bytes": 666917,
+          "sha256": "54214fd95ef48b3b05ab21f4cf9c819c20fd7417af89c8ede9be718e8d7b2952"
+        },
+        {
+          "filename": "page-01-dashboard_laptop_1366x768.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-01-dashboard_laptop_1366x768.png",
+          "size_bytes": 419197,
+          "sha256": "d90b45b08744fe227c2d4e84e8a12dfd5d15320e8f929de68435730a71802fc1"
+        },
+        {
+          "filename": "page-01-dashboard_mobile_390x844.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-01-dashboard_mobile_390x844.png",
+          "size_bytes": 141075,
+          "sha256": "91d7cb7f922f8c0f8c1127ac8f062d7302be4038ad786a0806ee972ed3532db3"
+        },
+        {
+          "filename": "page-01-dashboard_tablet_768x1024.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-01-dashboard_tablet_768x1024.png",
+          "size_bytes": 284867,
+          "sha256": "8b9886f92cb6be0b5c6720fcbbba74b01b200a2bbea2f25d0d51bfa60d5fbdc9"
+        },
+        {
+          "filename": "page-02-podcasts_desktop_1920x1080.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-02-podcasts_desktop_1920x1080.png",
+          "size_bytes": 783443,
+          "sha256": "aa7650b7bb519fa1e86a5118af60b03c674abea8a1e5be797661cf9f84f05757"
+        },
+        {
+          "filename": "page-02-podcasts_laptop_1366x768.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-02-podcasts_laptop_1366x768.png",
+          "size_bytes": 450798,
+          "sha256": "3836d9cf3ac0ddef50fb5aa6509b7a6cbcefc5ea41db6a7f1fe851e20a5fbab9"
+        },
+        {
+          "filename": "page-02-podcasts_mobile_390x844.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-02-podcasts_mobile_390x844.png",
+          "size_bytes": 128605,
+          "sha256": "f0db6cb5b099188c0098d29de2326def4342af20e2455d187a280384bde45ede"
+        },
+        {
+          "filename": "page-02-podcasts_tablet_768x1024.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-02-podcasts_tablet_768x1024.png",
+          "size_bytes": 270526,
+          "sha256": "2d786b4aa03c3cb1a5290f22c7c64402dc81e7cc3ceaf55461bdbff6a9031d31"
+        },
+        {
+          "filename": "page-03-studio_desktop_1920x1080.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-03-studio_desktop_1920x1080.png",
+          "size_bytes": 900913,
+          "sha256": "ae91c3a01ff44146da796ab8858162ceeb71444c7143955f467cdf3c2ef8609d"
+        },
+        {
+          "filename": "page-03-studio_laptop_1366x768.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-03-studio_laptop_1366x768.png",
+          "size_bytes": 562409,
+          "sha256": "e0b33a1eebfbc54044a6c87193d3e54e26ff37862dcb2a0875b97289a99191b4"
+        },
+        {
+          "filename": "page-03-studio_mobile_390x844.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-03-studio_mobile_390x844.png",
+          "size_bytes": 202288,
+          "sha256": "36226ab8592bfb299d4ca0560a42e564236158bf9d726eb4864822d23dd86af6"
+        },
+        {
+          "filename": "page-03-studio_tablet_768x1024.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-03-studio_tablet_768x1024.png",
+          "size_bytes": 390812,
+          "sha256": "6816bf8ee95970120260f6667a9430e81e3ffebb7a4aed63450305665fc34086"
+        },
+        {
+          "filename": "page-04-clips_desktop_1920x1080.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-04-clips_desktop_1920x1080.png",
+          "size_bytes": 1252385,
+          "sha256": "042b095bb6e1dda6516b2436770b0fd0fc7eb64b6a59ff51f5ba8ae754b59efa"
+        },
+        {
+          "filename": "page-04-clips_laptop_1366x768.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-04-clips_laptop_1366x768.png",
+          "size_bytes": 695537,
+          "sha256": "052c36f1ca71ec0b7a3bc75249b6c4de5bc7915ba861831f4ebfe3aa5099eca2"
+        },
+        {
+          "filename": "page-04-clips_mobile_390x844.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-04-clips_mobile_390x844.png",
+          "size_bytes": 205100,
+          "sha256": "22f09827967c36755a786900b94e4b535b60b3c62626c428afa18a4e22d6a622"
+        },
+        {
+          "filename": "page-04-clips_tablet_768x1024.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-04-clips_tablet_768x1024.png",
+          "size_bytes": 501123,
+          "sha256": "79e47b6ce5d09728977c004e937fd6fa7ffd2b46e9939aaecc5128e91660a658"
+        },
+        {
+          "filename": "page-05-analytics_desktop_1920x1080.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-05-analytics_desktop_1920x1080.png",
+          "size_bytes": 648727,
+          "sha256": "8c23a63f8ff502630d0203c181e9305a467c123541d036b5f2da8cde88f78afe"
+        },
+        {
+          "filename": "page-05-analytics_laptop_1366x768.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-05-analytics_laptop_1366x768.png",
+          "size_bytes": 384520,
+          "sha256": "8ef729b9d88db01f77c40acf63c68b4d96de971865b547c2ef8f205abebea008"
+        },
+        {
+          "filename": "page-05-analytics_mobile_390x844.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-05-analytics_mobile_390x844.png",
+          "size_bytes": 113971,
+          "sha256": "d961652e213e1591345a3f0ba1452ca168fd8e45617d303edf1536cb693df7c4"
+        },
+        {
+          "filename": "page-05-analytics_tablet_768x1024.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-05-analytics_tablet_768x1024.png",
+          "size_bytes": 228893,
+          "sha256": "7befe0c281f8e2fa714468369ac4d047af7e2ee082e25df0fc083a3b71f35c87"
+        },
+        {
+          "filename": "page-06-automation_desktop_1920x1080.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-06-automation_desktop_1920x1080.png",
+          "size_bytes": 519722,
+          "sha256": "d281383b922fcd7c7137dbb25de648d015732b8a2936e27bf8bb82c699792fbc"
+        },
+        {
+          "filename": "page-06-automation_laptop_1366x768.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-06-automation_laptop_1366x768.png",
+          "size_bytes": 367507,
+          "sha256": "f2baa6007552f95557e185ff8c35921fdaba56a9b982993d8805b09075b2ac82"
+        },
+        {
+          "filename": "page-06-automation_mobile_390x844.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-06-automation_mobile_390x844.png",
+          "size_bytes": 155853,
+          "sha256": "70e50ad8ebc92f5845ba0848b6c04a4ca22507ff01526e3470c3a6b6a273f971"
+        },
+        {
+          "filename": "page-06-automation_tablet_768x1024.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-06-automation_tablet_768x1024.png",
+          "size_bytes": 258086,
+          "sha256": "546d76c3e8cea6aadc18b5bf0bbaab06d136ab9128d06abd868e66ebbabf007d"
+        },
+        {
+          "filename": "page-07-channels_desktop_1920x1080.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-07-channels_desktop_1920x1080.png",
+          "size_bytes": 238082,
+          "sha256": "9f3e35f2788586644d19128b77bb67db8bf0b0d4c326115b372b1a77e23ef4e2"
+        },
+        {
+          "filename": "page-07-channels_laptop_1366x768.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-07-channels_laptop_1366x768.png",
+          "size_bytes": 178572,
+          "sha256": "25866933ec4da11f92e0704ed8aab58948a42c5a74dfc65b76b488801210d79b"
+        },
+        {
+          "filename": "page-07-channels_mobile_390x844.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-07-channels_mobile_390x844.png",
+          "size_bytes": 72388,
+          "sha256": "0ca3d79964a089725662819373d77d2e3f6ba761487364300624bc40bd599dbb"
+        },
+        {
+          "filename": "page-07-channels_tablet_768x1024.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-07-channels_tablet_768x1024.png",
+          "size_bytes": 129387,
+          "sha256": "a56abb5744df2f1cdbe077db7a7a06bfa1d61e6810b6ab116b0b84aab506a2af"
+        },
+        {
+          "filename": "page-08-publish_desktop_1920x1080.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-08-publish_desktop_1920x1080.png",
+          "size_bytes": 837501,
+          "sha256": "a01ae6b5dbcf558748441bf7b769d67555474fb1e3ef1e4e1dbdc537732fc629"
+        },
+        {
+          "filename": "page-08-publish_laptop_1366x768.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-08-publish_laptop_1366x768.png",
+          "size_bytes": 427856,
+          "sha256": "94b7a0947007308dd713726ce3ac4c54eefc17f241d5bd129e183d11c3e67085"
+        },
+        {
+          "filename": "page-08-publish_mobile_390x844.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-08-publish_mobile_390x844.png",
+          "size_bytes": 150522,
+          "sha256": "b2a0779c6ea3b30afd20b62d021588350ef2687c9fdd377840b3651647180c5f"
+        },
+        {
+          "filename": "page-08-publish_tablet_768x1024.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-08-publish_tablet_768x1024.png",
+          "size_bytes": 287439,
+          "sha256": "59632128a5fddadd51638d45a508e8a2d3f30df3d2e715ce2f66ffaa206f8e46"
+        },
+        {
+          "filename": "page-09-settings_desktop_1920x1080.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-09-settings_desktop_1920x1080.png",
+          "size_bytes": 447196,
+          "sha256": "df0ece0b7915ce2ade3a53ef337eb4b384a5f4a2c90f20e1d73e3156468fc1f3"
+        },
+        {
+          "filename": "page-09-settings_laptop_1366x768.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-09-settings_laptop_1366x768.png",
+          "size_bytes": 350473,
+          "sha256": "47ea61ab29b68301f5d2f8f6d33a031b87f856ee8d642476c4fb20c88051bbeb"
+        },
+        {
+          "filename": "page-09-settings_mobile_390x844.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-09-settings_mobile_390x844.png",
+          "size_bytes": 105387,
+          "sha256": "5f68c2049fb60320add57a0c56fb908ded5efed333878d48d9213c2d0f6019ad"
+        },
+        {
+          "filename": "page-09-settings_tablet_768x1024.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/page-09-settings_tablet_768x1024.png",
+          "size_bytes": 164416,
+          "sha256": "800fd3c154a07ff4147e2048df5d9242bb275139d62a4c92e28e1103ee8b11a9"
+        }
+      ],
+      "modal_screenshots": [
+        {
+          "filename": "modal_01_dashboard_process_video.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/modals/modal_01_dashboard_process_video.png",
+          "size_bytes": 244340,
+          "sha256": "c6e8fdf67a7c98793b47ee16fa8adedb60524a8138d9493fdb99adf1331131fc"
+        },
+        {
+          "filename": "modal_02_podcasts_manual_selection.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/modals/modal_02_podcasts_manual_selection.png",
+          "size_bytes": 259847,
+          "sha256": "8d32c4fd18d8a0411252fad45e5835a95cf6a152816ccf0ec2ad1daa903ac105"
+        },
+        {
+          "filename": "modal_03_podcasts_advanced_selection.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/modals/modal_03_podcasts_advanced_selection.png",
+          "size_bytes": 306390,
+          "sha256": "8b75ff09e92f93aed0d809ec7f3edb793c7ca2532ffa8fb98c8544484474b4c7"
+        },
+        {
+          "filename": "modal_04_clips_storage_cleanup.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/modals/modal_04_clips_storage_cleanup.png",
+          "size_bytes": 237689,
+          "sha256": "e0814c3af0d32b2b051a2d4cb4dccd0f2084b56169bf933737477418f625c445"
+        },
+        {
+          "filename": "modal_05_clips_preview_modal.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/modals/modal_05_clips_preview_modal.png",
+          "size_bytes": 350621,
+          "sha256": "02803a43dc375614dacbf9e830be0fed5ce5f0eb1ab55c7713523f9b4880ea6f"
+        },
+        {
+          "filename": "modal_06_channels_connect_modal.png",
+          "relative_path": "tmp/clipforge_full_website_audit/screenshots/modals/modal_06_channels_connect_modal.png",
+          "size_bytes": 153326,
+          "sha256": "f7ced6b7da5bdf9943ada68637ca0a087819aac362be79628c2b998bb5d10832"
+        }
+      ]
+    }
+  }
+}

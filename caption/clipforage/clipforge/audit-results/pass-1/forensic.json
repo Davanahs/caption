@@ -1,0 +1,914 @@
+{
+  "Production Runtime": [
+    {
+      "file": "backend/cleanup_storage.py",
+      "line": 82,
+      "term": "WAL",
+      "content": "for root, dirs, files in os.walk(upload_dir):"
+    },
+    {
+      "file": "backend/api/routes/channels.py",
+      "line": 12,
+      "term": ".db",
+      "content": "from backend.models.db_sync import create_job_sync"
+    },
+    {
+      "file": "backend/models/database.py",
+      "line": 12,
+      "term": ".db",
+      "content": "pool_size=settings.DB_POOL_SIZE,"
+    },
+    {
+      "file": "backend/models/database.py",
+      "line": 13,
+      "term": ".db",
+      "content": "max_overflow=settings.DB_MAX_OVERFLOW,"
+    },
+    {
+      "file": "backend/models/database.py",
+      "line": 14,
+      "term": ".db",
+      "content": "pool_timeout=settings.DB_POOL_TIMEOUT,"
+    },
+    {
+      "file": "backend/models/database.py",
+      "line": 26,
+      "term": ".db",
+      "content": "pool_size=settings.DB_POOL_SIZE,"
+    },
+    {
+      "file": "backend/models/database.py",
+      "line": 27,
+      "term": ".db",
+      "content": "max_overflow=settings.DB_MAX_OVERFLOW,"
+    },
+    {
+      "file": "backend/models/database.py",
+      "line": 28,
+      "term": ".db",
+      "content": "pool_timeout=settings.DB_POOL_TIMEOUT,"
+    },
+    {
+      "file": "backend/services/caption_generator.py",
+      "line": 232,
+      "term": "WAL",
+      "content": "transcript=\"She walked up to them with confidence. They didn't expect what came next.\","
+    },
+    {
+      "file": "backend/services/channel_monitor.py",
+      "line": 12,
+      "term": ".db",
+      "content": "from backend.models.db_sync import create_job_sync"
+    },
+    {
+      "file": "backend/tasks/process_video.py",
+      "line": 56,
+      "term": ".db",
+      "content": "from backend.models.db_sync import ("
+    },
+    {
+      "file": "data/codecourt.sqlite3",
+      "type": "filename",
+      "term": "codecourt.sqlite3"
+    },
+    {
+      "file": "frontend/package-lock.json",
+      "line": 1227,
+      "term": "WAL",
+      "content": "\"node_modules/@nodelib/fs.walk\": {"
+    },
+    {
+      "file": "frontend/package-lock.json",
+      "line": 1229,
+      "term": "WAL",
+      "content": "\"resolved\": \"https://registry.npmjs.org/@nodelib/fs.walk/-/fs.walk-1.2.8.tgz\","
+    },
+    {
+      "file": "frontend/package-lock.json",
+      "line": 3552,
+      "term": "WAL",
+      "content": "\"@nodelib/fs.walk\": \"^1.2.3\","
+    }
+  ],
+  "Migration Utility": [
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "type": "filename",
+      "term": "migrate_sqlite_to_postgres.py"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 3,
+      "term": "sqlite",
+      "content": "import sqlite3"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 23,
+      "term": "sqlite",
+      "content": "# SQLite typically stores isoformat without timezone or with +00:00"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 32,
+      "term": "sqlite",
+      "content": "sqlite_db_path = os.path.join(_repo_root, \"clipforge.db\")"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 33,
+      "term": "sqlite",
+      "content": "if not os.path.exists(sqlite_db_path):"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 34,
+      "term": "sqlite",
+      "content": "print(f\"No SQLite database found at {sqlite_db_path}. Skipping migration.\")"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 37,
+      "term": "sqlite",
+      "content": "print(\"Connecting to SQLite database...\")"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 38,
+      "term": "sqlite",
+      "content": "conn = sqlite3.connect(sqlite_db_path)"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 39,
+      "term": "sqlite",
+      "content": "conn.row_factory = sqlite3.Row"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 81,
+      "term": "sqlite",
+      "content": "# in older sqlite schema versions"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 94,
+      "term": "sqlite",
+      "content": "except sqlite3.OperationalError:"
+    },
+    {
+      "file": "backend/migrate_sqlite_to_postgres.py",
+      "line": 95,
+      "term": "sqlite",
+      "content": "print(f\"Table {table_name} does not exist in SQLite DB. Skipping.\")"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 56,
+      "term": "sqlite",
+      "content": "print(\"\\n[1/7] Running Forensic SQLite Scan (Part A, X, Y)...\")"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 86,
+      "term": "sqlite",
+      "content": "search_terms = [\"sqlite\", \"sqlite3\", \"aiosqlite\", \"sqlite://\", \"sqlite+aiosqlite\", \"clipforge.db\", \""
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 90,
+      "term": "WAL",
+      "content": "for root, dirs, files in os.walk(PROJECT_ROOT):"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 98,
+      "term": "sqlite",
+      "content": "if 'sqlite' in file.lower() or file.endswith('.db'):"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 106,
+      "term": ".db",
+      "content": "if file.endswith(('.db', '.db-shm', '.db-wal', '.mp4', '.png', '.jpg', '.exe', '.rdb', '.backup')):"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 134,
+      "term": "sqlite",
+      "content": "if f == 'backend/migrate_sqlite_to_postgres.py' or 'audit' in f:"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 140,
+      "term": "clipforge.db",
+      "content": "elif f in ['clipforge.db', 'clipforge.db-shm', 'clipforge.db-wal']:"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 242,
+      "term": "sqlite",
+      "content": "print(\"  -> Running sqlite_to_postgres migration utility using clipforge.db.backup ...\")"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 244,
+      "term": "clipforge.db",
+      "content": "backup_db = PROJECT_ROOT / \"clipforge.db.backup\""
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 247,
+      "term": "clipforge.db",
+      "content": "shutil.copy2(PROJECT_ROOT / \"clipforge.db\", backup_db)"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 249,
+      "term": "sqlite",
+      "content": "mig_result = run_cmd([\"python\", \"backend/migrate_sqlite_to_postgres.py\"], cwd=PROJECT_ROOT, env=env,"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 251,
+      "term": "sqlite",
+      "content": "data[\"steps\"] = {\"sqlite_to_postgres\": \"FAILED\", \"log\": mig_result.stderr}"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 254,
+      "term": "sqlite",
+      "content": "data[\"steps\"] = {\"sqlite_to_postgres\": \"SUCCESS\"}"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 301,
+      "term": "sqlite",
+      "content": "# Kill and read logs for sqlite errors"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 308,
+      "term": "sqlite",
+      "content": "bad_words = [\"database is locked\", \"database locked\", \"deadlock\", \"sqlite\"]"
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 311,
+      "term": "sqlite",
+      "content": "data[\"steps\"][\"sqlite_locking_check\"] = f\"FAILED: Found {found}\""
+    },
+    {
+      "file": "scripts/audit_phase1.py",
+      "line": 314,
+      "term": "sqlite",
+      "content": "data[\"steps\"][\"sqlite_locking_check\"] = \"SUCCESS\""
+    }
+  ],
+  "Test": [],
+  "Documentation": [
+    {
+      "file": "CLIPFORGE_ARCHITECT_ASSESSMENT.md",
+      "line": 25,
+      "term": "sqlite",
+      "content": "### Change 1: Unify Database Architecture (SQLite $\\rightarrow$ PostgreSQL)"
+    },
+    {
+      "file": "CLIPFORGE_ARCHITECT_ASSESSMENT.md",
+      "line": 26,
+      "term": "sqlite",
+      "content": "- **Why:** SQLite locks up when Celery worker processes try to update clip job statuses simultaneous"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 41,
+      "term": "sqlite",
+      "content": "- SQLite in a multi-process Celery environment causes database locks and thread conflicts."
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 67,
+      "term": "sqlite",
+      "content": "\u2502  Celery Worker   \u2502                \u2502  SQLite (aiosqlite)      \u2502"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 90,
+      "term": "sqlite",
+      "content": "| Database | SQLite + aiosqlite | embedded |"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 110,
+      "term": "sqlite",
+      "content": "\u2502  - Job record created in SQLite (status: pending)                          \u2502"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 177,
+      "term": "sqlite",
+      "content": "### CR-01: SQLite in Multi-Process Celery Environment"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 182,
+      "term": "sqlite",
+      "content": "| **Problem** | SQLite (`aiosqlite`) is used as the primary database while Celery workers run as sep"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 183,
+      "term": "sqlite",
+      "content": "| **Why it is a problem** | The `db_sync.py` module uses synchronous `sqlite3` connections from Cele"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 184,
+      "term": "sqlite",
+      "content": "| **Root cause** | Architecture decision to use SQLite without considering the multi-process executi"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 186,
+      "term": "sqlite",
+      "content": "| **Suggested direction** | Replace SQLite with PostgreSQL. Use SQLAlchemy's async & sync connection"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 205,
+      "term": "sqlite",
+      "content": "| **Why it is a problem** | High-volume channel monitoring will exhaust disk space rapidly. When dis"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 236,
+      "term": "sqlite",
+      "content": "| **Problem** | FastAPI uses `aiosqlite` while Celery tasks use blocking synchronous `sqlite3` calls"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 292,
+      "term": "sqlite",
+      "content": "- **Transcript Storage:** Full transcripts are stored as raw text blobs directly inside SQLite table"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 510,
+      "term": "sqlite",
+      "content": "- **Current Capacity:** Handles 1-2 concurrent jobs per node before hitting SQLite database write lo"
+    },
+    {
+      "file": "CLIPFORGE_ENGINEERING_AUDIT.md",
+      "line": 559,
+      "term": "sqlite",
+      "content": "| `backend/models/database.py` | 92 | SQLite database driver. Target for PostgreSQL migration. |"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 41,
+      "term": "sqlite",
+      "content": "- The database layer has **two competing access paths** (async SQLAlchemy + sync raw sqlite3) with n"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 72,
+      "term": "sqlite",
+      "content": "\u2502  Output: Job record (SQLite), File on disk (./uploads/{uuid}/)              \u2502"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 123,
+      "term": "sqlite",
+      "content": "\u2502  Primary: SQLite (single file: clipforge.db)                                \u2502"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 124,
+      "term": "sqlite",
+      "content": "\u2502    \u2022 Async path: SQLAlchemy 2.0 + aiosqlite (FastAPI routes)                \u2502"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 125,
+      "term": "sqlite",
+      "content": "\u2502    \u2022 Sync path: raw sqlite3 (Celery workers via db_sync.py)                 \u2502"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 126,
+      "term": "WAL",
+      "content": "\u2502    \u2022 WAL mode enabled on both paths                                         \u2502"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 127,
+      "term": "sqlite",
+      "content": "\u2502    \u2022 check_same_thread=False (required for aiosqlite)                       \u2502"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 158,
+      "term": "sqlite",
+      "content": "\u2192 Commits to SQLite via aiosqlite"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 163,
+      "term": "sqlite",
+      "content": "\u2192 update_job_sync(job_id, \"downloading\", 10, ...)  [SYNC sqlite3 write]"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 166,
+      "term": "sqlite",
+      "content": "\u2192 create_video_record(video_id, title, ...)  [SYNC sqlite3 write, INSERT OR IGNORE]"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 167,
+      "term": "sqlite",
+      "content": "\u2192 link_job_video_sync(job_id, video_id)  [SYNC sqlite3 write]"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 170,
+      "term": "sqlite",
+      "content": "\u2192 update_job_sync(job_id, \"transcribing\", 25, ...)  [SYNC sqlite3 write]"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 176,
+      "term": "sqlite",
+      "content": "\u2192 raw sqlite3 UPDATE videos SET transcript=? WHERE id=?  [BYPASSES SQLAlchemy]"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 179,
+      "term": "sqlite",
+      "content": "\u2192 update_job_sync(job_id, \"analyzing\", 45, ...)  [SYNC sqlite3 write]"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 190,
+      "term": "sqlite",
+      "content": "\u2192 save_clip_record(...)  [SYNC sqlite3 write from thread]"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 192,
+      "term": "sqlite",
+      "content": "\u2192 save_clip_metadata(...)  [SYNC sqlite3 write from thread]"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 193,
+      "term": "sqlite",
+      "content": "\u2192 IF auto_publish: upload_short(...) + raw sqlite3 UPDATE clips ... [from thread]"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 196,
+      "term": "sqlite",
+      "content": "\u2192 update_job_sync(job_id, \"done\", 100, ...)  [SYNC sqlite3 write]"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 210,
+      "term": "sqlite",
+      "content": "| Job status | `jobs` table (SQLite) | WebSocket stream, Celery task state | Poll-based (1s interval"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 222,
+      "term": "sqlite",
+      "content": "### P0-001: SQLite Concurrent Access from Async + Sync Paths Causes Database Corruption Risk"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 229,
+      "term": "sqlite",
+      "content": "**Problem:** The application uses TWO different database access patterns on the SAME SQLite file sim"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 230,
+      "term": "sqlite",
+      "content": "1. FastAPI routes use `aiosqlite` via SQLAlchemy async sessions (`AsyncSessionLocal`)"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 231,
+      "term": "sqlite",
+      "content": "2. Celery workers use raw `sqlite3` synchronous connections (`db_sync.py`)"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 233,
+      "term": "sqlite",
+      "content": "Both access paths enable WAL mode (`PRAGMA journal_mode=WAL`) but SQLite WAL mode still has limitati"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 236,
+      "term": "WAL",
+      "content": "- If a writer holds the lock and crashes, the WAL file grows unbounded"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 237,
+      "term": "sqlite",
+      "content": "- `check_same_thread=False` (required for aiosqlite) removes SQLite's thread-safety guardrails"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 244,
+      "term": "sqlite",
+      "content": "connect_args={\"check_same_thread\": False},  # REQUIRED for aiosqlite but dangerous"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 249,
+      "term": "sqlite",
+      "content": "conn = sqlite3.connect(str(settings.DB_PATH), timeout=30)"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 250,
+      "term": "PRAGMA",
+      "content": "conn.execute(\"PRAGMA journal_mode=WAL;\")"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 251,
+      "term": "PRAGMA",
+      "content": "conn.execute(\"PRAGMA busy_timeout=30000;\")"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 255,
+      "term": "sqlite",
+      "content": "The Celery worker (running in a separate process) opens raw sqlite3 connections while the FastAPI ap"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 257,
+      "term": "sqlite",
+      "content": "**Root Cause:** SQLite was chosen as \"zero-config\" without considering the multi-process reality (Fa"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 259,
+      "term": "WAL",
+      "content": "**Impact:** Intermittent \"database is locked\" errors, potential WAL corruption, lost writes, jobs ap"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 261,
+      "term": "sqlite",
+      "content": "**Reproduction:** Start a video processing job via channel auto-monitor. While it's processing, open"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 305,
+      "term": "sqlite",
+      "content": "### P0-003: ThreadPoolExecutor + SQLite Writes from Multiple Threads = Race Condition"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 313,
+      "term": "sqlite",
+      "content": "**Problem:** The `process_one_clip` closure runs inside `ThreadPoolExecutor` threads. Inside this cl"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 327,
+      "term": "sqlite",
+      "content": "# save_clip_record opens a NEW sqlite3 connection, executes INSERT, commits, closes"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 331,
+      "term": "sqlite",
+      "content": "While SQLite with WAL mode supports concurrent readers, writers are serialized. With 4 threads all t"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 333,
+      "term": "sqlite",
+      "content": "**Root Cause:** Parallel clip processing was added without considering that all clip save operations"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 399,
+      "term": "sqlite",
+      "content": "### P0-005: Direct Raw SQLite UPDATE Bypasses SQLAlchemy Session and ORM"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 407,
+      "term": "sqlite",
+      "content": "**Problem:** The pipeline writes transcript data and publish status using raw `sqlite3` connections "
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 417,
+      "term": "sqlite",
+      "content": "import sqlite3 as _sq3"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 418,
+      "term": ".db",
+      "content": "_c = _sq3.connect(str(settings.DB_PATH), timeout=30)"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 424,
+      "term": "sqlite",
+      "content": "import sqlite3"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 425,
+      "term": "sqlite",
+      "content": "conn = sqlite3.connect(str(settings.DB_PATH), timeout=30)"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 434,
+      "term": "sqlite",
+      "content": "**Root Cause:** The developer needed synchronous DB access from Celery and created `db_sync.py`, but"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 438,
+      "term": "sqlite",
+      "content": "**Recommended Fix:** Consolidate ALL database access through `db_sync.py` functions. Remove ALL inli"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 551,
+      "term": "sqlite",
+      "content": "| PIPE-001 | P0 | Database/Concurrency | `backend/models/database.py` | `engine` creation | SQLite a"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 553,
+      "term": "sqlite",
+      "content": "| PIPE-003 | P0 | Concurrency/Data Integrity | `backend/tasks/process_video.py` | `process_one_clip`"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 555,
+      "term": "sqlite",
+      "content": "| PIPE-005 | P0 | Data Integrity | `backend/tasks/process_video.py` | `process_video_task()` | Raw s"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 568,
+      "term": "WAL",
+      "content": "| PIPE-018 | P1 | Concurrency | `backend/main.py` | `scheduled_channel_check()` | Wraps async `run_c"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 575,
+      "term": "sqlite",
+      "content": "| PIPE-025 | P1 | Security | `backend/main.py` | `/api/stats` | Uses raw sqlite3 sync connection whi"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 578,
+      "term": "sqlite",
+      "content": "| PIPE-028 | P2 | Data Integrity | `backend/models/models.py` | `Clip` model | `tags` stored as JSON"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 690,
+      "term": "sqlite",
+      "content": "| SQLite \"database is locked\" | \u2705 Yes | Fatal (per-clip) | \u274c No | 0 | Clip skipped | \u2705 Job continues"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 764,
+      "term": "sqlite",
+      "content": "**Trigger:** YouTube upload succeeds but sqlite3 UPDATE fails (disk full)"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 896,
+      "term": "sqlite",
+      "content": "- Celery workers: Use raw sqlite3 with explicit `conn.commit()` per function call"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 897,
+      "term": "sqlite",
+      "content": "- Pipeline task: Multiple independent sqlite3 commits across the task lifecycle"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 902,
+      "term": "sqlite",
+      "content": "3. The auto-publish sqlite3 UPDATE (line 478-485) is a separate transaction from clip creation"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 918,
+      "term": "WAL",
+      "content": "- Swallows ALL errors, not just \"column already exists\""
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 967,
+      "term": "sqlite",
+      "content": "3. **Test: Parallel clip processing with SQLite** \u2192 Would catch PIPE-003"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 969,
+      "term": "sqlite",
+      "content": "5. **Test: Raw sqlite3 bypasses ORM** \u2192 Would catch PIPE-005"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1000,
+      "term": "sqlite",
+      "content": "| 2 | SQLite connection setup | `database.py` (async) AND `db_sync.py` (sync) | Both used simultaneo"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1001,
+      "term": "PRAGMA",
+      "content": "| 3 | PRAGMA WAL mode | `database.py:18-20` (event listener) AND `database.py:42-43` (init_db) AND `"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1003,
+      "term": "sqlite",
+      "content": "| 5 | Transcript update | `db_sync.py` (none) AND inline sqlite3 in `process_video.py:228-232` | Inl"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1027,
+      "term": "sqlite",
+      "content": "\u2192 SQLite WAL grows unbounded from failed writes"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1043,
+      "term": "sqlite",
+      "content": "\u2192 SQLite writer contention from 40+ concurrent workers"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1069,
+      "term": "sqlite",
+      "content": "\u2192 Clip 1: save_clip_record() \u2192 opens sqlite3 connection \u2192 writes \u2192 OK"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1070,
+      "term": "sqlite",
+      "content": "\u2192 Clip 2: save_clip_record() \u2192 opens sqlite3 connection \u2192 WAITS (Clip 1 writing)"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1071,
+      "term": "sqlite",
+      "content": "\u2192 Clip 3: save_clip_record() \u2192 opens sqlite3 connection \u2192 WAITS"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1072,
+      "term": "sqlite",
+      "content": "\u2192 Clip 4: save_clip_record() \u2192 opens sqlite3 connection \u2192 WAITS"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1093,
+      "term": "sqlite",
+      "content": "| Data Corruption | **CRITICAL** | P0-001, P0-003, P0-005 \u2014 concurrent SQLite writes, nested event l"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1112,
+      "term": "sqlite",
+      "content": "| 3 | PIPE-005 | Remove ALL inline sqlite3 from pipeline task \u2014 route through db_sync.py exclusively"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1179,
+      "term": "sqlite",
+      "content": "1. **Test: Concurrent job processing does not corrupt SQLite** \u2014 Run 5 jobs simultaneously, verify a"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1215,
+      "term": "sqlite",
+      "content": "1. **P0-001 (SQLite concurrent access):** Multiple processes writing to the same SQLite file will ev"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1219,
+      "term": "sqlite",
+      "content": "3. **P0-003 (ThreadPoolExecutor DB writes):** Parallel clip processing writes to SQLite from multipl"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1237,
+      "term": "sqlite",
+      "content": "- **Batch processing** (will overwhelm SQLite, create resource contention)"
+    },
+    {
+      "file": "CLIPFORGE_FORENSIC_AUDIT.md",
+      "line": 1242,
+      "term": "clipforge.db",
+      "content": "- `clipforge.db` \u2014 the entire database (but note: it may already have inconsistencies)"
+    },
+    {
+      "file": "phase1.md",
+      "line": 4,
+      "term": "sqlite",
+      "content": "Replace the embedded SQLite database (`aiosqlite` + `sqlite3`) with PostgreSQL to eliminate database"
+    },
+    {
+      "file": "phase1.md",
+      "line": 27,
+      "term": "sqlite",
+      "content": "- Replace raw `aiosqlite` pragmas in `database.py` with resilient SQLAlchemy `create_async_engine`:"
+    },
+    {
+      "file": "phase1.md",
+      "line": 38,
+      "term": "sqlite",
+      "content": "- Refactor `db_sync.py` to use a thread-safe synchronous engine pool (`create_engine(settings.SYNC_D"
+    },
+    {
+      "file": "phase1.md",
+      "line": 45,
+      "term": "sqlite",
+      "content": "### 4. Data Migration Script from SQLite"
+    },
+    {
+      "file": "phase1.md",
+      "line": 46,
+      "term": "sqlite",
+      "content": "- **Target File:** `backend/scripts/migrate_sqlite_to_postgres.py`"
+    },
+    {
+      "file": "phase1.md",
+      "line": 47,
+      "term": "clipforge.db",
+      "content": "- Build a robust migration script that reads existing records from `clipforge.db` and writes them in"
+    },
+    {
+      "file": "README.md",
+      "line": 24,
+      "term": "sqlite",
+      "content": "- **Backend API**: Python FastAPI (Async, sqlite + aiosqlite, sqlalchemy)"
+    },
+    {
+      "file": "backend/analyse.md",
+      "line": 13,
+      "term": "sqlite",
+      "content": "A[Video Source: YouTube URL / Upload] -->|FastAPI API| B[SQLite DB: Job Registered]"
+    },
+    {
+      "file": "backend/analyse.md",
+      "line": 20,
+      "term": "sqlite",
+      "content": "H -->|Local SQLite| I[6. Save Clips & Draft Metadata]"
+    },
+    {
+      "file": "backend/analyse.md",
+      "line": 31,
+      "term": "sqlite",
+      "content": "* **Database**: SQLite (via `aiosqlite` for async application routing and `sqlite3` for synchronous "
+    },
+    {
+      "file": "backend/analyse.md",
+      "line": 44,
+      "term": "sqlite",
+      "content": "\u251c\u2500\u2500 clipforge.db                # SQLite database storing settings, video, clip, and job records"
+    },
+    {
+      "file": "backend/analyse.md",
+      "line": 141,
+      "term": "sqlite",
+      "content": "participant DB as SQLite DB"
+    },
+    {
+      "file": "backend/analyse.md",
+      "line": 290,
+      "term": "sqlite",
+      "content": "* **Sync background workers**: Celery task executions and the post-publish tracker run inside synchr"
+    }
+  ],
+  "Obsolete": [
+    {
+      "file": "clipforge.db",
+      "type": "filename",
+      "term": "clipforge.db"
+    }
+  ]
+}

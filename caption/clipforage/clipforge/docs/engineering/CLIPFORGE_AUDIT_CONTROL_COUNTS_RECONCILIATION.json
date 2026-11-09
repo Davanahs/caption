@@ -1,0 +1,102 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "audit_item": "AUDIT-COUNTS-009",
+  "title": "ClipForge Full Website Control-Count Arithmetic Reconciliation",
+  "generated_at": "2026-11-03T06:35:00Z",
+  "git_branch": "feature/layout",
+  "git_head": "68b9bcd7d3688c6bd8feb781d98df72d14351e97",
+  "historical_findings": {
+    "source_manifest": "tmp/clipforge_full_website_audit/responsive_walkthrough_manifest.json",
+    "historical_report": "docs/engineering/CLIPFORGE_FULL_WEBSITE_FORENSIC_AUDIT_REPORT.md",
+    "claimed_executive_summary": {
+      "buttons": 411,
+      "inputs": 122,
+      "links": 296,
+      "total": 829,
+      "citation": "CLIPFORGE_FULL_WEBSITE_FORENSIC_AUDIT_REPORT.md:21, 179"
+    },
+    "page_level_table_recorded_values": [
+      { "page_id": "PAGE-01", "name": "Dashboard", "path": "/", "buttons": 54, "inputs": 3, "links": 10 },
+      { "page_id": "PAGE-02", "name": "Podcasts Studio", "path": "/podcasts", "buttons": 3, "inputs": 0, "links": 10 },
+      { "page_id": "PAGE-03", "name": "Upload Studio", "path": "/studio", "buttons": 3, "inputs": 2, "links": 10 },
+      { "page_id": "PAGE-04", "name": "Clips Library", "path": "/clips", "buttons": 210, "inputs": 101, "links": 160 },
+      { "page_id": "PAGE-05", "name": "Analytics", "path": "/analytics", "buttons": 15, "inputs": 1, "links": 10 },
+      { "page_id": "PAGE-06", "name": "Automation", "path": "/automation", "buttons": 91, "inputs": 21, "links": 42 },
+      { "page_id": "PAGE-07", "name": "My YouTube Channels", "path": "/youtube-channels", "buttons": 19, "inputs": 0, "links": 14 },
+      { "page_id": "PAGE-08", "name": "Publish", "path": "/publish", "buttons": 6, "inputs": 3, "links": 40 },
+      { "page_id": "PAGE-09", "name": "Settings", "path": "/settings", "buttons": 6, "inputs": 10, "links": 10 }
+    ],
+    "mechanical_page_table_sums": {
+      "buttons": 407,
+      "inputs": 141,
+      "links": 306,
+      "total": 854,
+      "derivation_formula": {
+        "buttons": "54 + 3 + 3 + 210 + 15 + 91 + 19 + 6 + 6",
+        "inputs": "3 + 0 + 2 + 101 + 1 + 21 + 0 + 3 + 10",
+        "links": "10 + 10 + 10 + 160 + 10 + 42 + 14 + 40 + 10"
+      }
+    },
+    "arithmetic_discrepancy_analysis": {
+      "buttons_delta": 4,
+      "inputs_delta": -19,
+      "links_delta": -10,
+      "total_delta": -25,
+      "root_cause": "The historical executive summary metrics (411/122/296) were manually transcribed in the report summary dashboard rather than derived mechanically via an automated sum() function over responsive_walkthrough_manifest.json. The page-level table values (summing to 407/141/306) represent the actual measured DOM query results from the Playwright walkthrough."
+    }
+  },
+  "methodology_and_selectors": {
+    "scope": "9 primary user-facing Next.js routes",
+    "measurement_tiers": {
+      "tier_1_raw_dom": {
+        "description": "All DOM elements matching CSS selector present in DOM tree after networkidle",
+        "selectors": {
+          "buttons": "document.querySelectorAll('button')",
+          "inputs": "document.querySelectorAll('input, select, textarea')",
+          "links": "document.querySelectorAll('a')"
+        }
+      },
+      "tier_2_visible_enabled": {
+        "description": "Controls that are visible, not display:none/visibility:hidden, not disabled, and not aria-hidden",
+        "criteria": "style.display !== 'none' && style.visibility !== 'hidden' && offsetParent !== null && !disabled && aria-hidden !== 'true'"
+      },
+      "tier_3_shell_attribution": {
+        "description": "Controls located within <aside> or [role='navigation'] shared across all 9 pages",
+        "shell_links_per_page": 9,
+        "shell_buttons_per_page": 0,
+        "cumulative_shell_links": 81
+      },
+      "tier_4_deduplicated_unique": {
+        "description": "Unique interactive control instances deduplicated by composite key (category|tag|id|name|href|text)",
+        "purpose": "Prevents list items, card buttons, and recurring shell navigation from distorting application surface size"
+      }
+    }
+  },
+  "live_remeasurement_audit": {
+    "measurement_script": "tmp/reconcile_audit_counts_live.mjs",
+    "raw_live_manifest": "tmp/clipforge_full_website_audit/reconciled_audit_counts_live.json",
+    "state": "Live Clean/Baseline Application State (zero mock clips)",
+    "canonical_pages": [
+      { "id": "PAGE-01", "path": "/", "name": "Dashboard", "buttons": 9, "inputs": 3, "links": 10, "visible_enabled_buttons": 8, "visible_enabled_inputs": 2, "visible_enabled_links": 10 },
+      { "id": "PAGE-02", "path": "/podcasts", "name": "Podcasts Studio", "buttons": 3, "inputs": 0, "links": 10, "visible_enabled_buttons": 3, "visible_enabled_inputs": 0, "visible_enabled_links": 10 },
+      { "id": "PAGE-03", "path": "/studio", "name": "Upload Studio", "buttons": 3, "inputs": 2, "links": 10, "visible_enabled_buttons": 2, "visible_enabled_inputs": 2, "visible_enabled_links": 10 },
+      { "id": "PAGE-04", "path": "/clips", "name": "Clips Library", "buttons": 10, "inputs": 1, "links": 11, "visible_enabled_buttons": 7, "visible_enabled_inputs": 1, "visible_enabled_links": 11 },
+      { "id": "PAGE-05", "path": "/analytics", "name": "Analytics", "buttons": 2, "inputs": 1, "links": 10, "visible_enabled_buttons": 2, "visible_enabled_inputs": 1, "visible_enabled_links": 10 },
+      { "id": "PAGE-06", "path": "/automation", "name": "Automation", "buttons": 6, "inputs": 4, "links": 11, "visible_enabled_buttons": 5, "visible_enabled_inputs": 4, "visible_enabled_links": 11 },
+      { "id": "PAGE-07", "path": "/youtube-channels", "name": "My YouTube Channels", "buttons": 5, "inputs": 0, "links": 11, "visible_enabled_buttons": 5, "visible_enabled_inputs": 0, "visible_enabled_links": 11 },
+      { "id": "PAGE-08", "path": "/publish", "name": "Publish", "buttons": 2, "inputs": 2, "links": 12, "visible_enabled_buttons": 2, "visible_enabled_inputs": 2, "visible_enabled_links": 12 },
+      { "id": "PAGE-09", "path": "/settings", "name": "Settings", "buttons": 6, "inputs": 10, "links": 10, "visible_enabled_buttons": 0, "visible_enabled_inputs": 8, "visible_enabled_links": 10 }
+    ],
+    "baseline_derived_totals": {
+      "raw_dom": { "buttons": 46, "inputs": 23, "links": 95, "total": 164 },
+      "visible_enabled": { "buttons": 34, "inputs": 20, "links": 95, "total": 149 },
+      "page_body_only": { "buttons": 46, "inputs": 23, "links": 14, "total": 83 },
+      "deduplicated_unique": { "buttons": 38, "inputs": 18, "links": 14, "total": 70 }
+    },
+    "dynamic_content_explanation": "In the historical walkthrough (manifest responsive_walkthrough_manifest.json), /clips rendered 20 mock clip cards (each contributing action buttons, preview buttons, download links, publish links, and batch checkboxes), producing 210 buttons, 101 inputs, and 160 links on /clips alone. Similarly, /automation rendered populated automation channels and templates (91 buttons, 21 inputs, 42 links). When measured against a cold baseline database without seeded items, /clips renders the empty-state container (10 buttons, 1 input, 11 links). This confirms that control counts are dynamically data-dependent, while the structural UI component surface remains stable."
+  },
+  "reconciliation_verdict": {
+    "status": "RECONCILED",
+    "conclusion": "The historical discrepancy (411/122/296 vs 407/141/306) is definitively resolved as a manual transcription error in the executive summary. The authoritative mechanical sum of the historical audit walkthrough is exactly 407 buttons, 141 inputs, and 306 links (854 total DOM controls). The live baseline clean state is 46 buttons, 23 inputs, and 95 links (38 unique buttons, 18 unique inputs, 14 unique links)."
+  }
+}

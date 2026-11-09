@@ -1,0 +1,80 @@
+->  celery@99bef10f1e28: OK
+    {
+        "broker": {
+            "alternates": [],
+            "connect_timeout": 4,
+            "credential_provider": null,
+            "failover_strategy": "round-robin",
+            "heartbeat": 120.0,
+            "hostname": "redis",
+            "insist": false,
+            "login_method": null,
+            "port": 6379,
+            "ssl": false,
+            "transport": "redis",
+            "transport_options": {},
+            "uri_prefix": null,
+            "userid": null,
+            "virtual_host": "0"
+        },
+        "clock": "64478",
+        "pid": 1,
+        "pool": {
+            "implementation": "celery.concurrency.prefork:TaskPool",
+            "max-concurrency": 4,
+            "max-tasks-per-child": "N/A",
+            "processes": [
+                8,
+                9,
+                10,
+                11
+            ],
+            "put-guarded-by-semaphore": false,
+            "timeouts": [
+                1800,
+                1860
+            ],
+            "writes": {
+                "all": "0.98, 0.01, 0.00, 0.00",
+                "avg": "0.25",
+                "inqueues": {
+                    "active": 0,
+                    "total": 4
+                },
+                "raw": "3590, 44, 13, 7",
+                "strategy": "fair",
+                "total": 3654
+            }
+        },
+        "prefetch_count": 16,
+        "rusage": {
+            "idrss": 0,
+            "inblock": 5192,
+            "isrss": 0,
+            "ixrss": 0,
+            "majflt": 5,
+            "maxrss": 129524,
+            "minflt": 75798,
+            "msgrcv": 0,
+            "msgsnd": 0,
+            "nivcsw": 438,
+            "nsignals": 0,
+            "nswap": 0,
+            "nvcsw": 145812,
+            "oublock": 12088,
+            "stime": 10.076347,
+            "utime": 49.382989
+        },
+        "total": {
+            "backend.tasks.orchestration.stale_recovery_task": 148,
+            "backend.tasks.orchestration.sweep_pending_decisions_task": 2974,
+            "backend.tasks.storage_tasks.cleanup_expired_artifacts_task": 12,
+            "backend.tasks.studio_tasks.recover_stale_studio_batches_task": 148,
+            "recover_stranded_publish_jobs": 371,
+            "track_and_optimize_clips": 1
+        },
+        "uptime": 44626
+    }
+    
+
+1 node online.

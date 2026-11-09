@@ -1,0 +1,75 @@
+{
+  "extracted_audio_files": {
+    "audio_video1_cleantech.wav": {
+      "path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\audio_video1_cleantech.wav",
+      "sha256": "9FC3AF83105A21E73FA4065052C997CD9F68207FE7D11B4C396B1B152834997A",
+      "format": "PCM 16-bit little-endian (pcm_s16le)",
+      "sample_rate_hz": 16000,
+      "channels": 1,
+      "duration_s": 619.670938,
+      "size_bytes": 19829516
+    },
+    "audio_video2_podcast.wav": {
+      "path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\audio_video2_podcast.wav",
+      "sha256": "2F1CC6BFECF5E805921B7B7D8E6ED13EB4266A7ABCD1487B303E5E8F14BD569B",
+      "format": "PCM 16-bit little-endian (pcm_s16le)",
+      "sample_rate_hz": 16000,
+      "channels": 1,
+      "duration_s": 138.158750,
+      "size_bytes": 4421124
+    },
+    "audio_video3_indian_tech.wav": {
+      "path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\audio_video3_indian_tech.wav",
+      "sha256": "7B8A627CFB94691A67558532A5A98EEC1B3F7A590733517B395622CDE0AAFEF1",
+      "format": "PCM 16-bit little-endian (pcm_s16le)",
+      "sample_rate_hz": 16000,
+      "channels": 1,
+      "duration_s": 798.325250,
+      "size_bytes": 25546452
+    }
+  },
+  "source_video_files": {
+    "video1_cleantech.mp4": {
+      "path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\video1_cleantech.mp4",
+      "sha256": "352A44D4667B67D1607F42A6898AE7209AEFA9108CEA7BF83BF0E1C87FC9326B",
+      "resolution": "640x360",
+      "fps": 30,
+      "video_codec": "h264 (Main)",
+      "audio_codec": "aac (LC)",
+      "duration_s": 619.67,
+      "size_bytes": 21095593
+    },
+    "video2_podcast.mp4": {
+      "path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\video2_podcast.mp4",
+      "sha256": "BFCD3465DADF2D9D2348E178D45B09CE9E19FF80E61C3E2BF67378FE9DD1B6FD",
+      "resolution": "640x360",
+      "fps": 30,
+      "video_codec": "h264 (Main)",
+      "audio_codec": "aac (LC)",
+      "duration_s": 138.16,
+      "size_bytes": 7195773
+    },
+    "video3_indian_tech.mp4": {
+      "path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\video3_indian_tech.mp4",
+      "sha256": "70C2C7D5FAF50144FC571FE9DD7A74201AC6E20294A7D07AB39342A562BD7F91",
+      "resolution": "640x360",
+      "fps": 30,
+      "video_codec": "h264 (Main)",
+      "audio_codec": "aac (LC)",
+      "duration_s": 798.33,
+      "size_bytes": 38065517
+    }
+  },
+  "model_weight_files": {
+    "whisper_base.pt": {
+      "path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\cache\\whisper\\base.pt",
+      "sha256": "ED3A0B6B1C0EDF879AD9B11B1AF5A0E6AB5DB9205F891F668F8B0E6C6326E34E",
+      "size_bytes": 141643767
+    },
+    "whistle.cact": {
+      "path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\cache\\whistle\\whistle.cact",
+      "sha256": "B6E02F048568AC5D01A2042556C658061E699ACBC0AA2A1439F52F3D461DFFEB",
+      "size_bytes": 16919407
+    }
+  }
+}

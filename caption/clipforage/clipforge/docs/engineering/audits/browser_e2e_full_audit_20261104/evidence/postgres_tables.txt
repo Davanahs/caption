@@ -1,0 +1,37 @@
+                         List of relations
+ Schema |               Name               | Type  |     Owner      
+--------+----------------------------------+-------+----------------
+ public | ab_experiments                   | table | clipforge_user
+ public | alembic_version                  | table | clipforge_user
+ public | artifact_records                 | table | clipforge_user
+ public | channel_destinations             | table | clipforge_user
+ public | channels                         | table | clipforge_user
+ public | clip_hook_plans                  | table | clipforge_user
+ public | clip_retention                   | table | clipforge_user
+ public | clip_sfx_plans                   | table | clipforge_user
+ public | clip_variants                    | table | clipforge_user
+ public | clip_visual_plans                | table | clipforge_user
+ public | clips                            | table | clipforge_user
+ public | content_analysis                 | table | clipforge_user
+ public | dubbing_plans                    | table | clipforge_user
+ public | dubbing_segments                 | table | clipforge_user
+ public | jobs                             | table | clipforge_user
+ public | metadata                         | table | clipforge_user
+ public | optimization_context             | table | clipforge_user
+ public | optimizations                    | table | clipforge_user
+ public | pipeline_metrics                 | table | clipforge_user
+ public | publish_records                  | table | clipforge_user
+ public | publish_targets                  | table | clipforge_user
+ public | seo_analysis                     | table | clipforge_user
+ public | sfx_assets                       | table | clipforge_user
+ public | sfx_packs                        | table | clipforge_user
+ public | storage_reservation_coordinators | table | clipforge_user
+ public | task_executions                  | table | clipforge_user
+ public | upload_batches                   | table | clipforge_user
+ public | video_analytics                  | table | clipforge_user
+ public | video_decisions                  | table | clipforge_user
+ public | video_tracking_queue             | table | clipforge_user
+ public | videos                           | table | clipforge_user
+ public | visual_assets                    | table | clipforge_user
+(32 rows)
+

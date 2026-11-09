@@ -1,0 +1,24 @@
+                       Table "public.task_executions"
+     Column      |           Type           | Collation | Nullable | Default 
+-----------------+--------------------------+-----------+----------+---------
+ id              | character varying        |           | not null | 
+ task_id         | character varying(200)   |           |          | 
+ job_id          | character varying        |           |          | 
+ clip_id         | character varying        |           |          | 
+ operation       | character varying(100)   |           | not null | 
+ status          | character varying(50)    |           | not null | 
+ attempt         | integer                  |           | not null | 
+ retry_count     | integer                  |           | not null | 
+ worker_id       | character varying(200)   |           |          | 
+ started_at      | timestamp with time zone |           | not null | 
+ last_heartbeat  | timestamp with time zone |           | not null | 
+ completed_at    | timestamp with time zone |           |          | 
+ failure_reason  | text                     |           |          | 
+ idempotency_key | character varying(500)   |           |          | 
+Indexes:
+    "task_executions_pkey" PRIMARY KEY, btree (id)
+    "task_executions_idempotency_key_key" UNIQUE CONSTRAINT, btree (idempotency_key)
+Foreign-key constraints:
+    "task_executions_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE SET NULL
+    "task_executions_job_id_fkey" FOREIGN KEY (job_id) REFERENCES jobs(id)
+

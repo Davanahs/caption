@@ -1,0 +1,65 @@
+                                            Table "public.clips"
+          Column           |           Type           | Collation | Nullable |           Default            
+---------------------------+--------------------------+-----------+----------+------------------------------
+ id                        | character varying        |           | not null | 
+ video_id                  | character varying        |           | not null | 
+ title                     | character varying(500)   |           | not null | 
+ description               | text                     |           |          | 
+ start_time                | double precision         |           | not null | 
+ end_time                  | double precision         |           | not null | 
+ duration                  | double precision         |           | not null | 
+ score                     | double precision         |           | not null | '0'::double precision
+ output_path               | character varying(1000)  |           |          | 
+ thumbnail_path            | character varying(1000)  |           |          | 
+ transcript_segment        | text                     |           |          | 
+ publish_status            | character varying(50)    |           | not null | 'draft'::character varying
+ youtube_short_id          | character varying(50)    |           |          | 
+ scheduled_at              | timestamp with time zone |           |          | 
+ published_at              | timestamp with time zone |           |          | 
+ privacy                   | character varying(50)    |           | not null | 'public'::character varying
+ made_for_kids             | boolean                  |           | not null | false
+ age_restricted            | boolean                  |           | not null | false
+ tags                      | text                     |           |          | 
+ category                  | character varying(100)   |           |          | '22'::character varying
+ license                   | character varying(100)   |           |          | 'youtube'::character varying
+ created_at                | timestamp with time zone |           | not null | 
+ pinned_comment            | character varying(200)   |           |          | 
+ metadata_status           | character varying(50)    |           | not null | 'pending'::character varying
+ analytics_views           | integer                  |           | not null | 0
+ analytics_likes           | integer                  |           | not null | 0
+ analytics_comments        | integer                  |           | not null | 0
+ analytics_engagement_rate | double precision         |           | not null | '0'::double precision
+ analytics_view_score      | double precision         |           | not null | '0'::double precision
+ analytics_last_checked    | character varying(50)    |           |          | 
+ analytics_check_count     | integer                  |           | not null | 0
+ optimization_attempts     | integer                  |           | not null | 0
+ last_optimized_at         | character varying(50)    |           |          | 
+ status                    | character varying(50)    |           | not null | 'pending'::character varying
+ run_identity              | character varying(200)   |           |          | 
+ publish_destination_id    | character varying(100)   |           |          | 
+ publish_error             | text                     |           |          | 
+ publish_task_id           | character varying(200)   |           |          | 
+ publish_attempt           | integer                  |           | not null | 0
+ publish_progress          | integer                  |           | not null | 0
+ publish_stage             | character varying(50)    |           |          | 
+ publish_started_at        | timestamp with time zone |           |          | 
+ publish_completed_at      | timestamp with time zone |           |          | 
+ publish_idempotency_key   | character varying(128)   |           |          | 
+ upload_session_uri        | character varying(500)   |           |          | 
+Indexes:
+    "clips_pkey" PRIMARY KEY, btree (id)
+    "ix_clips_publish_status" btree (publish_status)
+Check constraints:
+    "ck_clip_publish_status" CHECK (publish_status::text = ANY (ARRAY['draft'::character varying, 'queued'::character varying, 'uploading'::character varying, 'finalizing'::character varying, 'publishing'::character varying, 'published'::character varying, 'failed'::character varying, 'manual_review'::character varying, 'cancelling'::character varying, 'cancelled'::character varying, 'scheduled'::character varying]::text[]))
+Referenced by:
+    TABLE "clip_hook_plans" CONSTRAINT "clip_hook_plans_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE CASCADE
+    TABLE "clip_retention" CONSTRAINT "clip_retention_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE CASCADE
+    TABLE "clip_sfx_plans" CONSTRAINT "clip_sfx_plans_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE CASCADE
+    TABLE "clip_variants" CONSTRAINT "clip_variants_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE CASCADE
+    TABLE "clip_visual_plans" CONSTRAINT "clip_visual_plans_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE CASCADE
+    TABLE "dubbing_plans" CONSTRAINT "dubbing_plans_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE CASCADE
+    TABLE "publish_records" CONSTRAINT "publish_records_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE CASCADE
+    TABLE "publish_targets" CONSTRAINT "publish_targets_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE CASCADE
+    TABLE "task_executions" CONSTRAINT "task_executions_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE SET NULL
+    TABLE "video_tracking_queue" CONSTRAINT "video_tracking_queue_clip_id_fkey" FOREIGN KEY (clip_id) REFERENCES clips(id) ON DELETE CASCADE
+

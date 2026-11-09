@@ -1,0 +1,56 @@
+{
+  "overall_verdict": "FAIL",
+  "duration_sec": 180.0,
+  "metrics": {
+    "shot_precision": {
+      "value": 1.0,
+      "threshold": ">= 0.95",
+      "passed": true
+    },
+    "shot_recall": {
+      "value": 1.0,
+      "threshold": ">= 0.9",
+      "passed": true
+    },
+    "active_speaker_accuracy": {
+      "value": 0.3384,
+      "threshold": ">= 0.92",
+      "passed": false
+    },
+    "false_switch_rate": {
+      "value": 0.0,
+      "threshold": "<= 0.05 switches/s",
+      "passed": true
+    },
+    "crop_jitter_rms_px": {
+      "value": 1.75,
+      "threshold": "<= 2.5 px/frame",
+      "passed": true
+    },
+    "manual_review_rate": {
+      "value": 0.6544,
+      "threshold": "<= 0.08",
+      "passed": false
+    }
+  },
+  "media_sha256": "8144a74a30ddebbbdb1946c43bbddd018e4b7891aedd31ddcb846d326ff7e4c0",
+  "media_size_bytes": 243392976,
+  "ground_truth_sha256": "4f0f128ac7521b2f8ea8cd8744d3d50557d3ee6e8611c81a76678010d28f0391",
+  "input_file": "uploads\\authentic_podcast_test.mp4",
+  "ground_truth_file": "uploads\\authentic_podcast_ground_truth.json",
+  "subtitles_prohibited": true,
+  "output_geometry": "1080x1920",
+  "total_schedule_shots": 93,
+  "rendered_output": {
+    "output_path": "outputs\\authentic_podcast_acceptance_rendered.mp4",
+    "file_size_bytes": 90247916,
+    "sha256": "1da2444814244ba1a9554964d5bf5751a9c0e29fad1534b58e8d21675238bede",
+    "width": 1080,
+    "height": 1920,
+    "aspect_ratio": "9:16",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "subtitle_stream_count": 0,
+    "zero_subtitles_verified": true
+  }
+}

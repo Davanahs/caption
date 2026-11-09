@@ -1,0 +1,239 @@
+{
+  "fastapi": {
+    "latest_version": "0.162.0",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "uvicorn": {
+    "latest_version": "0.54.0",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "sqlalchemy": {
+    "latest_version": "2.1.6",
+    "has_py312_wheel": true,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": [
+      "sqlalchemy-2.1.6-cp312-cp312-musllinux_1_2_riscv64.whl",
+      "sqlalchemy-2.1.6-cp312-cp312-musllinux_1_2_x86_64.whl"
+    ]
+  },
+  "asyncpg": {
+    "latest_version": "0.32.0",
+    "has_py312_wheel": true,
+    "has_universal_wheel": false,
+    "status": "AVAILABLE",
+    "sample_files": [
+      "asyncpg-0.32.0-cp312-cp312-musllinux_1_2_aarch64.whl",
+      "asyncpg-0.32.0-cp312-cp312-musllinux_1_2_x86_64.whl"
+    ]
+  },
+  "psycopg2-binary": {
+    "latest_version": "2.9.13",
+    "has_py312_wheel": true,
+    "has_universal_wheel": false,
+    "status": "AVAILABLE",
+    "sample_files": [
+      "psycopg2_binary-2.9.9-cp312-cp312-musllinux_1_1_ppc64le.whl",
+      "psycopg2_binary-2.9.9-cp312-cp312-musllinux_1_1_x86_64.whl"
+    ]
+  },
+  "alembic": {
+    "latest_version": "1.20.1",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "python-multipart": {
+    "latest_version": "0.0.33",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "python-dotenv": {
+    "latest_version": "1.2.4",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "celery": {
+    "latest_version": "5.6.3",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "redis": {
+    "latest_version": "8.1.0",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "yt-dlp": {
+    "latest_version": "2026.10.26",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "openai-whisper": {
+    "latest_version": "20250625",
+    "has_py312_wheel": false,
+    "has_universal_wheel": false,
+    "status": "SOURCE_ONLY_OR_MISSING",
+    "sample_files": []
+  },
+  "opencv-python-headless": {
+    "latest_version": "5.0.0.93",
+    "has_py312_wheel": false,
+    "has_universal_wheel": false,
+    "status": "SOURCE_ONLY_OR_MISSING",
+    "sample_files": []
+  },
+  "scenedetect": {
+    "latest_version": "0.7.2",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "ffmpeg-python": {
+    "latest_version": "0.2.0",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "google-api-python-client": {
+    "latest_version": "2.201.0",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "google-auth-oauthlib": {
+    "latest_version": "1.5.0",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "google-auth-httplib2": {
+    "latest_version": "0.4.4",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "httpx": {
+    "latest_version": "0.28.1",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "websockets": {
+    "latest_version": "17.4",
+    "has_py312_wheel": true,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": [
+      "websockets-17.4-cp312-cp312-musllinux_1_2_s390x.whl",
+      "websockets-17.4-cp312-cp312-musllinux_1_2_x86_64.whl"
+    ]
+  },
+  "apscheduler": {
+    "latest_version": "3.11.3",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "Pillow": {
+    "latest_version": "13.0.0",
+    "has_py312_wheel": true,
+    "has_universal_wheel": false,
+    "status": "AVAILABLE",
+    "sample_files": [
+      "pillow-13.0.0-cp312-cp312-musllinux_1_2_aarch64.whl",
+      "pillow-13.0.0-cp312-cp312-musllinux_1_2_x86_64.whl"
+    ]
+  },
+  "pydantic": {
+    "latest_version": "2.14.2",
+    "has_py312_wheel": true,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": [
+      "pydantic-1.10.27-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl",
+      "pydantic-1.10.27-cp312-cp312-musllinux_1_2_x86_64.whl"
+    ]
+  },
+  "pydantic-settings": {
+    "latest_version": "2.16.2",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "numpy": {
+    "latest_version": "2.5.4",
+    "has_py312_wheel": true,
+    "has_universal_wheel": false,
+    "status": "AVAILABLE",
+    "sample_files": [
+      "numpy-2.5.4-cp312-cp312-musllinux_1_2_aarch64.whl",
+      "numpy-2.5.4-cp312-cp312-musllinux_1_2_x86_64.whl"
+    ]
+  },
+  "flower": {
+    "latest_version": "2.2.0",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "mediapipe": {
+    "latest_version": "1.2.0",
+    "has_py312_wheel": true,
+    "has_universal_wheel": false,
+    "status": "AVAILABLE",
+    "sample_files": [
+      "mediapipe-0.10.20-cp312-cp312-manylinux_2_28_x86_64.whl",
+      "mediapipe-0.10.21-cp312-cp312-manylinux_2_28_x86_64.whl"
+    ]
+  },
+  "aiohttp": {
+    "latest_version": "3.14.5",
+    "has_py312_wheel": true,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": [
+      "aiohttp-3.9.5-cp312-cp312-musllinux_1_1_s390x.whl",
+      "aiohttp-3.9.5-cp312-cp312-musllinux_1_1_x86_64.whl"
+    ]
+  },
+  "edge-tts": {
+    "latest_version": "7.3.1",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  },
+  "boto3": {
+    "latest_version": "1.43.123",
+    "has_py312_wheel": false,
+    "has_universal_wheel": true,
+    "status": "AVAILABLE",
+    "sample_files": []
+  }
+}

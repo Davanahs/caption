@@ -1,0 +1,7626 @@
+{
+  "model": "OpenAI Whisper Base",
+  "video_id": "video2_podcast",
+  "duration_s": 138.15875,
+  "text": "So whether you've landed on this video because someone suggested a podcast to you and you work quite sure what they were talking about or you've heard about a ton of people starting podcasts and you want to know if that's something that you'd be into, but every reason, welcome. We'd love to help you understand what a podcast is and how they work. So what is a podcast? A podcast is essentially a series or collection of digital audio files that are made available for listening or downloading via the internet. So that could be a website. It could be a listening app. What have you? And so each individual audio file that is uploaded would be considered a podcast episode. And podcasts are typically hosted by a person that leads a conversation that will tell stories that may report on the news and they are called a podcast host. A person who creates a podcast is called a podcaster. The best way to think of podcasting is kind of like the Netflix of audio. So you know how you can pick a show on Netflix and just watch the whole show or just watch a few episodes. Podcasting is very similar. You can pick a show and decide you want to listen to all the episodes they have available or you can just listen to one or two of the episodes that they have available. The thing is this is audio on your time. So how do podcasts work? Well, if you were to create a podcast, you'd upload audio, get a hosting site to make it available. And when you do that, your hosting site would create an RSS feed. And that just stands for real simple syndication. All this is is a page of raw data that holds all the information about your podcast. It's title, the cover art, how many episodes, title episodes, the whole shebang. So where can you listen to these things? Podcasts. You can listen to podcasts in a couple of different places. So there are podcast listening apps. We like to call some of them directories. Apple podcast is one such Google podcast is another directory, but you can also listen to podcasts and a lot of music listening apps. So Spotify is made podcasts available in their app, Amazon, Stitcher is a podcast specific app that you can listen to podcasts on. Some people even have their podcasts embedded on their website. So there are embedded players where you can listen to podcasts that aren't necessarily in a directory. And if you are a bus route user, we actually give you a podcast listening website, all your own for your podcast. So people can listen there as well. So now let's know what a podcast is. If you're interested in starting a podcast, check this video out over here that's going to give you all the information that you need to know to start a podcast. We hope this video answered your questions about what a podcast is. As always, thanks for watching and keep podcasting.",
+  "words_count": 516,
+  "words": [
+    {
+      "word": "So",
+      "start": 0.0,
+      "end": 0.16,
+      "probability": 0.7932
+    },
+    {
+      "word": "whether",
+      "start": 0.16,
+      "end": 0.36,
+      "probability": 0.8936
+    },
+    {
+      "word": "you've",
+      "start": 0.36,
+      "end": 0.6,
+      "probability": 0.9741
+    },
+    {
+      "word": "landed",
+      "start": 0.6,
+      "end": 0.76,
+      "probability": 0.9691
+    },
+    {
+      "word": "on",
+      "start": 0.76,
+      "end": 0.96,
+      "probability": 0.9976
+    },
+    {
+      "word": "this",
+      "start": 0.96,
+      "end": 1.14,
+      "probability": 0.998
+    },
+    {
+      "word": "video",
+      "start": 1.14,
+      "end": 1.4,
+      "probability": 0.9991
+    },
+    {
+      "word": "because",
+      "start": 1.4,
+      "end": 1.8,
+      "probability": 0.8998
+    },
+    {
+      "word": "someone",
+      "start": 1.8,
+      "end": 2.2,
+      "probability": 0.9849
+    },
+    {
+      "word": "suggested",
+      "start": 2.2,
+      "end": 2.52,
+      "probability": 0.9979
+    },
+    {
+      "word": "a",
+      "start": 2.52,
+      "end": 2.78,
+      "probability": 0.9962
+    },
+    {
+      "word": "podcast",
+      "start": 2.78,
+      "end": 3.1,
+      "probability": 0.996
+    },
+    {
+      "word": "to",
+      "start": 3.1,
+      "end": 3.44,
+      "probability": 0.9979
+    },
+    {
+      "word": "you",
+      "start": 3.44,
+      "end": 3.64,
+      "probability": 0.9954
+    },
+    {
+      "word": "and",
+      "start": 3.64,
+      "end": 3.82,
+      "probability": 0.8678
+    },
+    {
+      "word": "you",
+      "start": 3.82,
+      "end": 3.94,
+      "probability": 0.9975
+    },
+    {
+      "word": "work",
+      "start": 3.94,
+      "end": 4.1,
+      "probability": 0.1262
+    },
+    {
+      "word": "quite",
+      "start": 4.1,
+      "end": 4.26,
+      "probability": 0.8837
+    },
+    {
+      "word": "sure",
+      "start": 4.26,
+      "end": 4.4,
+      "probability": 0.9254
+    },
+    {
+      "word": "what",
+      "start": 4.4,
+      "end": 4.52,
+      "probability": 0.9956
+    },
+    {
+      "word": "they",
+      "start": 4.52,
+      "end": 4.62,
+      "probability": 0.9965
+    },
+    {
+      "word": "were",
+      "start": 4.62,
+      "end": 4.68,
+      "probability": 0.9893
+    },
+    {
+      "word": "talking",
+      "start": 4.68,
+      "end": 4.98,
+      "probability": 0.9987
+    },
+    {
+      "word": "about",
+      "start": 4.98,
+      "end": 5.26,
+      "probability": 0.9993
+    },
+    {
+      "word": "or",
+      "start": 5.26,
+      "end": 5.54,
+      "probability": 0.6512
+    },
+    {
+      "word": "you've",
+      "start": 5.54,
+      "end": 5.78,
+      "probability": 0.9878
+    },
+    {
+      "word": "heard",
+      "start": 5.78,
+      "end": 5.88,
+      "probability": 0.9975
+    },
+    {
+      "word": "about",
+      "start": 5.88,
+      "end": 6.12,
+      "probability": 0.9972
+    },
+    {
+      "word": "a",
+      "start": 6.12,
+      "end": 6.28,
+      "probability": 0.9936
+    },
+    {
+      "word": "ton",
+      "start": 6.28,
+      "end": 6.46,
+      "probability": 0.9962
+    },
+    {
+      "word": "of",
+      "start": 6.46,
+      "end": 6.58,
+      "probability": 0.9962
+    },
+    {
+      "word": "people",
+      "start": 6.58,
+      "end": 6.78,
+      "probability": 0.9982
+    },
+    {
+      "word": "starting",
+      "start": 6.78,
+      "end": 7.06,
+      "probability": 0.979
+    },
+    {
+      "word": "podcasts",
+      "start": 7.06,
+      "end": 7.46,
+      "probability": 0.9794
+    },
+    {
+      "word": "and",
+      "start": 7.46,
+      "end": 7.78,
+      "probability": 0.8043
+    },
+    {
+      "word": "you",
+      "start": 7.78,
+      "end": 7.84,
+      "probability": 0.9972
+    },
+    {
+      "word": "want",
+      "start": 7.84,
+      "end": 8.02,
+      "probability": 0.9137
+    },
+    {
+      "word": "to",
+      "start": 8.02,
+      "end": 8.12,
+      "probability": 0.9989
+    },
+    {
+      "word": "know",
+      "start": 8.12,
+      "end": 8.34,
+      "probability": 0.9992
+    },
+    {
+      "word": "if",
+      "start": 8.34,
+      "end": 8.56,
+      "probability": 0.9676
+    },
+    {
+      "word": "that's",
+      "start": 8.56,
+      "end": 8.78,
+      "probability": 0.9842
+    },
+    {
+      "word": "something",
+      "start": 8.78,
+      "end": 8.9,
+      "probability": 0.9982
+    },
+    {
+      "word": "that",
+      "start": 8.9,
+      "end": 9.02,
+      "probability": 0.9787
+    },
+    {
+      "word": "you'd",
+      "start": 9.02,
+      "end": 9.22,
+      "probability": 0.993
+    },
+    {
+      "word": "be",
+      "start": 9.22,
+      "end": 9.32,
+      "probability": 0.9958
+    },
+    {
+      "word": "into,",
+      "start": 9.32,
+      "end": 9.64,
+      "probability": 0.9863
+    },
+    {
+      "word": "but",
+      "start": 9.94,
+      "end": 9.96,
+      "probability": 0.6522
+    },
+    {
+      "word": "every",
+      "start": 9.96,
+      "end": 10.1,
+      "probability": 0.8835
+    },
+    {
+      "word": "reason,",
+      "start": 10.1,
+      "end": 10.46,
+      "probability": 0.983
+    },
+    {
+      "word": "welcome.",
+      "start": 10.74,
+      "end": 11.06,
+      "probability": 0.9367
+    },
+    {
+      "word": "We'd",
+      "start": 11.24,
+      "end": 11.4,
+      "probability": 0.9674
+    },
+    {
+      "word": "love",
+      "start": 11.4,
+      "end": 11.54,
+      "probability": 0.9962
+    },
+    {
+      "word": "to",
+      "start": 11.54,
+      "end": 11.7,
+      "probability": 0.9993
+    },
+    {
+      "word": "help",
+      "start": 11.7,
+      "end": 11.82,
+      "probability": 0.998
+    },
+    {
+      "word": "you",
+      "start": 11.82,
+      "end": 11.94,
+      "probability": 0.9969
+    },
+    {
+      "word": "understand",
+      "start": 11.94,
+      "end": 12.3,
+      "probability": 0.9941
+    },
+    {
+      "word": "what",
+      "start": 12.3,
+      "end": 12.46,
+      "probability": 0.9956
+    },
+    {
+      "word": "a",
+      "start": 12.46,
+      "end": 12.5,
+      "probability": 0.9945
+    },
+    {
+      "word": "podcast",
+      "start": 12.5,
+      "end": 12.82,
+      "probability": 0.9983
+    },
+    {
+      "word": "is",
+      "start": 12.82,
+      "end": 13.24,
+      "probability": 0.9987
+    },
+    {
+      "word": "and",
+      "start": 13.24,
+      "end": 13.86,
+      "probability": 0.9304
+    },
+    {
+      "word": "how",
+      "start": 13.86,
+      "end": 14.14,
+      "probability": 0.9993
+    },
+    {
+      "word": "they",
+      "start": 14.14,
+      "end": 14.3,
+      "probability": 0.9989
+    },
+    {
+      "word": "work.",
+      "start": 14.3,
+      "end": 14.5,
+      "probability": 0.9992
+    },
+    {
+      "word": "So",
+      "start": 16.94,
+      "end": 17.34,
+      "probability": 0.7713
+    },
+    {
+      "word": "what",
+      "start": 17.34,
+      "end": 17.46,
+      "probability": 0.9763
+    },
+    {
+      "word": "is",
+      "start": 17.46,
+      "end": 17.56,
+      "probability": 0.8991
+    },
+    {
+      "word": "a",
+      "start": 17.56,
+      "end": 17.56,
+      "probability": 0.9796
+    },
+    {
+      "word": "podcast?",
+      "start": 17.56,
+      "end": 17.84,
+      "probability": 0.9975
+    },
+    {
+      "word": "A",
+      "start": 18.14,
+      "end": 18.22,
+      "probability": 0.9523
+    },
+    {
+      "word": "podcast",
+      "start": 18.22,
+      "end": 18.44,
+      "probability": 0.9982
+    },
+    {
+      "word": "is",
+      "start": 18.44,
+      "end": 18.64,
+      "probability": 0.994
+    },
+    {
+      "word": "essentially",
+      "start": 18.64,
+      "end": 19.02,
+      "probability": 0.9911
+    },
+    {
+      "word": "a",
+      "start": 19.02,
+      "end": 19.16,
+      "probability": 0.9966
+    },
+    {
+      "word": "series",
+      "start": 19.16,
+      "end": 19.5,
+      "probability": 0.9789
+    },
+    {
+      "word": "or",
+      "start": 19.5,
+      "end": 19.64,
+      "probability": 0.9678
+    },
+    {
+      "word": "collection",
+      "start": 19.64,
+      "end": 19.96,
+      "probability": 0.6819
+    },
+    {
+      "word": "of",
+      "start": 19.96,
+      "end": 20.26,
+      "probability": 0.9982
+    },
+    {
+      "word": "digital",
+      "start": 20.26,
+      "end": 20.62,
+      "probability": 0.9969
+    },
+    {
+      "word": "audio",
+      "start": 20.62,
+      "end": 20.88,
+      "probability": 0.98
+    },
+    {
+      "word": "files",
+      "start": 20.88,
+      "end": 21.32,
+      "probability": 0.9992
+    },
+    {
+      "word": "that",
+      "start": 21.32,
+      "end": 21.5,
+      "probability": 0.9975
+    },
+    {
+      "word": "are",
+      "start": 21.5,
+      "end": 21.58,
+      "probability": 0.9988
+    },
+    {
+      "word": "made",
+      "start": 21.58,
+      "end": 21.78,
+      "probability": 0.9967
+    },
+    {
+      "word": "available",
+      "start": 21.78,
+      "end": 22.26,
+      "probability": 0.999
+    },
+    {
+      "word": "for",
+      "start": 22.26,
+      "end": 22.66,
+      "probability": 0.9985
+    },
+    {
+      "word": "listening",
+      "start": 22.66,
+      "end": 23.06,
+      "probability": 0.9927
+    },
+    {
+      "word": "or",
+      "start": 23.06,
+      "end": 23.32,
+      "probability": 0.9824
+    },
+    {
+      "word": "downloading",
+      "start": 23.32,
+      "end": 23.78,
+      "probability": 0.9952
+    },
+    {
+      "word": "via",
+      "start": 23.78,
+      "end": 24.4,
+      "probability": 0.9464
+    },
+    {
+      "word": "the",
+      "start": 24.4,
+      "end": 24.52,
+      "probability": 0.9944
+    },
+    {
+      "word": "internet.",
+      "start": 24.52,
+      "end": 24.9,
+      "probability": 0.7482
+    },
+    {
+      "word": "So",
+      "start": 25.02,
+      "end": 25.12,
+      "probability": 0.9968
+    },
+    {
+      "word": "that",
+      "start": 25.12,
+      "end": 25.26,
+      "probability": 0.995
+    },
+    {
+      "word": "could",
+      "start": 25.26,
+      "end": 25.4,
+      "probability": 0.9643
+    },
+    {
+      "word": "be",
+      "start": 25.4,
+      "end": 25.58,
+      "probability": 0.9994
+    },
+    {
+      "word": "a",
+      "start": 25.58,
+      "end": 25.76,
+      "probability": 0.9972
+    },
+    {
+      "word": "website.",
+      "start": 25.76,
+      "end": 26.16,
+      "probability": 0.9888
+    },
+    {
+      "word": "It",
+      "start": 26.38,
+      "end": 26.48,
+      "probability": 0.9971
+    },
+    {
+      "word": "could",
+      "start": 26.48,
+      "end": 26.62,
+      "probability": 0.9975
+    },
+    {
+      "word": "be",
+      "start": 26.62,
+      "end": 26.8,
+      "probability": 0.9992
+    },
+    {
+      "word": "a",
+      "start": 26.8,
+      "end": 26.96,
+      "probability": 0.9958
+    },
+    {
+      "word": "listening",
+      "start": 26.96,
+      "end": 27.26,
+      "probability": 0.959
+    },
+    {
+      "word": "app.",
+      "start": 27.26,
+      "end": 27.54,
+      "probability": 0.9975
+    },
+    {
+      "word": "What",
+      "start": 27.54,
+      "end": 27.9,
+      "probability": 0.9699
+    },
+    {
+      "word": "have",
+      "start": 27.9,
+      "end": 28.14,
+      "probability": 0.8796
+    },
+    {
+      "word": "you?",
+      "start": 28.14,
+      "end": 28.38,
+      "probability": 0.9917
+    },
+    {
+      "word": "And",
+      "start": 28.38,
+      "end": 28.54,
+      "probability": 0.3482
+    },
+    {
+      "word": "so",
+      "start": 28.54,
+      "end": 28.64,
+      "probability": 0.9864
+    },
+    {
+      "word": "each",
+      "start": 28.64,
+      "end": 29.02,
+      "probability": 0.8239
+    },
+    {
+      "word": "individual",
+      "start": 29.02,
+      "end": 29.56,
+      "probability": 0.9976
+    },
+    {
+      "word": "audio",
+      "start": 29.56,
+      "end": 29.84,
+      "probability": 0.9868
+    },
+    {
+      "word": "file",
+      "start": 29.84,
+      "end": 30.26,
+      "probability": 0.9884
+    },
+    {
+      "word": "that",
+      "start": 30.26,
+      "end": 30.46,
+      "probability": 0.9891
+    },
+    {
+      "word": "is",
+      "start": 30.46,
+      "end": 30.62,
+      "probability": 0.9845
+    },
+    {
+      "word": "uploaded",
+      "start": 30.62,
+      "end": 30.94,
+      "probability": 0.9968
+    },
+    {
+      "word": "would",
+      "start": 30.94,
+      "end": 31.16,
+      "probability": 0.9812
+    },
+    {
+      "word": "be",
+      "start": 31.16,
+      "end": 31.28,
+      "probability": 0.9996
+    },
+    {
+      "word": "considered",
+      "start": 31.28,
+      "end": 31.62,
+      "probability": 0.9985
+    },
+    {
+      "word": "a",
+      "start": 31.62,
+      "end": 31.82,
+      "probability": 0.9931
+    },
+    {
+      "word": "podcast",
+      "start": 31.82,
+      "end": 32.22,
+      "probability": 0.9835
+    },
+    {
+      "word": "episode.",
+      "start": 32.22,
+      "end": 33.06,
+      "probability": 0.9494
+    },
+    {
+      "word": "And",
+      "start": 33.36,
+      "end": 33.42,
+      "probability": 0.9759
+    },
+    {
+      "word": "podcasts",
+      "start": 33.42,
+      "end": 33.7,
+      "probability": 0.966
+    },
+    {
+      "word": "are",
+      "start": 33.7,
+      "end": 33.94,
+      "probability": 0.9968
+    },
+    {
+      "word": "typically",
+      "start": 33.94,
+      "end": 34.24,
+      "probability": 0.9987
+    },
+    {
+      "word": "hosted",
+      "start": 34.24,
+      "end": 34.7,
+      "probability": 0.9914
+    },
+    {
+      "word": "by",
+      "start": 34.7,
+      "end": 35.0,
+      "probability": 0.999
+    },
+    {
+      "word": "a",
+      "start": 35.0,
+      "end": 35.3,
+      "probability": 0.9907
+    },
+    {
+      "word": "person",
+      "start": 35.3,
+      "end": 35.64,
+      "probability": 0.9985
+    },
+    {
+      "word": "that",
+      "start": 35.64,
+      "end": 35.94,
+      "probability": 0.9652
+    },
+    {
+      "word": "leads",
+      "start": 35.94,
+      "end": 36.14,
+      "probability": 0.9706
+    },
+    {
+      "word": "a",
+      "start": 36.14,
+      "end": 36.24,
+      "probability": 0.8399
+    },
+    {
+      "word": "conversation",
+      "start": 36.24,
+      "end": 36.82,
+      "probability": 0.9993
+    },
+    {
+      "word": "that",
+      "start": 36.82,
+      "end": 37.46,
+      "probability": 0.6211
+    },
+    {
+      "word": "will",
+      "start": 37.46,
+      "end": 37.6,
+      "probability": 0.9911
+    },
+    {
+      "word": "tell",
+      "start": 37.6,
+      "end": 37.74,
+      "probability": 0.9981
+    },
+    {
+      "word": "stories",
+      "start": 37.74,
+      "end": 38.18,
+      "probability": 0.9988
+    },
+    {
+      "word": "that",
+      "start": 38.18,
+      "end": 38.36,
+      "probability": 0.7907
+    },
+    {
+      "word": "may",
+      "start": 38.36,
+      "end": 38.48,
+      "probability": 0.9866
+    },
+    {
+      "word": "report",
+      "start": 38.48,
+      "end": 38.68,
+      "probability": 0.9914
+    },
+    {
+      "word": "on",
+      "start": 38.68,
+      "end": 38.88,
+      "probability": 0.9989
+    },
+    {
+      "word": "the",
+      "start": 38.88,
+      "end": 38.98,
+      "probability": 0.9987
+    },
+    {
+      "word": "news",
+      "start": 38.98,
+      "end": 39.22,
+      "probability": 0.9982
+    },
+    {
+      "word": "and",
+      "start": 39.22,
+      "end": 39.46,
+      "probability": 0.6424
+    },
+    {
+      "word": "they",
+      "start": 39.46,
+      "end": 39.56,
+      "probability": 0.9942
+    },
+    {
+      "word": "are",
+      "start": 39.56,
+      "end": 39.66,
+      "probability": 0.9842
+    },
+    {
+      "word": "called",
+      "start": 39.66,
+      "end": 39.9,
+      "probability": 0.9991
+    },
+    {
+      "word": "a",
+      "start": 39.9,
+      "end": 39.98,
+      "probability": 0.9672
+    },
+    {
+      "word": "podcast",
+      "start": 39.98,
+      "end": 40.3,
+      "probability": 0.9861
+    },
+    {
+      "word": "host.",
+      "start": 40.3,
+      "end": 40.74,
+      "probability": 0.9832
+    },
+    {
+      "word": "A",
+      "start": 41.0,
+      "end": 41.06,
+      "probability": 0.9689
+    },
+    {
+      "word": "person",
+      "start": 41.06,
+      "end": 41.32,
+      "probability": 0.9997
+    },
+    {
+      "word": "who",
+      "start": 41.32,
+      "end": 41.48,
+      "probability": 0.9987
+    },
+    {
+      "word": "creates",
+      "start": 41.48,
+      "end": 41.72,
+      "probability": 0.9967
+    },
+    {
+      "word": "a",
+      "start": 41.72,
+      "end": 41.84,
+      "probability": 0.9932
+    },
+    {
+      "word": "podcast",
+      "start": 41.84,
+      "end": 42.18,
+      "probability": 0.9989
+    },
+    {
+      "word": "is",
+      "start": 42.18,
+      "end": 42.48,
+      "probability": 0.976
+    },
+    {
+      "word": "called",
+      "start": 42.48,
+      "end": 42.64,
+      "probability": 0.9912
+    },
+    {
+      "word": "a",
+      "start": 42.64,
+      "end": 42.76,
+      "probability": 0.9944
+    },
+    {
+      "word": "podcaster.",
+      "start": 42.76,
+      "end": 43.3,
+      "probability": 0.7864
+    },
+    {
+      "word": "The",
+      "start": 43.5,
+      "end": 43.6,
+      "probability": 0.9954
+    },
+    {
+      "word": "best",
+      "start": 43.6,
+      "end": 43.76,
+      "probability": 0.9992
+    },
+    {
+      "word": "way",
+      "start": 43.76,
+      "end": 43.86,
+      "probability": 0.9994
+    },
+    {
+      "word": "to",
+      "start": 43.86,
+      "end": 43.96,
+      "probability": 0.9995
+    },
+    {
+      "word": "think",
+      "start": 43.96,
+      "end": 44.12,
+      "probability": 0.9989
+    },
+    {
+      "word": "of",
+      "start": 44.12,
+      "end": 44.22,
+      "probability": 0.989
+    },
+    {
+      "word": "podcasting",
+      "start": 44.22,
+      "end": 44.84,
+      "probability": 0.9803
+    },
+    {
+      "word": "is",
+      "start": 44.84,
+      "end": 44.98,
+      "probability": 0.9885
+    },
+    {
+      "word": "kind",
+      "start": 44.98,
+      "end": 45.18,
+      "probability": 0.9847
+    },
+    {
+      "word": "of",
+      "start": 45.18,
+      "end": 45.32,
+      "probability": 0.9985
+    },
+    {
+      "word": "like",
+      "start": 45.32,
+      "end": 45.68,
+      "probability": 0.9873
+    },
+    {
+      "word": "the",
+      "start": 45.68,
+      "end": 46.28,
+      "probability": 0.4349
+    },
+    {
+      "word": "Netflix",
+      "start": 46.28,
+      "end": 46.54,
+      "probability": 0.9839
+    },
+    {
+      "word": "of",
+      "start": 46.54,
+      "end": 46.8,
+      "probability": 0.993
+    },
+    {
+      "word": "audio.",
+      "start": 46.8,
+      "end": 47.08,
+      "probability": 0.9876
+    },
+    {
+      "word": "So",
+      "start": 47.26,
+      "end": 47.36,
+      "probability": 0.9802
+    },
+    {
+      "word": "you",
+      "start": 47.36,
+      "end": 47.42,
+      "probability": 0.9263
+    },
+    {
+      "word": "know",
+      "start": 47.42,
+      "end": 47.5,
+      "probability": 0.9926
+    },
+    {
+      "word": "how",
+      "start": 47.5,
+      "end": 47.6,
+      "probability": 0.9344
+    },
+    {
+      "word": "you",
+      "start": 47.6,
+      "end": 47.66,
+      "probability": 0.9968
+    },
+    {
+      "word": "can",
+      "start": 47.66,
+      "end": 47.76,
+      "probability": 0.997
+    },
+    {
+      "word": "pick",
+      "start": 47.76,
+      "end": 47.92,
+      "probability": 0.9697
+    },
+    {
+      "word": "a",
+      "start": 47.92,
+      "end": 48.04,
+      "probability": 0.9987
+    },
+    {
+      "word": "show",
+      "start": 48.04,
+      "end": 48.22,
+      "probability": 0.9983
+    },
+    {
+      "word": "on",
+      "start": 48.22,
+      "end": 48.56,
+      "probability": 0.9966
+    },
+    {
+      "word": "Netflix",
+      "start": 48.56,
+      "end": 48.84,
+      "probability": 0.9964
+    },
+    {
+      "word": "and",
+      "start": 48.84,
+      "end": 49.3,
+      "probability": 0.9469
+    },
+    {
+      "word": "just",
+      "start": 49.3,
+      "end": 49.48,
+      "probability": 0.9991
+    },
+    {
+      "word": "watch",
+      "start": 49.48,
+      "end": 49.76,
+      "probability": 0.996
+    },
+    {
+      "word": "the",
+      "start": 49.76,
+      "end": 49.94,
+      "probability": 0.9969
+    },
+    {
+      "word": "whole",
+      "start": 49.94,
+      "end": 50.06,
+      "probability": 0.9968
+    },
+    {
+      "word": "show",
+      "start": 50.06,
+      "end": 50.28,
+      "probability": 0.9993
+    },
+    {
+      "word": "or",
+      "start": 50.28,
+      "end": 50.44,
+      "probability": 0.9659
+    },
+    {
+      "word": "just",
+      "start": 50.44,
+      "end": 50.54,
+      "probability": 0.9991
+    },
+    {
+      "word": "watch",
+      "start": 50.54,
+      "end": 50.74,
+      "probability": 0.9987
+    },
+    {
+      "word": "a",
+      "start": 50.74,
+      "end": 50.88,
+      "probability": 0.9988
+    },
+    {
+      "word": "few",
+      "start": 50.88,
+      "end": 51.02,
+      "probability": 0.9992
+    },
+    {
+      "word": "episodes.",
+      "start": 51.02,
+      "end": 51.62,
+      "probability": 0.9993
+    },
+    {
+      "word": "Podcasting",
+      "start": 51.84,
+      "end": 52.24,
+      "probability": 0.9319
+    },
+    {
+      "word": "is",
+      "start": 52.24,
+      "end": 52.3,
+      "probability": 0.9982
+    },
+    {
+      "word": "very",
+      "start": 52.3,
+      "end": 52.48,
+      "probability": 0.9991
+    },
+    {
+      "word": "similar.",
+      "start": 52.48,
+      "end": 52.8,
+      "probability": 0.9994
+    },
+    {
+      "word": "You",
+      "start": 53.02,
+      "end": 53.06,
+      "probability": 0.9949
+    },
+    {
+      "word": "can",
+      "start": 53.06,
+      "end": 53.14,
+      "probability": 0.9982
+    },
+    {
+      "word": "pick",
+      "start": 53.14,
+      "end": 53.26,
+      "probability": 0.986
+    },
+    {
+      "word": "a",
+      "start": 53.26,
+      "end": 53.38,
+      "probability": 0.9978
+    },
+    {
+      "word": "show",
+      "start": 53.38,
+      "end": 53.6,
+      "probability": 0.9981
+    },
+    {
+      "word": "and",
+      "start": 53.6,
+      "end": 53.88,
+      "probability": 0.9911
+    },
+    {
+      "word": "decide",
+      "start": 53.88,
+      "end": 54.14,
+      "probability": 0.9984
+    },
+    {
+      "word": "you",
+      "start": 54.14,
+      "end": 54.42,
+      "probability": 0.9786
+    },
+    {
+      "word": "want",
+      "start": 54.42,
+      "end": 54.62,
+      "probability": 0.9989
+    },
+    {
+      "word": "to",
+      "start": 54.62,
+      "end": 54.92,
+      "probability": 0.9992
+    },
+    {
+      "word": "listen",
+      "start": 54.92,
+      "end": 55.18,
+      "probability": 0.9974
+    },
+    {
+      "word": "to",
+      "start": 55.18,
+      "end": 55.48,
+      "probability": 0.9997
+    },
+    {
+      "word": "all",
+      "start": 55.48,
+      "end": 55.96,
+      "probability": 0.9951
+    },
+    {
+      "word": "the",
+      "start": 55.96,
+      "end": 56.08,
+      "probability": 0.9964
+    },
+    {
+      "word": "episodes",
+      "start": 56.08,
+      "end": 56.36,
+      "probability": 0.997
+    },
+    {
+      "word": "they",
+      "start": 56.36,
+      "end": 56.56,
+      "probability": 0.9601
+    },
+    {
+      "word": "have",
+      "start": 56.56,
+      "end": 56.62,
+      "probability": 0.9916
+    },
+    {
+      "word": "available",
+      "start": 56.62,
+      "end": 56.96,
+      "probability": 0.9995
+    },
+    {
+      "word": "or",
+      "start": 56.96,
+      "end": 57.18,
+      "probability": 0.6053
+    },
+    {
+      "word": "you",
+      "start": 57.18,
+      "end": 57.3,
+      "probability": 0.9698
+    },
+    {
+      "word": "can",
+      "start": 57.3,
+      "end": 57.42,
+      "probability": 0.9938
+    },
+    {
+      "word": "just",
+      "start": 57.42,
+      "end": 57.62,
+      "probability": 0.971
+    },
+    {
+      "word": "listen",
+      "start": 57.62,
+      "end": 57.92,
+      "probability": 0.9935
+    },
+    {
+      "word": "to",
+      "start": 57.92,
+      "end": 58.1,
+      "probability": 0.996
+    },
+    {
+      "word": "one",
+      "start": 58.1,
+      "end": 58.28,
+      "probability": 0.979
+    },
+    {
+      "word": "or",
+      "start": 58.28,
+      "end": 58.36,
+      "probability": 0.9956
+    },
+    {
+      "word": "two",
+      "start": 58.36,
+      "end": 58.5,
+      "probability": 0.9964
+    },
+    {
+      "word": "of",
+      "start": 58.5,
+      "end": 58.66,
+      "probability": 0.9895
+    },
+    {
+      "word": "the",
+      "start": 58.66,
+      "end": 58.68,
+      "probability": 0.9986
+    },
+    {
+      "word": "episodes",
+      "start": 58.68,
+      "end": 58.94,
+      "probability": 0.9952
+    },
+    {
+      "word": "that",
+      "start": 58.94,
+      "end": 59.12,
+      "probability": 0.8142
+    },
+    {
+      "word": "they",
+      "start": 59.12,
+      "end": 59.22,
+      "probability": 0.9854
+    },
+    {
+      "word": "have",
+      "start": 59.22,
+      "end": 59.32,
+      "probability": 0.9873
+    },
+    {
+      "word": "available.",
+      "start": 59.32,
+      "end": 59.64,
+      "probability": 0.999
+    },
+    {
+      "word": "The",
+      "start": 59.84,
+      "end": 59.86,
+      "probability": 0.983
+    },
+    {
+      "word": "thing",
+      "start": 59.86,
+      "end": 60.02,
+      "probability": 0.9965
+    },
+    {
+      "word": "is",
+      "start": 60.02,
+      "end": 60.18,
+      "probability": 0.997
+    },
+    {
+      "word": "this",
+      "start": 60.18,
+      "end": 60.34,
+      "probability": 0.4639
+    },
+    {
+      "word": "is",
+      "start": 60.34,
+      "end": 60.5,
+      "probability": 0.9965
+    },
+    {
+      "word": "audio",
+      "start": 60.5,
+      "end": 60.88,
+      "probability": 0.9279
+    },
+    {
+      "word": "on",
+      "start": 60.88,
+      "end": 61.2,
+      "probability": 0.9911
+    },
+    {
+      "word": "your",
+      "start": 61.2,
+      "end": 61.42,
+      "probability": 0.9883
+    },
+    {
+      "word": "time.",
+      "start": 61.42,
+      "end": 61.9,
+      "probability": 0.9925
+    },
+    {
+      "word": "So",
+      "start": 64.32,
+      "end": 64.72,
+      "probability": 0.4871
+    },
+    {
+      "word": "how",
+      "start": 64.72,
+      "end": 64.86,
+      "probability": 0.928
+    },
+    {
+      "word": "do",
+      "start": 64.86,
+      "end": 64.92,
+      "probability": 0.6848
+    },
+    {
+      "word": "podcasts",
+      "start": 64.92,
+      "end": 65.26,
+      "probability": 0.9877
+    },
+    {
+      "word": "work?",
+      "start": 65.26,
+      "end": 65.74,
+      "probability": 0.9967
+    },
+    {
+      "word": "Well,",
+      "start": 65.98,
+      "end": 66.06,
+      "probability": 0.9656
+    },
+    {
+      "word": "if",
+      "start": 66.08,
+      "end": 66.22,
+      "probability": 0.9953
+    },
+    {
+      "word": "you",
+      "start": 66.22,
+      "end": 66.28,
+      "probability": 0.9992
+    },
+    {
+      "word": "were",
+      "start": 66.28,
+      "end": 66.34,
+      "probability": 0.9909
+    },
+    {
+      "word": "to",
+      "start": 66.34,
+      "end": 66.42,
+      "probability": 0.9997
+    },
+    {
+      "word": "create",
+      "start": 66.42,
+      "end": 66.58,
+      "probability": 0.9984
+    },
+    {
+      "word": "a",
+      "start": 66.58,
+      "end": 66.66,
+      "probability": 0.9993
+    },
+    {
+      "word": "podcast,",
+      "start": 66.66,
+      "end": 67.02,
+      "probability": 0.9982
+    },
+    {
+      "word": "you'd",
+      "start": 67.24,
+      "end": 67.38,
+      "probability": 0.991
+    },
+    {
+      "word": "upload",
+      "start": 67.38,
+      "end": 67.68,
+      "probability": 0.9977
+    },
+    {
+      "word": "audio,",
+      "start": 67.68,
+      "end": 68.18,
+      "probability": 0.992
+    },
+    {
+      "word": "get",
+      "start": 68.56,
+      "end": 68.68,
+      "probability": 0.9974
+    },
+    {
+      "word": "a",
+      "start": 68.68,
+      "end": 68.78,
+      "probability": 0.9951
+    },
+    {
+      "word": "hosting",
+      "start": 68.78,
+      "end": 69.08,
+      "probability": 0.9904
+    },
+    {
+      "word": "site",
+      "start": 69.08,
+      "end": 69.42,
+      "probability": 0.9989
+    },
+    {
+      "word": "to",
+      "start": 69.42,
+      "end": 69.62,
+      "probability": 0.9378
+    },
+    {
+      "word": "make",
+      "start": 69.62,
+      "end": 69.74,
+      "probability": 0.9994
+    },
+    {
+      "word": "it",
+      "start": 69.74,
+      "end": 69.86,
+      "probability": 0.9996
+    },
+    {
+      "word": "available.",
+      "start": 69.86,
+      "end": 70.2,
+      "probability": 0.9997
+    },
+    {
+      "word": "And",
+      "start": 70.5,
+      "end": 70.74,
+      "probability": 0.9891
+    },
+    {
+      "word": "when",
+      "start": 70.74,
+      "end": 70.9,
+      "probability": 0.9953
+    },
+    {
+      "word": "you",
+      "start": 70.9,
+      "end": 71.04,
+      "probability": 0.9995
+    },
+    {
+      "word": "do",
+      "start": 71.04,
+      "end": 71.22,
+      "probability": 0.9977
+    },
+    {
+      "word": "that,",
+      "start": 71.22,
+      "end": 71.42,
+      "probability": 0.9984
+    },
+    {
+      "word": "your",
+      "start": 71.5,
+      "end": 71.56,
+      "probability": 0.9784
+    },
+    {
+      "word": "hosting",
+      "start": 71.56,
+      "end": 71.82,
+      "probability": 0.9986
+    },
+    {
+      "word": "site",
+      "start": 71.82,
+      "end": 72.04,
+      "probability": 0.9983
+    },
+    {
+      "word": "would",
+      "start": 72.04,
+      "end": 72.16,
+      "probability": 0.9826
+    },
+    {
+      "word": "create",
+      "start": 72.16,
+      "end": 72.4,
+      "probability": 0.9988
+    },
+    {
+      "word": "an",
+      "start": 72.4,
+      "end": 72.58,
+      "probability": 0.9805
+    },
+    {
+      "word": "RSS",
+      "start": 72.58,
+      "end": 73.12,
+      "probability": 0.7379
+    },
+    {
+      "word": "feed.",
+      "start": 73.12,
+      "end": 73.34,
+      "probability": 0.2999
+    },
+    {
+      "word": "And",
+      "start": 73.56,
+      "end": 73.64,
+      "probability": 0.9913
+    },
+    {
+      "word": "that",
+      "start": 73.64,
+      "end": 73.78,
+      "probability": 0.9978
+    },
+    {
+      "word": "just",
+      "start": 73.78,
+      "end": 73.94,
+      "probability": 0.9982
+    },
+    {
+      "word": "stands",
+      "start": 73.94,
+      "end": 74.12,
+      "probability": 0.9906
+    },
+    {
+      "word": "for",
+      "start": 74.12,
+      "end": 74.32,
+      "probability": 0.9988
+    },
+    {
+      "word": "real",
+      "start": 74.32,
+      "end": 74.52,
+      "probability": 0.5336
+    },
+    {
+      "word": "simple",
+      "start": 74.52,
+      "end": 74.9,
+      "probability": 0.9008
+    },
+    {
+      "word": "syndication.",
+      "start": 74.9,
+      "end": 75.48,
+      "probability": 0.9937
+    },
+    {
+      "word": "All",
+      "start": 75.82,
+      "end": 75.88,
+      "probability": 0.9789
+    },
+    {
+      "word": "this",
+      "start": 75.88,
+      "end": 76.0,
+      "probability": 0.993
+    },
+    {
+      "word": "is",
+      "start": 76.0,
+      "end": 76.2,
+      "probability": 0.9929
+    },
+    {
+      "word": "is",
+      "start": 76.2,
+      "end": 76.34,
+      "probability": 0.5834
+    },
+    {
+      "word": "a",
+      "start": 76.34,
+      "end": 76.42,
+      "probability": 0.9898
+    },
+    {
+      "word": "page",
+      "start": 76.42,
+      "end": 76.6,
+      "probability": 0.9966
+    },
+    {
+      "word": "of",
+      "start": 76.6,
+      "end": 76.78,
+      "probability": 0.9981
+    },
+    {
+      "word": "raw",
+      "start": 76.78,
+      "end": 76.98,
+      "probability": 0.9424
+    },
+    {
+      "word": "data",
+      "start": 76.98,
+      "end": 77.24,
+      "probability": 0.9996
+    },
+    {
+      "word": "that",
+      "start": 77.24,
+      "end": 77.52,
+      "probability": 0.9942
+    },
+    {
+      "word": "holds",
+      "start": 77.52,
+      "end": 77.76,
+      "probability": 0.9986
+    },
+    {
+      "word": "all",
+      "start": 77.76,
+      "end": 78.02,
+      "probability": 0.9986
+    },
+    {
+      "word": "the",
+      "start": 78.02,
+      "end": 78.14,
+      "probability": 0.9982
+    },
+    {
+      "word": "information",
+      "start": 78.14,
+      "end": 78.6,
+      "probability": 0.9996
+    },
+    {
+      "word": "about",
+      "start": 78.6,
+      "end": 78.82,
+      "probability": 0.9995
+    },
+    {
+      "word": "your",
+      "start": 78.82,
+      "end": 78.94,
+      "probability": 0.9989
+    },
+    {
+      "word": "podcast.",
+      "start": 78.94,
+      "end": 79.32,
+      "probability": 0.9703
+    },
+    {
+      "word": "It's",
+      "start": 79.58,
+      "end": 79.74,
+      "probability": 0.9877
+    },
+    {
+      "word": "title,",
+      "start": 79.74,
+      "end": 80.04,
+      "probability": 0.7635
+    },
+    {
+      "word": "the",
+      "start": 80.24,
+      "end": 80.28,
+      "probability": 0.5212
+    },
+    {
+      "word": "cover",
+      "start": 80.28,
+      "end": 80.56,
+      "probability": 0.98
+    },
+    {
+      "word": "art,",
+      "start": 80.56,
+      "end": 80.9,
+      "probability": 0.9454
+    },
+    {
+      "word": "how",
+      "start": 81.06,
+      "end": 81.16,
+      "probability": 0.9941
+    },
+    {
+      "word": "many",
+      "start": 81.16,
+      "end": 81.34,
+      "probability": 0.9989
+    },
+    {
+      "word": "episodes,",
+      "start": 81.34,
+      "end": 81.76,
+      "probability": 0.9993
+    },
+    {
+      "word": "title",
+      "start": 81.76,
+      "end": 82.18,
+      "probability": 0.6442
+    },
+    {
+      "word": "episodes,",
+      "start": 82.18,
+      "end": 82.6,
+      "probability": 0.9936
+    },
+    {
+      "word": "the",
+      "start": 82.6,
+      "end": 82.86,
+      "probability": 0.9724
+    },
+    {
+      "word": "whole",
+      "start": 82.86,
+      "end": 83.04,
+      "probability": 0.8446
+    },
+    {
+      "word": "shebang.",
+      "start": 83.04,
+      "end": 83.32,
+      "probability": 0.7036
+    },
+    {
+      "word": "So",
+      "start": 85.82,
+      "end": 86.18,
+      "probability": 0.2804
+    },
+    {
+      "word": "where",
+      "start": 86.18,
+      "end": 86.3,
+      "probability": 0.7817
+    },
+    {
+      "word": "can",
+      "start": 86.3,
+      "end": 86.42,
+      "probability": 0.9915
+    },
+    {
+      "word": "you",
+      "start": 86.42,
+      "end": 86.5,
+      "probability": 0.9852
+    },
+    {
+      "word": "listen",
+      "start": 86.5,
+      "end": 86.64,
+      "probability": 0.9917
+    },
+    {
+      "word": "to",
+      "start": 86.64,
+      "end": 86.74,
+      "probability": 0.7968
+    },
+    {
+      "word": "these",
+      "start": 86.74,
+      "end": 86.88,
+      "probability": 0.9773
+    },
+    {
+      "word": "things?",
+      "start": 86.88,
+      "end": 87.04,
+      "probability": 0.9758
+    },
+    {
+      "word": "Podcasts.",
+      "start": 87.56,
+      "end": 87.92,
+      "probability": 0.949
+    },
+    {
+      "word": "You",
+      "start": 87.96,
+      "end": 88.0,
+      "probability": 0.7759
+    },
+    {
+      "word": "can",
+      "start": 88.0,
+      "end": 88.1,
+      "probability": 0.997
+    },
+    {
+      "word": "listen",
+      "start": 88.1,
+      "end": 88.24,
+      "probability": 0.9838
+    },
+    {
+      "word": "to",
+      "start": 88.24,
+      "end": 88.36,
+      "probability": 0.9988
+    },
+    {
+      "word": "podcasts",
+      "start": 88.36,
+      "end": 88.64,
+      "probability": 0.9547
+    },
+    {
+      "word": "in",
+      "start": 88.64,
+      "end": 88.9,
+      "probability": 0.9777
+    },
+    {
+      "word": "a",
+      "start": 88.9,
+      "end": 88.92,
+      "probability": 0.9978
+    },
+    {
+      "word": "couple",
+      "start": 88.92,
+      "end": 89.12,
+      "probability": 0.9951
+    },
+    {
+      "word": "of",
+      "start": 89.12,
+      "end": 89.22,
+      "probability": 0.7141
+    },
+    {
+      "word": "different",
+      "start": 89.22,
+      "end": 89.4,
+      "probability": 0.9943
+    },
+    {
+      "word": "places.",
+      "start": 89.4,
+      "end": 89.76,
+      "probability": 0.9966
+    },
+    {
+      "word": "So",
+      "start": 89.92,
+      "end": 89.98,
+      "probability": 0.96
+    },
+    {
+      "word": "there",
+      "start": 89.98,
+      "end": 90.1,
+      "probability": 0.8946
+    },
+    {
+      "word": "are",
+      "start": 90.1,
+      "end": 90.26,
+      "probability": 0.9955
+    },
+    {
+      "word": "podcast",
+      "start": 90.26,
+      "end": 90.72,
+      "probability": 0.8182
+    },
+    {
+      "word": "listening",
+      "start": 90.72,
+      "end": 91.22,
+      "probability": 0.9352
+    },
+    {
+      "word": "apps.",
+      "start": 91.22,
+      "end": 91.52,
+      "probability": 0.9963
+    },
+    {
+      "word": "We",
+      "start": 91.66,
+      "end": 91.74,
+      "probability": 0.9948
+    },
+    {
+      "word": "like",
+      "start": 91.74,
+      "end": 91.86,
+      "probability": 0.9776
+    },
+    {
+      "word": "to",
+      "start": 91.86,
+      "end": 92.0,
+      "probability": 0.9994
+    },
+    {
+      "word": "call",
+      "start": 92.0,
+      "end": 92.14,
+      "probability": 0.9944
+    },
+    {
+      "word": "some",
+      "start": 92.14,
+      "end": 92.32,
+      "probability": 0.9724
+    },
+    {
+      "word": "of",
+      "start": 92.32,
+      "end": 92.4,
+      "probability": 0.9981
+    },
+    {
+      "word": "them",
+      "start": 92.4,
+      "end": 92.52,
+      "probability": 0.9975
+    },
+    {
+      "word": "directories.",
+      "start": 92.52,
+      "end": 93.14,
+      "probability": 0.8686
+    },
+    {
+      "word": "Apple",
+      "start": 93.26,
+      "end": 93.4,
+      "probability": 0.9414
+    },
+    {
+      "word": "podcast",
+      "start": 93.4,
+      "end": 93.78,
+      "probability": 0.4113
+    },
+    {
+      "word": "is",
+      "start": 93.78,
+      "end": 94.18,
+      "probability": 0.9771
+    },
+    {
+      "word": "one",
+      "start": 94.18,
+      "end": 94.36,
+      "probability": 0.9735
+    },
+    {
+      "word": "such",
+      "start": 94.36,
+      "end": 94.74,
+      "probability": 0.9901
+    },
+    {
+      "word": "Google",
+      "start": 94.74,
+      "end": 95.14,
+      "probability": 0.8694
+    },
+    {
+      "word": "podcast",
+      "start": 95.14,
+      "end": 95.58,
+      "probability": 0.7335
+    },
+    {
+      "word": "is",
+      "start": 95.58,
+      "end": 95.86,
+      "probability": 0.8425
+    },
+    {
+      "word": "another",
+      "start": 95.86,
+      "end": 96.02,
+      "probability": 0.9963
+    },
+    {
+      "word": "directory,",
+      "start": 96.02,
+      "end": 96.54,
+      "probability": 0.9752
+    },
+    {
+      "word": "but",
+      "start": 96.68,
+      "end": 96.74,
+      "probability": 0.9567
+    },
+    {
+      "word": "you",
+      "start": 96.74,
+      "end": 96.84,
+      "probability": 0.9987
+    },
+    {
+      "word": "can",
+      "start": 96.84,
+      "end": 96.92,
+      "probability": 0.9849
+    },
+    {
+      "word": "also",
+      "start": 96.92,
+      "end": 97.14,
+      "probability": 0.9976
+    },
+    {
+      "word": "listen",
+      "start": 97.14,
+      "end": 97.4,
+      "probability": 0.9958
+    },
+    {
+      "word": "to",
+      "start": 97.4,
+      "end": 97.58,
+      "probability": 0.9996
+    },
+    {
+      "word": "podcasts",
+      "start": 97.58,
+      "end": 97.9,
+      "probability": 0.9093
+    },
+    {
+      "word": "and",
+      "start": 97.9,
+      "end": 98.14,
+      "probability": 0.621
+    },
+    {
+      "word": "a",
+      "start": 98.14,
+      "end": 98.2,
+      "probability": 0.9967
+    },
+    {
+      "word": "lot",
+      "start": 98.2,
+      "end": 98.3,
+      "probability": 0.9994
+    },
+    {
+      "word": "of",
+      "start": 98.3,
+      "end": 98.4,
+      "probability": 0.9989
+    },
+    {
+      "word": "music",
+      "start": 98.4,
+      "end": 98.6,
+      "probability": 0.996
+    },
+    {
+      "word": "listening",
+      "start": 98.6,
+      "end": 98.94,
+      "probability": 0.9844
+    },
+    {
+      "word": "apps.",
+      "start": 98.94,
+      "end": 99.14,
+      "probability": 0.9442
+    },
+    {
+      "word": "So",
+      "start": 99.36,
+      "end": 99.42,
+      "probability": 0.992
+    },
+    {
+      "word": "Spotify",
+      "start": 99.42,
+      "end": 100.02,
+      "probability": 0.9542
+    },
+    {
+      "word": "is",
+      "start": 100.02,
+      "end": 100.32,
+      "probability": 0.6412
+    },
+    {
+      "word": "made",
+      "start": 100.32,
+      "end": 100.42,
+      "probability": 0.9979
+    },
+    {
+      "word": "podcasts",
+      "start": 100.42,
+      "end": 100.84,
+      "probability": 0.7354
+    },
+    {
+      "word": "available",
+      "start": 100.84,
+      "end": 101.28,
+      "probability": 0.9802
+    },
+    {
+      "word": "in",
+      "start": 101.28,
+      "end": 101.6,
+      "probability": 0.9317
+    },
+    {
+      "word": "their",
+      "start": 101.6,
+      "end": 101.78,
+      "probability": 0.9913
+    },
+    {
+      "word": "app,",
+      "start": 101.78,
+      "end": 102.1,
+      "probability": 0.987
+    },
+    {
+      "word": "Amazon,",
+      "start": 102.24,
+      "end": 102.62,
+      "probability": 0.9877
+    },
+    {
+      "word": "Stitcher",
+      "start": 102.88,
+      "end": 103.42,
+      "probability": 0.9578
+    },
+    {
+      "word": "is",
+      "start": 103.42,
+      "end": 103.54,
+      "probability": 0.9475
+    },
+    {
+      "word": "a",
+      "start": 103.54,
+      "end": 103.62,
+      "probability": 0.9939
+    },
+    {
+      "word": "podcast",
+      "start": 103.62,
+      "end": 104.02,
+      "probability": 0.9881
+    },
+    {
+      "word": "specific",
+      "start": 104.02,
+      "end": 104.6,
+      "probability": 0.7883
+    },
+    {
+      "word": "app",
+      "start": 104.6,
+      "end": 104.94,
+      "probability": 0.9959
+    },
+    {
+      "word": "that",
+      "start": 104.94,
+      "end": 105.12,
+      "probability": 0.9744
+    },
+    {
+      "word": "you",
+      "start": 105.12,
+      "end": 105.24,
+      "probability": 0.9989
+    },
+    {
+      "word": "can",
+      "start": 105.24,
+      "end": 105.36,
+      "probability": 0.9993
+    },
+    {
+      "word": "listen",
+      "start": 105.36,
+      "end": 105.54,
+      "probability": 0.9957
+    },
+    {
+      "word": "to",
+      "start": 105.54,
+      "end": 105.74,
+      "probability": 0.9996
+    },
+    {
+      "word": "podcasts",
+      "start": 105.74,
+      "end": 106.04,
+      "probability": 0.8315
+    },
+    {
+      "word": "on.",
+      "start": 106.04,
+      "end": 106.44,
+      "probability": 0.9794
+    },
+    {
+      "word": "Some",
+      "start": 106.58,
+      "end": 106.7,
+      "probability": 0.9961
+    },
+    {
+      "word": "people",
+      "start": 106.7,
+      "end": 106.96,
+      "probability": 0.9993
+    },
+    {
+      "word": "even",
+      "start": 106.96,
+      "end": 107.28,
+      "probability": 0.9941
+    },
+    {
+      "word": "have",
+      "start": 107.28,
+      "end": 107.52,
+      "probability": 0.9992
+    },
+    {
+      "word": "their",
+      "start": 107.52,
+      "end": 107.7,
+      "probability": 0.9984
+    },
+    {
+      "word": "podcasts",
+      "start": 107.7,
+      "end": 108.06,
+      "probability": 0.8484
+    },
+    {
+      "word": "embedded",
+      "start": 108.06,
+      "end": 108.52,
+      "probability": 0.9965
+    },
+    {
+      "word": "on",
+      "start": 108.52,
+      "end": 108.8,
+      "probability": 0.9983
+    },
+    {
+      "word": "their",
+      "start": 108.8,
+      "end": 108.96,
+      "probability": 0.999
+    },
+    {
+      "word": "website.",
+      "start": 108.96,
+      "end": 109.3,
+      "probability": 0.9438
+    },
+    {
+      "word": "So",
+      "start": 109.42,
+      "end": 109.54,
+      "probability": 0.9971
+    },
+    {
+      "word": "there",
+      "start": 109.54,
+      "end": 109.66,
+      "probability": 0.7405
+    },
+    {
+      "word": "are",
+      "start": 109.66,
+      "end": 109.78,
+      "probability": 0.9816
+    },
+    {
+      "word": "embedded",
+      "start": 109.78,
+      "end": 110.04,
+      "probability": 0.9975
+    },
+    {
+      "word": "players",
+      "start": 110.04,
+      "end": 110.44,
+      "probability": 0.997
+    },
+    {
+      "word": "where",
+      "start": 110.44,
+      "end": 110.6,
+      "probability": 0.9417
+    },
+    {
+      "word": "you",
+      "start": 110.6,
+      "end": 110.66,
+      "probability": 0.999
+    },
+    {
+      "word": "can",
+      "start": 110.66,
+      "end": 110.78,
+      "probability": 0.9986
+    },
+    {
+      "word": "listen",
+      "start": 110.78,
+      "end": 110.98,
+      "probability": 0.9962
+    },
+    {
+      "word": "to",
+      "start": 110.98,
+      "end": 111.12,
+      "probability": 0.9994
+    },
+    {
+      "word": "podcasts",
+      "start": 111.12,
+      "end": 111.44,
+      "probability": 0.9732
+    },
+    {
+      "word": "that",
+      "start": 111.44,
+      "end": 111.74,
+      "probability": 0.9918
+    },
+    {
+      "word": "aren't",
+      "start": 111.74,
+      "end": 111.88,
+      "probability": 0.9945
+    },
+    {
+      "word": "necessarily",
+      "start": 111.88,
+      "end": 112.26,
+      "probability": 0.9978
+    },
+    {
+      "word": "in",
+      "start": 112.26,
+      "end": 112.38,
+      "probability": 0.6154
+    },
+    {
+      "word": "a",
+      "start": 112.38,
+      "end": 112.46,
+      "probability": 0.9816
+    },
+    {
+      "word": "directory.",
+      "start": 112.46,
+      "end": 112.88,
+      "probability": 0.9918
+    },
+    {
+      "word": "And",
+      "start": 113.22,
+      "end": 113.4,
+      "probability": 0.9205
+    },
+    {
+      "word": "if",
+      "start": 113.4,
+      "end": 113.8,
+      "probability": 0.872
+    },
+    {
+      "word": "you",
+      "start": 113.8,
+      "end": 113.94,
+      "probability": 0.9983
+    },
+    {
+      "word": "are",
+      "start": 113.94,
+      "end": 114.08,
+      "probability": 0.9839
+    },
+    {
+      "word": "a",
+      "start": 114.08,
+      "end": 114.24,
+      "probability": 0.9974
+    },
+    {
+      "word": "bus",
+      "start": 114.24,
+      "end": 114.62,
+      "probability": 0.5121
+    },
+    {
+      "word": "route",
+      "start": 114.62,
+      "end": 114.8,
+      "probability": 0.6618
+    },
+    {
+      "word": "user,",
+      "start": 114.8,
+      "end": 115.24,
+      "probability": 0.9928
+    },
+    {
+      "word": "we",
+      "start": 115.44,
+      "end": 115.52,
+      "probability": 0.995
+    },
+    {
+      "word": "actually",
+      "start": 115.52,
+      "end": 115.84,
+      "probability": 0.9831
+    },
+    {
+      "word": "give",
+      "start": 115.84,
+      "end": 116.06,
+      "probability": 0.9887
+    },
+    {
+      "word": "you",
+      "start": 116.06,
+      "end": 116.24,
+      "probability": 0.9968
+    },
+    {
+      "word": "a",
+      "start": 116.24,
+      "end": 116.38,
+      "probability": 0.9939
+    },
+    {
+      "word": "podcast",
+      "start": 116.38,
+      "end": 116.82,
+      "probability": 0.9757
+    },
+    {
+      "word": "listening",
+      "start": 116.82,
+      "end": 117.32,
+      "probability": 0.9241
+    },
+    {
+      "word": "website,",
+      "start": 117.32,
+      "end": 117.94,
+      "probability": 0.9916
+    },
+    {
+      "word": "all",
+      "start": 118.18,
+      "end": 118.34,
+      "probability": 0.9636
+    },
+    {
+      "word": "your",
+      "start": 118.34,
+      "end": 118.52,
+      "probability": 0.9901
+    },
+    {
+      "word": "own",
+      "start": 118.52,
+      "end": 118.8,
+      "probability": 0.9965
+    },
+    {
+      "word": "for",
+      "start": 118.8,
+      "end": 118.96,
+      "probability": 0.6434
+    },
+    {
+      "word": "your",
+      "start": 118.96,
+      "end": 119.08,
+      "probability": 0.9971
+    },
+    {
+      "word": "podcast.",
+      "start": 119.08,
+      "end": 119.5,
+      "probability": 0.6801
+    },
+    {
+      "word": "So",
+      "start": 119.76,
+      "end": 119.8,
+      "probability": 0.9913
+    },
+    {
+      "word": "people",
+      "start": 119.8,
+      "end": 119.96,
+      "probability": 0.8374
+    },
+    {
+      "word": "can",
+      "start": 119.96,
+      "end": 120.14,
+      "probability": 0.9985
+    },
+    {
+      "word": "listen",
+      "start": 120.14,
+      "end": 120.32,
+      "probability": 0.9882
+    },
+    {
+      "word": "there",
+      "start": 120.32,
+      "end": 120.6,
+      "probability": 0.9826
+    },
+    {
+      "word": "as",
+      "start": 120.6,
+      "end": 120.88,
+      "probability": 0.9716
+    },
+    {
+      "word": "well.",
+      "start": 120.88,
+      "end": 121.08,
+      "probability": 0.9988
+    },
+    {
+      "word": "So",
+      "start": 121.3,
+      "end": 121.38,
+      "probability": 0.9691
+    },
+    {
+      "word": "now",
+      "start": 121.38,
+      "end": 121.5,
+      "probability": 0.9569
+    },
+    {
+      "word": "let's",
+      "start": 121.5,
+      "end": 121.62,
+      "probability": 0.8753
+    },
+    {
+      "word": "know",
+      "start": 121.62,
+      "end": 121.72,
+      "probability": 0.3178
+    },
+    {
+      "word": "what",
+      "start": 121.72,
+      "end": 121.8,
+      "probability": 0.883
+    },
+    {
+      "word": "a",
+      "start": 121.8,
+      "end": 121.84,
+      "probability": 0.9661
+    },
+    {
+      "word": "podcast",
+      "start": 121.84,
+      "end": 122.14,
+      "probability": 0.9938
+    },
+    {
+      "word": "is.",
+      "start": 122.14,
+      "end": 122.52,
+      "probability": 0.9956
+    },
+    {
+      "word": "If",
+      "start": 122.68,
+      "end": 122.8,
+      "probability": 0.9935
+    },
+    {
+      "word": "you're",
+      "start": 122.8,
+      "end": 122.88,
+      "probability": 0.9927
+    },
+    {
+      "word": "interested",
+      "start": 122.88,
+      "end": 123.16,
+      "probability": 0.9994
+    },
+    {
+      "word": "in",
+      "start": 123.16,
+      "end": 123.3,
+      "probability": 0.9968
+    },
+    {
+      "word": "starting",
+      "start": 123.3,
+      "end": 123.78,
+      "probability": 0.9922
+    },
+    {
+      "word": "a",
+      "start": 123.78,
+      "end": 124.04,
+      "probability": 0.9927
+    },
+    {
+      "word": "podcast,",
+      "start": 124.04,
+      "end": 124.44,
+      "probability": 0.9974
+    },
+    {
+      "word": "check",
+      "start": 124.78,
+      "end": 125.0,
+      "probability": 0.9979
+    },
+    {
+      "word": "this",
+      "start": 125.0,
+      "end": 125.2,
+      "probability": 0.9973
+    },
+    {
+      "word": "video",
+      "start": 125.2,
+      "end": 125.48,
+      "probability": 0.999
+    },
+    {
+      "word": "out",
+      "start": 125.48,
+      "end": 125.72,
+      "probability": 0.9989
+    },
+    {
+      "word": "over",
+      "start": 125.72,
+      "end": 126.0,
+      "probability": 0.9838
+    },
+    {
+      "word": "here",
+      "start": 126.0,
+      "end": 126.14,
+      "probability": 0.9991
+    },
+    {
+      "word": "that's",
+      "start": 126.14,
+      "end": 126.36,
+      "probability": 0.9541
+    },
+    {
+      "word": "going",
+      "start": 126.36,
+      "end": 126.46,
+      "probability": 0.6938
+    },
+    {
+      "word": "to",
+      "start": 126.46,
+      "end": 126.54,
+      "probability": 0.9985
+    },
+    {
+      "word": "give",
+      "start": 126.54,
+      "end": 126.64,
+      "probability": 0.9988
+    },
+    {
+      "word": "you",
+      "start": 126.64,
+      "end": 126.8,
+      "probability": 0.9981
+    },
+    {
+      "word": "all",
+      "start": 126.8,
+      "end": 127.0,
+      "probability": 0.9986
+    },
+    {
+      "word": "the",
+      "start": 127.0,
+      "end": 127.14,
+      "probability": 0.9977
+    },
+    {
+      "word": "information",
+      "start": 127.14,
+      "end": 127.66,
+      "probability": 0.9997
+    },
+    {
+      "word": "that",
+      "start": 127.66,
+      "end": 127.84,
+      "probability": 0.9965
+    },
+    {
+      "word": "you",
+      "start": 127.84,
+      "end": 128.0,
+      "probability": 0.9995
+    },
+    {
+      "word": "need",
+      "start": 128.0,
+      "end": 128.14,
+      "probability": 0.9935
+    },
+    {
+      "word": "to",
+      "start": 128.14,
+      "end": 128.3,
+      "probability": 0.9982
+    },
+    {
+      "word": "know",
+      "start": 128.3,
+      "end": 128.42,
+      "probability": 0.9991
+    },
+    {
+      "word": "to",
+      "start": 128.42,
+      "end": 128.58,
+      "probability": 0.993
+    },
+    {
+      "word": "start",
+      "start": 128.58,
+      "end": 128.82,
+      "probability": 0.998
+    },
+    {
+      "word": "a",
+      "start": 128.82,
+      "end": 128.94,
+      "probability": 0.9751
+    },
+    {
+      "word": "podcast.",
+      "start": 128.94,
+      "end": 129.36,
+      "probability": 0.9985
+    },
+    {
+      "word": "We",
+      "start": 129.74,
+      "end": 129.96,
+      "probability": 0.9969
+    },
+    {
+      "word": "hope",
+      "start": 129.96,
+      "end": 130.1,
+      "probability": 0.9984
+    },
+    {
+      "word": "this",
+      "start": 130.1,
+      "end": 130.28,
+      "probability": 0.9966
+    },
+    {
+      "word": "video",
+      "start": 130.28,
+      "end": 130.52,
+      "probability": 0.9994
+    },
+    {
+      "word": "answered",
+      "start": 130.52,
+      "end": 130.8,
+      "probability": 0.9884
+    },
+    {
+      "word": "your",
+      "start": 130.8,
+      "end": 130.98,
+      "probability": 0.9963
+    },
+    {
+      "word": "questions",
+      "start": 130.98,
+      "end": 131.32,
+      "probability": 0.9963
+    },
+    {
+      "word": "about",
+      "start": 131.32,
+      "end": 131.58,
+      "probability": 0.994
+    },
+    {
+      "word": "what",
+      "start": 131.58,
+      "end": 131.84,
+      "probability": 0.9914
+    },
+    {
+      "word": "a",
+      "start": 131.84,
+      "end": 131.94,
+      "probability": 0.9982
+    },
+    {
+      "word": "podcast",
+      "start": 131.94,
+      "end": 132.28,
+      "probability": 0.9978
+    },
+    {
+      "word": "is.",
+      "start": 132.28,
+      "end": 132.78,
+      "probability": 0.9979
+    },
+    {
+      "word": "As",
+      "start": 133.18,
+      "end": 133.46,
+      "probability": 0.9939
+    },
+    {
+      "word": "always,",
+      "start": 133.46,
+      "end": 133.96,
+      "probability": 0.998
+    },
+    {
+      "word": "thanks",
+      "start": 134.22,
+      "end": 134.38,
+      "probability": 0.986
+    },
+    {
+      "word": "for",
+      "start": 134.38,
+      "end": 134.48,
+      "probability": 0.9991
+    },
+    {
+      "word": "watching",
+      "start": 134.48,
+      "end": 134.8,
+      "probability": 0.999
+    },
+    {
+      "word": "and",
+      "start": 134.8,
+      "end": 135.16,
+      "probability": 0.8798
+    },
+    {
+      "word": "keep",
+      "start": 135.16,
+      "end": 135.36,
+      "probability": 0.9954
+    },
+    {
+      "word": "podcasting.",
+      "start": 135.36,
+      "end": 136.06,
+      "probability": 0.9397
+    }
+  ],
+  "segments": [
+    {
+      "id": 0,
+      "seek": 0,
+      "start": 0.0,
+      "end": 3.94,
+      "text": " So whether you've landed on this video because someone suggested a podcast to you and you",
+      "tokens": [
+        50364,
+        407,
+        1968,
+        291,
+        600,
+        15336,
+        322,
+        341,
+        960,
+        570,
+        1580,
+        10945,
+        257,
+        7367,
+        281,
+        291,
+        293,
+        291,
+        50562
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " So",
+          "start": 0.0,
+          "end": 0.16,
+          "probability": 0.7931799292564392
+        },
+        {
+          "word": " whether",
+          "start": 0.16,
+          "end": 0.36,
+          "probability": 0.8936261534690857
+        },
+        {
+          "word": " you've",
+          "start": 0.36,
+          "end": 0.6,
+          "probability": 0.974128931760788
+        },
+        {
+          "word": " landed",
+          "start": 0.6,
+          "end": 0.76,
+          "probability": 0.9690551161766052
+        },
+        {
+          "word": " on",
+          "start": 0.76,
+          "end": 0.96,
+          "probability": 0.9976175427436829
+        },
+        {
+          "word": " this",
+          "start": 0.96,
+          "end": 1.14,
+          "probability": 0.9979879856109619
+        },
+        {
+          "word": " video",
+          "start": 1.14,
+          "end": 1.4,
+          "probability": 0.9990807771682739
+        },
+        {
+          "word": " because",
+          "start": 1.4,
+          "end": 1.8,
+          "probability": 0.8998230695724487
+        },
+        {
+          "word": " someone",
+          "start": 1.8,
+          "end": 2.2,
+          "probability": 0.9848724603652954
+        },
+        {
+          "word": " suggested",
+          "start": 2.2,
+          "end": 2.52,
+          "probability": 0.9978834986686707
+        },
+        {
+          "word": " a",
+          "start": 2.52,
+          "end": 2.78,
+          "probability": 0.9962478280067444
+        },
+        {
+          "word": " podcast",
+          "start": 2.78,
+          "end": 3.1,
+          "probability": 0.9960387945175171
+        },
+        {
+          "word": " to",
+          "start": 3.1,
+          "end": 3.44,
+          "probability": 0.9979357719421387
+        },
+        {
+          "word": " you",
+          "start": 3.44,
+          "end": 3.64,
+          "probability": 0.9953948855400085
+        },
+        {
+          "word": " and",
+          "start": 3.64,
+          "end": 3.82,
+          "probability": 0.8678438067436218
+        },
+        {
+          "word": " you",
+          "start": 3.82,
+          "end": 3.94,
+          "probability": 0.9975246787071228
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "seek": 0,
+      "start": 3.94,
+      "end": 7.06,
+      "text": " work quite sure what they were talking about or you've heard about a ton of people starting",
+      "tokens": [
+        50562,
+        589,
+        1596,
+        988,
+        437,
+        436,
+        645,
+        1417,
+        466,
+        420,
+        291,
+        600,
+        2198,
+        466,
+        257,
+        2952,
+        295,
+        561,
+        2891,
+        50720
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " work",
+          "start": 3.94,
+          "end": 4.1,
+          "probability": 0.1261945366859436
+        },
+        {
+          "word": " quite",
+          "start": 4.1,
+          "end": 4.26,
+          "probability": 0.8837489485740662
+        },
+        {
+          "word": " sure",
+          "start": 4.26,
+          "end": 4.4,
+          "probability": 0.9253849387168884
+        },
+        {
+          "word": " what",
+          "start": 4.4,
+          "end": 4.52,
+          "probability": 0.995623767375946
+        },
+        {
+          "word": " they",
+          "start": 4.52,
+          "end": 4.62,
+          "probability": 0.9964995384216309
+        },
+        {
+          "word": " were",
+          "start": 4.62,
+          "end": 4.68,
+          "probability": 0.9892578721046448
+        },
+        {
+          "word": " talking",
+          "start": 4.68,
+          "end": 4.98,
+          "probability": 0.9986953139305115
+        },
+        {
+          "word": " about",
+          "start": 4.98,
+          "end": 5.26,
+          "probability": 0.9993083477020264
+        },
+        {
+          "word": " or",
+          "start": 5.26,
+          "end": 5.54,
+          "probability": 0.6511749029159546
+        },
+        {
+          "word": " you've",
+          "start": 5.54,
+          "end": 5.78,
+          "probability": 0.9877559542655945
+        },
+        {
+          "word": " heard",
+          "start": 5.78,
+          "end": 5.88,
+          "probability": 0.9975065588951111
+        },
+        {
+          "word": " about",
+          "start": 5.88,
+          "end": 6.12,
+          "probability": 0.9972033500671387
+        },
+        {
+          "word": " a",
+          "start": 6.12,
+          "end": 6.28,
+          "probability": 0.9936261177062988
+        },
+        {
+          "word": " ton",
+          "start": 6.28,
+          "end": 6.46,
+          "probability": 0.9962284564971924
+        },
+        {
+          "word": " of",
+          "start": 6.46,
+          "end": 6.58,
+          "probability": 0.9962373971939087
+        },
+        {
+          "word": " people",
+          "start": 6.58,
+          "end": 6.78,
+          "probability": 0.998167872428894
+        },
+        {
+          "word": " starting",
+          "start": 6.78,
+          "end": 7.06,
+          "probability": 0.9790079593658447
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "seek": 0,
+      "start": 7.06,
+      "end": 10.46,
+      "text": " podcasts and you want to know if that's something that you'd be into, but every reason,",
+      "tokens": [
+        50720,
+        24045,
+        293,
+        291,
+        528,
+        281,
+        458,
+        498,
+        300,
+        311,
+        746,
+        300,
+        291,
+        1116,
+        312,
+        666,
+        11,
+        457,
+        633,
+        1778,
+        11,
+        50908
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " podcasts",
+          "start": 7.06,
+          "end": 7.46,
+          "probability": 0.979371190071106
+        },
+        {
+          "word": " and",
+          "start": 7.46,
+          "end": 7.78,
+          "probability": 0.8043016195297241
+        },
+        {
+          "word": " you",
+          "start": 7.78,
+          "end": 7.84,
+          "probability": 0.9971643090248108
+        },
+        {
+          "word": " want",
+          "start": 7.84,
+          "end": 8.02,
+          "probability": 0.9137285351753235
+        },
+        {
+          "word": " to",
+          "start": 8.02,
+          "end": 8.12,
+          "probability": 0.9989452958106995
+        },
+        {
+          "word": " know",
+          "start": 8.12,
+          "end": 8.34,
+          "probability": 0.9992469549179077
+        },
+        {
+          "word": " if",
+          "start": 8.34,
+          "end": 8.56,
+          "probability": 0.967552900314331
+        },
+        {
+          "word": " that's",
+          "start": 8.56,
+          "end": 8.78,
+          "probability": 0.9842329025268555
+        },
+        {
+          "word": " something",
+          "start": 8.78,
+          "end": 8.9,
+          "probability": 0.9981725215911865
+        },
+        {
+          "word": " that",
+          "start": 8.9,
+          "end": 9.02,
+          "probability": 0.9786846041679382
+        },
+        {
+          "word": " you'd",
+          "start": 9.02,
+          "end": 9.22,
+          "probability": 0.9930027425289154
+        },
+        {
+          "word": " be",
+          "start": 9.22,
+          "end": 9.32,
+          "probability": 0.9958256483078003
+        },
+        {
+          "word": " into,",
+          "start": 9.32,
+          "end": 9.64,
+          "probability": 0.9862790107727051
+        },
+        {
+          "word": " but",
+          "start": 9.94,
+          "end": 9.96,
+          "probability": 0.6521866917610168
+        },
+        {
+          "word": " every",
+          "start": 9.96,
+          "end": 10.1,
+          "probability": 0.8835034966468811
+        },
+        {
+          "word": " reason,",
+          "start": 10.1,
+          "end": 10.46,
+          "probability": 0.9830365777015686
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "seek": 0,
+      "start": 10.74,
+      "end": 11.06,
+      "text": " welcome.",
+      "tokens": [
+        50908,
+        2928,
+        13,
+        50958
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " welcome.",
+          "start": 10.74,
+          "end": 11.06,
+          "probability": 0.9366658329963684
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "seek": 0,
+      "start": 11.24,
+      "end": 14.5,
+      "text": " We'd love to help you understand what a podcast is and how they work.",
+      "tokens": [
+        50958,
+        492,
+        1116,
+        959,
+        281,
+        854,
+        291,
+        1223,
+        437,
+        257,
+        7367,
+        307,
+        293,
+        577,
+        436,
+        589,
+        13,
+        51132
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " We'd",
+          "start": 11.24,
+          "end": 11.4,
+          "probability": 0.9674233198165894
+        },
+        {
+          "word": " love",
+          "start": 11.4,
+          "end": 11.54,
+          "probability": 0.9962456822395325
+        },
+        {
+          "word": " to",
+          "start": 11.54,
+          "end": 11.7,
+          "probability": 0.9993332028388977
+        },
+        {
+          "word": " help",
+          "start": 11.7,
+          "end": 11.82,
+          "probability": 0.9980204105377197
+        },
+        {
+          "word": " you",
+          "start": 11.82,
+          "end": 11.94,
+          "probability": 0.9968616962432861
+        },
+        {
+          "word": " understand",
+          "start": 11.94,
+          "end": 12.3,
+          "probability": 0.9941353797912598
+        },
+        {
+          "word": " what",
+          "start": 12.3,
+          "end": 12.46,
+          "probability": 0.995558500289917
+        },
+        {
+          "word": " a",
+          "start": 12.46,
+          "end": 12.5,
+          "probability": 0.9944676160812378
+        },
+        {
+          "word": " podcast",
+          "start": 12.5,
+          "end": 12.82,
+          "probability": 0.9982871413230896
+        },
+        {
+          "word": " is",
+          "start": 12.82,
+          "end": 13.24,
+          "probability": 0.9987229704856873
+        },
+        {
+          "word": " and",
+          "start": 13.24,
+          "end": 13.86,
+          "probability": 0.9303821325302124
+        },
+        {
+          "word": " how",
+          "start": 13.86,
+          "end": 14.14,
+          "probability": 0.9992638230323792
+        },
+        {
+          "word": " they",
+          "start": 14.14,
+          "end": 14.3,
+          "probability": 0.9989166259765625
+        },
+        {
+          "word": " work.",
+          "start": 14.3,
+          "end": 14.5,
+          "probability": 0.9991974234580994
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "seek": 0,
+      "start": 16.94,
+      "end": 17.84,
+      "text": " So what is a podcast?",
+      "tokens": [
+        51132,
+        407,
+        437,
+        307,
+        257,
+        7367,
+        30,
+        51272
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " So",
+          "start": 16.94,
+          "end": 17.34,
+          "probability": 0.7713444232940674
+        },
+        {
+          "word": " what",
+          "start": 17.34,
+          "end": 17.46,
+          "probability": 0.9762577414512634
+        },
+        {
+          "word": " is",
+          "start": 17.46,
+          "end": 17.56,
+          "probability": 0.8991280794143677
+        },
+        {
+          "word": " a",
+          "start": 17.56,
+          "end": 17.56,
+          "probability": 0.9795956015586853
+        },
+        {
+          "word": " podcast?",
+          "start": 17.56,
+          "end": 17.84,
+          "probability": 0.9974563717842102
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "seek": 0,
+      "start": 18.14,
+      "end": 22.26,
+      "text": " A podcast is essentially a series or collection of digital audio files that are made available",
+      "tokens": [
+        51272,
+        316,
+        7367,
+        307,
+        4476,
+        257,
+        2638,
+        420,
+        5765,
+        295,
+        4562,
+        6278,
+        7098,
+        300,
+        366,
+        1027,
+        2435,
+        51480
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " A",
+          "start": 18.14,
+          "end": 18.22,
+          "probability": 0.9523478150367737
+        },
+        {
+          "word": " podcast",
+          "start": 18.22,
+          "end": 18.44,
+          "probability": 0.9982434511184692
+        },
+        {
+          "word": " is",
+          "start": 18.44,
+          "end": 18.64,
+          "probability": 0.9940081834793091
+        },
+        {
+          "word": " essentially",
+          "start": 18.64,
+          "end": 19.02,
+          "probability": 0.9910998940467834
+        },
+        {
+          "word": " a",
+          "start": 19.02,
+          "end": 19.16,
+          "probability": 0.9966172575950623
+        },
+        {
+          "word": " series",
+          "start": 19.16,
+          "end": 19.5,
+          "probability": 0.9788987040519714
+        },
+        {
+          "word": " or",
+          "start": 19.5,
+          "end": 19.64,
+          "probability": 0.9677661061286926
+        },
+        {
+          "word": " collection",
+          "start": 19.64,
+          "end": 19.96,
+          "probability": 0.6818550825119019
+        },
+        {
+          "word": " of",
+          "start": 19.96,
+          "end": 20.26,
+          "probability": 0.9981628060340881
+        },
+        {
+          "word": " digital",
+          "start": 20.26,
+          "end": 20.62,
+          "probability": 0.9968928098678589
+        },
+        {
+          "word": " audio",
+          "start": 20.62,
+          "end": 20.88,
+          "probability": 0.9800217747688293
+        },
+        {
+          "word": " files",
+          "start": 20.88,
+          "end": 21.32,
+          "probability": 0.999231219291687
+        },
+        {
+          "word": " that",
+          "start": 21.32,
+          "end": 21.5,
+          "probability": 0.9975276589393616
+        },
+        {
+          "word": " are",
+          "start": 21.5,
+          "end": 21.58,
+          "probability": 0.9987810254096985
+        },
+        {
+          "word": " made",
+          "start": 21.58,
+          "end": 21.78,
+          "probability": 0.9967119693756104
+        },
+        {
+          "word": " available",
+          "start": 21.78,
+          "end": 22.26,
+          "probability": 0.9990347623825073
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "seek": 0,
+      "start": 22.26,
+      "end": 24.9,
+      "text": " for listening or downloading via the internet.",
+      "tokens": [
+        51480,
+        337,
+        4764,
+        420,
+        32529,
+        5766,
+        264,
+        4705,
+        13,
+        51620
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " for",
+          "start": 22.26,
+          "end": 22.66,
+          "probability": 0.9984652996063232
+        },
+        {
+          "word": " listening",
+          "start": 22.66,
+          "end": 23.06,
+          "probability": 0.9926579594612122
+        },
+        {
+          "word": " or",
+          "start": 23.06,
+          "end": 23.32,
+          "probability": 0.9824100732803345
+        },
+        {
+          "word": " downloading",
+          "start": 23.32,
+          "end": 23.78,
+          "probability": 0.9952291250228882
+        },
+        {
+          "word": " via",
+          "start": 23.78,
+          "end": 24.4,
+          "probability": 0.9463945031166077
+        },
+        {
+          "word": " the",
+          "start": 24.4,
+          "end": 24.52,
+          "probability": 0.9943599104881287
+        },
+        {
+          "word": " internet.",
+          "start": 24.52,
+          "end": 24.9,
+          "probability": 0.7482368350028992
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "seek": 0,
+      "start": 25.02,
+      "end": 26.16,
+      "text": " So that could be a website.",
+      "tokens": [
+        51620,
+        407,
+        300,
+        727,
+        312,
+        257,
+        3144,
+        13,
+        51686
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " So",
+          "start": 25.02,
+          "end": 25.12,
+          "probability": 0.9968030452728271
+        },
+        {
+          "word": " that",
+          "start": 25.12,
+          "end": 25.26,
+          "probability": 0.9950013756752014
+        },
+        {
+          "word": " could",
+          "start": 25.26,
+          "end": 25.4,
+          "probability": 0.9642564654350281
+        },
+        {
+          "word": " be",
+          "start": 25.4,
+          "end": 25.58,
+          "probability": 0.9994213581085205
+        },
+        {
+          "word": " a",
+          "start": 25.58,
+          "end": 25.76,
+          "probability": 0.9972361922264099
+        },
+        {
+          "word": " website.",
+          "start": 25.76,
+          "end": 26.16,
+          "probability": 0.9887556433677673
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "seek": 0,
+      "start": 26.38,
+      "end": 27.54,
+      "text": " It could be a listening app.",
+      "tokens": [
+        51686,
+        467,
+        727,
+        312,
+        257,
+        4764,
+        724,
+        13,
+        51760
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " It",
+          "start": 26.38,
+          "end": 26.48,
+          "probability": 0.9970683455467224
+        },
+        {
+          "word": " could",
+          "start": 26.48,
+          "end": 26.62,
+          "probability": 0.997542142868042
+        },
+        {
+          "word": " be",
+          "start": 26.62,
+          "end": 26.8,
+          "probability": 0.9992490410804749
+        },
+        {
+          "word": " a",
+          "start": 26.8,
+          "end": 26.96,
+          "probability": 0.9958155751228333
+        },
+        {
+          "word": " listening",
+          "start": 26.96,
+          "end": 27.26,
+          "probability": 0.9589500427246094
+        },
+        {
+          "word": " app.",
+          "start": 27.26,
+          "end": 27.54,
+          "probability": 0.9975131750106812
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "seek": 0,
+      "start": 27.54,
+      "end": 28.38,
+      "text": " What have you?",
+      "tokens": [
+        51760,
+        708,
+        362,
+        291,
+        30,
+        51810
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.21919751660577183,
+      "compression_ratio": 1.8024691358024691,
+      "no_speech_prob": 0.005799828562885523,
+      "words": [
+        {
+          "word": " What",
+          "start": 27.54,
+          "end": 27.9,
+          "probability": 0.9698797464370728
+        },
+        {
+          "word": " have",
+          "start": 27.9,
+          "end": 28.14,
+          "probability": 0.8795605301856995
+        },
+        {
+          "word": " you?",
+          "start": 28.14,
+          "end": 28.38,
+          "probability": 0.9917026162147522
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "seek": 2838,
+      "start": 28.38,
+      "end": 33.06,
+      "text": " And so each individual audio file that is uploaded would be considered a podcast episode.",
+      "tokens": [
+        50364,
+        400,
+        370,
+        1184,
+        2609,
+        6278,
+        3991,
+        300,
+        307,
+        17135,
+        576,
+        312,
+        4888,
+        257,
+        7367,
+        3500,
+        13,
+        50616
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.13651363666240984,
+      "compression_ratio": 1.907936507936508,
+      "no_speech_prob": 0.00067797681549564,
+      "words": [
+        {
+          "word": " And",
+          "start": 28.38,
+          "end": 28.54,
+          "probability": 0.34819361567497253
+        },
+        {
+          "word": " so",
+          "start": 28.54,
+          "end": 28.64,
+          "probability": 0.9863835573196411
+        },
+        {
+          "word": " each",
+          "start": 28.64,
+          "end": 29.02,
+          "probability": 0.8239324688911438
+        },
+        {
+          "word": " individual",
+          "start": 29.02,
+          "end": 29.56,
+          "probability": 0.9976133108139038
+        },
+        {
+          "word": " audio",
+          "start": 29.56,
+          "end": 29.84,
+          "probability": 0.9867569208145142
+        },
+        {
+          "word": " file",
+          "start": 29.84,
+          "end": 30.26,
+          "probability": 0.9883930087089539
+        },
+        {
+          "word": " that",
+          "start": 30.26,
+          "end": 30.46,
+          "probability": 0.9890599250793457
+        },
+        {
+          "word": " is",
+          "start": 30.46,
+          "end": 30.62,
+          "probability": 0.9844772815704346
+        },
+        {
+          "word": " uploaded",
+          "start": 30.62,
+          "end": 30.94,
+          "probability": 0.9967783093452454
+        },
+        {
+          "word": " would",
+          "start": 30.94,
+          "end": 31.16,
+          "probability": 0.9811621904373169
+        },
+        {
+          "word": " be",
+          "start": 31.16,
+          "end": 31.28,
+          "probability": 0.9995540976524353
+        },
+        {
+          "word": " considered",
+          "start": 31.28,
+          "end": 31.62,
+          "probability": 0.9985252022743225
+        },
+        {
+          "word": " a",
+          "start": 31.62,
+          "end": 31.82,
+          "probability": 0.9930763244628906
+        },
+        {
+          "word": " podcast",
+          "start": 31.82,
+          "end": 32.22,
+          "probability": 0.9834815859794617
+        },
+        {
+          "word": " episode.",
+          "start": 32.22,
+          "end": 33.06,
+          "probability": 0.9494054913520813
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "seek": 2838,
+      "start": 33.36,
+      "end": 38.18,
+      "text": " And podcasts are typically hosted by a person that leads a conversation that will tell stories",
+      "tokens": [
+        50616,
+        400,
+        24045,
+        366,
+        5850,
+        19204,
+        538,
+        257,
+        954,
+        300,
+        6689,
+        257,
+        3761,
+        300,
+        486,
+        980,
+        3676,
+        50856
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.13651363666240984,
+      "compression_ratio": 1.907936507936508,
+      "no_speech_prob": 0.00067797681549564,
+      "words": [
+        {
+          "word": " And",
+          "start": 33.36,
+          "end": 33.42,
+          "probability": 0.9759004712104797
+        },
+        {
+          "word": " podcasts",
+          "start": 33.42,
+          "end": 33.7,
+          "probability": 0.9659797549247742
+        },
+        {
+          "word": " are",
+          "start": 33.7,
+          "end": 33.94,
+          "probability": 0.9968312382698059
+        },
+        {
+          "word": " typically",
+          "start": 33.94,
+          "end": 34.24,
+          "probability": 0.9986752867698669
+        },
+        {
+          "word": " hosted",
+          "start": 34.24,
+          "end": 34.7,
+          "probability": 0.9914222359657288
+        },
+        {
+          "word": " by",
+          "start": 34.7,
+          "end": 35.0,
+          "probability": 0.9989979863166809
+        },
+        {
+          "word": " a",
+          "start": 35.0,
+          "end": 35.3,
+          "probability": 0.9907301068305969
+        },
+        {
+          "word": " person",
+          "start": 35.3,
+          "end": 35.64,
+          "probability": 0.99847012758255
+        },
+        {
+          "word": " that",
+          "start": 35.64,
+          "end": 35.94,
+          "probability": 0.9652410745620728
+        },
+        {
+          "word": " leads",
+          "start": 35.94,
+          "end": 36.14,
+          "probability": 0.9706028699874878
+        },
+        {
+          "word": " a",
+          "start": 36.14,
+          "end": 36.24,
+          "probability": 0.8399475812911987
+        },
+        {
+          "word": " conversation",
+          "start": 36.24,
+          "end": 36.82,
+          "probability": 0.9993382096290588
+        },
+        {
+          "word": " that",
+          "start": 36.82,
+          "end": 37.46,
+          "probability": 0.6211315989494324
+        },
+        {
+          "word": " will",
+          "start": 37.46,
+          "end": 37.6,
+          "probability": 0.991050124168396
+        },
+        {
+          "word": " tell",
+          "start": 37.6,
+          "end": 37.74,
+          "probability": 0.9981454610824585
+        },
+        {
+          "word": " stories",
+          "start": 37.74,
+          "end": 38.18,
+          "probability": 0.9987596273422241
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "seek": 2838,
+      "start": 38.18,
+      "end": 40.74,
+      "text": " that may report on the news and they are called a podcast host.",
+      "tokens": [
+        50856,
+        300,
+        815,
+        2275,
+        322,
+        264,
+        2583,
+        293,
+        436,
+        366,
+        1219,
+        257,
+        7367,
+        3975,
+        13,
+        50992
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.13651363666240984,
+      "compression_ratio": 1.907936507936508,
+      "no_speech_prob": 0.00067797681549564,
+      "words": [
+        {
+          "word": " that",
+          "start": 38.18,
+          "end": 38.36,
+          "probability": 0.7907235026359558
+        },
+        {
+          "word": " may",
+          "start": 38.36,
+          "end": 38.48,
+          "probability": 0.9865880608558655
+        },
+        {
+          "word": " report",
+          "start": 38.48,
+          "end": 38.68,
+          "probability": 0.9914242625236511
+        },
+        {
+          "word": " on",
+          "start": 38.68,
+          "end": 38.88,
+          "probability": 0.9988501071929932
+        },
+        {
+          "word": " the",
+          "start": 38.88,
+          "end": 38.98,
+          "probability": 0.9987103939056396
+        },
+        {
+          "word": " news",
+          "start": 38.98,
+          "end": 39.22,
+          "probability": 0.9982245564460754
+        },
+        {
+          "word": " and",
+          "start": 39.22,
+          "end": 39.46,
+          "probability": 0.6423560380935669
+        },
+        {
+          "word": " they",
+          "start": 39.46,
+          "end": 39.56,
+          "probability": 0.9942293167114258
+        },
+        {
+          "word": " are",
+          "start": 39.56,
+          "end": 39.66,
+          "probability": 0.9842368960380554
+        },
+        {
+          "word": " called",
+          "start": 39.66,
+          "end": 39.9,
+          "probability": 0.9990782737731934
+        },
+        {
+          "word": " a",
+          "start": 39.9,
+          "end": 39.98,
+          "probability": 0.9672428369522095
+        },
+        {
+          "word": " podcast",
+          "start": 39.98,
+          "end": 40.3,
+          "probability": 0.9861286878585815
+        },
+        {
+          "word": " host.",
+          "start": 40.3,
+          "end": 40.74,
+          "probability": 0.9832214117050171
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "seek": 2838,
+      "start": 41.0,
+      "end": 43.3,
+      "text": " A person who creates a podcast is called a podcaster.",
+      "tokens": [
+        50992,
+        316,
+        954,
+        567,
+        7829,
+        257,
+        7367,
+        307,
+        1219,
+        257,
+        2497,
+        42640,
+        13,
+        51120
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.13651363666240984,
+      "compression_ratio": 1.907936507936508,
+      "no_speech_prob": 0.00067797681549564,
+      "words": [
+        {
+          "word": " A",
+          "start": 41.0,
+          "end": 41.06,
+          "probability": 0.9689475297927856
+        },
+        {
+          "word": " person",
+          "start": 41.06,
+          "end": 41.32,
+          "probability": 0.9997186064720154
+        },
+        {
+          "word": " who",
+          "start": 41.32,
+          "end": 41.48,
+          "probability": 0.9987382292747498
+        },
+        {
+          "word": " creates",
+          "start": 41.48,
+          "end": 41.72,
+          "probability": 0.9967040419578552
+        },
+        {
+          "word": " a",
+          "start": 41.72,
+          "end": 41.84,
+          "probability": 0.9932222366333008
+        },
+        {
+          "word": " podcast",
+          "start": 41.84,
+          "end": 42.18,
+          "probability": 0.9989346861839294
+        },
+        {
+          "word": " is",
+          "start": 42.18,
+          "end": 42.48,
+          "probability": 0.9759932160377502
+        },
+        {
+          "word": " called",
+          "start": 42.48,
+          "end": 42.64,
+          "probability": 0.9912095069885254
+        },
+        {
+          "word": " a",
+          "start": 42.64,
+          "end": 42.76,
+          "probability": 0.9944263696670532
+        },
+        {
+          "word": " podcaster.",
+          "start": 42.76,
+          "end": 43.3,
+          "probability": 0.7864380478858948
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "seek": 2838,
+      "start": 43.5,
+      "end": 47.08,
+      "text": " The best way to think of podcasting is kind of like the Netflix of audio.",
+      "tokens": [
+        51120,
+        440,
+        1151,
+        636,
+        281,
+        519,
+        295,
+        7367,
+        278,
+        307,
+        733,
+        295,
+        411,
+        264,
+        12778,
+        295,
+        6278,
+        13,
+        51302
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.13651363666240984,
+      "compression_ratio": 1.907936507936508,
+      "no_speech_prob": 0.00067797681549564,
+      "words": [
+        {
+          "word": " The",
+          "start": 43.5,
+          "end": 43.6,
+          "probability": 0.9954090714454651
+        },
+        {
+          "word": " best",
+          "start": 43.6,
+          "end": 43.76,
+          "probability": 0.9992367029190063
+        },
+        {
+          "word": " way",
+          "start": 43.76,
+          "end": 43.86,
+          "probability": 0.999352753162384
+        },
+        {
+          "word": " to",
+          "start": 43.86,
+          "end": 43.96,
+          "probability": 0.9995138645172119
+        },
+        {
+          "word": " think",
+          "start": 43.96,
+          "end": 44.12,
+          "probability": 0.9988852143287659
+        },
+        {
+          "word": " of",
+          "start": 44.12,
+          "end": 44.22,
+          "probability": 0.9890433549880981
+        },
+        {
+          "word": " podcasting",
+          "start": 44.22,
+          "end": 44.84,
+          "probability": 0.9802547097206116
+        },
+        {
+          "word": " is",
+          "start": 44.84,
+          "end": 44.98,
+          "probability": 0.9885247349739075
+        },
+        {
+          "word": " kind",
+          "start": 44.98,
+          "end": 45.18,
+          "probability": 0.984715461730957
+        },
+        {
+          "word": " of",
+          "start": 45.18,
+          "end": 45.32,
+          "probability": 0.9985472559928894
+        },
+        {
+          "word": " like",
+          "start": 45.32,
+          "end": 45.68,
+          "probability": 0.9873400330543518
+        },
+        {
+          "word": " the",
+          "start": 45.68,
+          "end": 46.28,
+          "probability": 0.43489643931388855
+        },
+        {
+          "word": " Netflix",
+          "start": 46.28,
+          "end": 46.54,
+          "probability": 0.9839136600494385
+        },
+        {
+          "word": " of",
+          "start": 46.54,
+          "end": 46.8,
+          "probability": 0.9929971098899841
+        },
+        {
+          "word": " audio.",
+          "start": 46.8,
+          "end": 47.08,
+          "probability": 0.987614631652832
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "seek": 2838,
+      "start": 47.26,
+      "end": 50.74,
+      "text": " So you know how you can pick a show on Netflix and just watch the whole show or just watch",
+      "tokens": [
+        51302,
+        407,
+        291,
+        458,
+        577,
+        291,
+        393,
+        1888,
+        257,
+        855,
+        322,
+        12778,
+        293,
+        445,
+        1159,
+        264,
+        1379,
+        855,
+        420,
+        445,
+        1159,
+        51482
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.13651363666240984,
+      "compression_ratio": 1.907936507936508,
+      "no_speech_prob": 0.00067797681549564,
+      "words": [
+        {
+          "word": " So",
+          "start": 47.26,
+          "end": 47.36,
+          "probability": 0.9802317023277283
+        },
+        {
+          "word": " you",
+          "start": 47.36,
+          "end": 47.42,
+          "probability": 0.9263198375701904
+        },
+        {
+          "word": " know",
+          "start": 47.42,
+          "end": 47.5,
+          "probability": 0.9926080703735352
+        },
+        {
+          "word": " how",
+          "start": 47.5,
+          "end": 47.6,
+          "probability": 0.9344414472579956
+        },
+        {
+          "word": " you",
+          "start": 47.6,
+          "end": 47.66,
+          "probability": 0.9968486428260803
+        },
+        {
+          "word": " can",
+          "start": 47.66,
+          "end": 47.76,
+          "probability": 0.997007429599762
+        },
+        {
+          "word": " pick",
+          "start": 47.76,
+          "end": 47.92,
+          "probability": 0.9697095155715942
+        },
+        {
+          "word": " a",
+          "start": 47.92,
+          "end": 48.04,
+          "probability": 0.9987038373947144
+        },
+        {
+          "word": " show",
+          "start": 48.04,
+          "end": 48.22,
+          "probability": 0.9983205199241638
+        },
+        {
+          "word": " on",
+          "start": 48.22,
+          "end": 48.56,
+          "probability": 0.9966248273849487
+        },
+        {
+          "word": " Netflix",
+          "start": 48.56,
+          "end": 48.84,
+          "probability": 0.996442973613739
+        },
+        {
+          "word": " and",
+          "start": 48.84,
+          "end": 49.3,
+          "probability": 0.9469307661056519
+        },
+        {
+          "word": " just",
+          "start": 49.3,
+          "end": 49.48,
+          "probability": 0.9991217255592346
+        },
+        {
+          "word": " watch",
+          "start": 49.48,
+          "end": 49.76,
+          "probability": 0.9959927201271057
+        },
+        {
+          "word": " the",
+          "start": 49.76,
+          "end": 49.94,
+          "probability": 0.9969086050987244
+        },
+        {
+          "word": " whole",
+          "start": 49.94,
+          "end": 50.06,
+          "probability": 0.996800422668457
+        },
+        {
+          "word": " show",
+          "start": 50.06,
+          "end": 50.28,
+          "probability": 0.9992672801017761
+        },
+        {
+          "word": " or",
+          "start": 50.28,
+          "end": 50.44,
+          "probability": 0.9659109115600586
+        },
+        {
+          "word": " just",
+          "start": 50.44,
+          "end": 50.54,
+          "probability": 0.9990801811218262
+        },
+        {
+          "word": " watch",
+          "start": 50.54,
+          "end": 50.74,
+          "probability": 0.9986844658851624
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "seek": 2838,
+      "start": 50.74,
+      "end": 51.62,
+      "text": " a few episodes.",
+      "tokens": [
+        51482,
+        257,
+        1326,
+        9313,
+        13,
+        51532
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.13651363666240984,
+      "compression_ratio": 1.907936507936508,
+      "no_speech_prob": 0.00067797681549564,
+      "words": [
+        {
+          "word": " a",
+          "start": 50.74,
+          "end": 50.88,
+          "probability": 0.9987654685974121
+        },
+        {
+          "word": " few",
+          "start": 50.88,
+          "end": 51.02,
+          "probability": 0.9992424249649048
+        },
+        {
+          "word": " episodes.",
+          "start": 51.02,
+          "end": 51.62,
+          "probability": 0.9993108510971069
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "seek": 2838,
+      "start": 51.84,
+      "end": 52.8,
+      "text": " Podcasting is very similar.",
+      "tokens": [
+        51532,
+        29972,
+        278,
+        307,
+        588,
+        2531,
+        13,
+        51594
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.13651363666240984,
+      "compression_ratio": 1.907936507936508,
+      "no_speech_prob": 0.00067797681549564,
+      "words": [
+        {
+          "word": " Podcasting",
+          "start": 51.84,
+          "end": 52.24,
+          "probability": 0.9319021999835968
+        },
+        {
+          "word": " is",
+          "start": 52.24,
+          "end": 52.3,
+          "probability": 0.9981690645217896
+        },
+        {
+          "word": " very",
+          "start": 52.3,
+          "end": 52.48,
+          "probability": 0.9990843534469604
+        },
+        {
+          "word": " similar.",
+          "start": 52.48,
+          "end": 52.8,
+          "probability": 0.999377429485321
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "seek": 2838,
+      "start": 53.02,
+      "end": 56.96,
+      "text": " You can pick a show and decide you want to listen to all the episodes they have available",
+      "tokens": [
+        51594,
+        509,
+        393,
+        1888,
+        257,
+        855,
+        293,
+        4536,
+        291,
+        528,
+        281,
+        2140,
+        281,
+        439,
+        264,
+        9313,
+        436,
+        362,
+        2435,
+        51796
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.13651363666240984,
+      "compression_ratio": 1.907936507936508,
+      "no_speech_prob": 0.00067797681549564,
+      "words": [
+        {
+          "word": " You",
+          "start": 53.02,
+          "end": 53.06,
+          "probability": 0.9949252605438232
+        },
+        {
+          "word": " can",
+          "start": 53.06,
+          "end": 53.14,
+          "probability": 0.9982032775878906
+        },
+        {
+          "word": " pick",
+          "start": 53.14,
+          "end": 53.26,
+          "probability": 0.9859859943389893
+        },
+        {
+          "word": " a",
+          "start": 53.26,
+          "end": 53.38,
+          "probability": 0.9978273510932922
+        },
+        {
+          "word": " show",
+          "start": 53.38,
+          "end": 53.6,
+          "probability": 0.9981160163879395
+        },
+        {
+          "word": " and",
+          "start": 53.6,
+          "end": 53.88,
+          "probability": 0.9910949468612671
+        },
+        {
+          "word": " decide",
+          "start": 53.88,
+          "end": 54.14,
+          "probability": 0.9984050393104553
+        },
+        {
+          "word": " you",
+          "start": 54.14,
+          "end": 54.42,
+          "probability": 0.9786387085914612
+        },
+        {
+          "word": " want",
+          "start": 54.42,
+          "end": 54.62,
+          "probability": 0.998860239982605
+        },
+        {
+          "word": " to",
+          "start": 54.62,
+          "end": 54.92,
+          "probability": 0.9992013573646545
+        },
+        {
+          "word": " listen",
+          "start": 54.92,
+          "end": 55.18,
+          "probability": 0.9973537921905518
+        },
+        {
+          "word": " to",
+          "start": 55.18,
+          "end": 55.48,
+          "probability": 0.99967360496521
+        },
+        {
+          "word": " all",
+          "start": 55.48,
+          "end": 55.96,
+          "probability": 0.9951406717300415
+        },
+        {
+          "word": " the",
+          "start": 55.96,
+          "end": 56.08,
+          "probability": 0.9964162111282349
+        },
+        {
+          "word": " episodes",
+          "start": 56.08,
+          "end": 56.36,
+          "probability": 0.9970237612724304
+        },
+        {
+          "word": " they",
+          "start": 56.36,
+          "end": 56.56,
+          "probability": 0.9601001143455505
+        },
+        {
+          "word": " have",
+          "start": 56.56,
+          "end": 56.62,
+          "probability": 0.9915830492973328
+        },
+        {
+          "word": " available",
+          "start": 56.62,
+          "end": 56.96,
+          "probability": 0.9995369911193848
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "seek": 5696,
+      "start": 56.96,
+      "end": 59.64,
+      "text": " or you can just listen to one or two of the episodes that they have available.",
+      "tokens": [
+        50372,
+        420,
+        291,
+        393,
+        445,
+        2140,
+        281,
+        472,
+        420,
+        732,
+        295,
+        264,
+        9313,
+        300,
+        436,
+        362,
+        2435,
+        13,
+        50508
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.19432408758934508,
+      "compression_ratio": 1.7651006711409396,
+      "no_speech_prob": 0.01411242876201868,
+      "words": [
+        {
+          "word": " or",
+          "start": 56.96,
+          "end": 57.18,
+          "probability": 0.6053333878517151
+        },
+        {
+          "word": " you",
+          "start": 57.18,
+          "end": 57.3,
+          "probability": 0.9697704911231995
+        },
+        {
+          "word": " can",
+          "start": 57.3,
+          "end": 57.42,
+          "probability": 0.9937961101531982
+        },
+        {
+          "word": " just",
+          "start": 57.42,
+          "end": 57.62,
+          "probability": 0.9710062146186829
+        },
+        {
+          "word": " listen",
+          "start": 57.62,
+          "end": 57.92,
+          "probability": 0.9935252666473389
+        },
+        {
+          "word": " to",
+          "start": 57.92,
+          "end": 58.1,
+          "probability": 0.9960242509841919
+        },
+        {
+          "word": " one",
+          "start": 58.1,
+          "end": 58.28,
+          "probability": 0.9789882898330688
+        },
+        {
+          "word": " or",
+          "start": 58.28,
+          "end": 58.36,
+          "probability": 0.9955678582191467
+        },
+        {
+          "word": " two",
+          "start": 58.36,
+          "end": 58.5,
+          "probability": 0.9963924288749695
+        },
+        {
+          "word": " of",
+          "start": 58.5,
+          "end": 58.66,
+          "probability": 0.9895042181015015
+        },
+        {
+          "word": " the",
+          "start": 58.66,
+          "end": 58.68,
+          "probability": 0.998576283454895
+        },
+        {
+          "word": " episodes",
+          "start": 58.68,
+          "end": 58.94,
+          "probability": 0.9951890707015991
+        },
+        {
+          "word": " that",
+          "start": 58.94,
+          "end": 59.12,
+          "probability": 0.8141863346099854
+        },
+        {
+          "word": " they",
+          "start": 59.12,
+          "end": 59.22,
+          "probability": 0.985421895980835
+        },
+        {
+          "word": " have",
+          "start": 59.22,
+          "end": 59.32,
+          "probability": 0.9873300790786743
+        },
+        {
+          "word": " available.",
+          "start": 59.32,
+          "end": 59.64,
+          "probability": 0.9990197420120239
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "seek": 5696,
+      "start": 59.84,
+      "end": 61.9,
+      "text": " The thing is this is audio on your time.",
+      "tokens": [
+        50508,
+        440,
+        551,
+        307,
+        341,
+        307,
+        6278,
+        322,
+        428,
+        565,
+        13,
+        50618
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.19432408758934508,
+      "compression_ratio": 1.7651006711409396,
+      "no_speech_prob": 0.01411242876201868,
+      "words": [
+        {
+          "word": " The",
+          "start": 59.84,
+          "end": 59.86,
+          "probability": 0.9830060601234436
+        },
+        {
+          "word": " thing",
+          "start": 59.86,
+          "end": 60.02,
+          "probability": 0.9964666366577148
+        },
+        {
+          "word": " is",
+          "start": 60.02,
+          "end": 60.18,
+          "probability": 0.9970114231109619
+        },
+        {
+          "word": " this",
+          "start": 60.18,
+          "end": 60.34,
+          "probability": 0.46387022733688354
+        },
+        {
+          "word": " is",
+          "start": 60.34,
+          "end": 60.5,
+          "probability": 0.9965062141418457
+        },
+        {
+          "word": " audio",
+          "start": 60.5,
+          "end": 60.88,
+          "probability": 0.9279403686523438
+        },
+        {
+          "word": " on",
+          "start": 60.88,
+          "end": 61.2,
+          "probability": 0.991148829460144
+        },
+        {
+          "word": " your",
+          "start": 61.2,
+          "end": 61.42,
+          "probability": 0.9883487224578857
+        },
+        {
+          "word": " time.",
+          "start": 61.42,
+          "end": 61.9,
+          "probability": 0.9924904704093933
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "seek": 5696,
+      "start": 64.32,
+      "end": 65.74,
+      "text": " So how do podcasts work?",
+      "tokens": [
+        50744,
+        407,
+        577,
+        360,
+        24045,
+        589,
+        30,
+        50812
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.19432408758934508,
+      "compression_ratio": 1.7651006711409396,
+      "no_speech_prob": 0.01411242876201868,
+      "words": [
+        {
+          "word": " So",
+          "start": 64.32,
+          "end": 64.72,
+          "probability": 0.48714253306388855
+        },
+        {
+          "word": " how",
+          "start": 64.72,
+          "end": 64.86,
+          "probability": 0.9279525279998779
+        },
+        {
+          "word": " do",
+          "start": 64.86,
+          "end": 64.92,
+          "probability": 0.6848028898239136
+        },
+        {
+          "word": " podcasts",
+          "start": 64.92,
+          "end": 65.26,
+          "probability": 0.987712562084198
+        },
+        {
+          "word": " work?",
+          "start": 65.26,
+          "end": 65.74,
+          "probability": 0.9967455863952637
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "seek": 5696,
+      "start": 65.98,
+      "end": 69.86,
+      "text": " Well, if you were to create a podcast, you'd upload audio, get a hosting site to make it",
+      "tokens": [
+        50812,
+        1042,
+        11,
+        498,
+        291,
+        645,
+        281,
+        1884,
+        257,
+        7367,
+        11,
+        291,
+        1116,
+        6580,
+        6278,
+        11,
+        483,
+        257,
+        16058,
+        3621,
+        281,
+        652,
+        309,
+        51010
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.19432408758934508,
+      "compression_ratio": 1.7651006711409396,
+      "no_speech_prob": 0.01411242876201868,
+      "words": [
+        {
+          "word": " Well,",
+          "start": 65.98,
+          "end": 66.06,
+          "probability": 0.9655694961547852
+        },
+        {
+          "word": " if",
+          "start": 66.08,
+          "end": 66.22,
+          "probability": 0.9952627420425415
+        },
+        {
+          "word": " you",
+          "start": 66.22,
+          "end": 66.28,
+          "probability": 0.9991573095321655
+        },
+        {
+          "word": " were",
+          "start": 66.28,
+          "end": 66.34,
+          "probability": 0.9908635020256042
+        },
+        {
+          "word": " to",
+          "start": 66.34,
+          "end": 66.42,
+          "probability": 0.999692440032959
+        },
+        {
+          "word": " create",
+          "start": 66.42,
+          "end": 66.58,
+          "probability": 0.9983922839164734
+        },
+        {
+          "word": " a",
+          "start": 66.58,
+          "end": 66.66,
+          "probability": 0.9992935657501221
+        },
+        {
+          "word": " podcast,",
+          "start": 66.66,
+          "end": 67.02,
+          "probability": 0.9982489347457886
+        },
+        {
+          "word": " you'd",
+          "start": 67.24,
+          "end": 67.38,
+          "probability": 0.9910382628440857
+        },
+        {
+          "word": " upload",
+          "start": 67.38,
+          "end": 67.68,
+          "probability": 0.9977265000343323
+        },
+        {
+          "word": " audio,",
+          "start": 67.68,
+          "end": 68.18,
+          "probability": 0.99204021692276
+        },
+        {
+          "word": " get",
+          "start": 68.56,
+          "end": 68.68,
+          "probability": 0.9974330067634583
+        },
+        {
+          "word": " a",
+          "start": 68.68,
+          "end": 68.78,
+          "probability": 0.9950672388076782
+        },
+        {
+          "word": " hosting",
+          "start": 68.78,
+          "end": 69.08,
+          "probability": 0.9904176592826843
+        },
+        {
+          "word": " site",
+          "start": 69.08,
+          "end": 69.42,
+          "probability": 0.9989172220230103
+        },
+        {
+          "word": " to",
+          "start": 69.42,
+          "end": 69.62,
+          "probability": 0.9378350377082825
+        },
+        {
+          "word": " make",
+          "start": 69.62,
+          "end": 69.74,
+          "probability": 0.9994261264801025
+        },
+        {
+          "word": " it",
+          "start": 69.74,
+          "end": 69.86,
+          "probability": 0.9996080994606018
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "seek": 5696,
+      "start": 69.86,
+      "end": 70.2,
+      "text": " available.",
+      "tokens": [
+        51010,
+        2435,
+        13,
+        51060
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.19432408758934508,
+      "compression_ratio": 1.7651006711409396,
+      "no_speech_prob": 0.01411242876201868,
+      "words": [
+        {
+          "word": " available.",
+          "start": 69.86,
+          "end": 70.2,
+          "probability": 0.9997155070304871
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "seek": 5696,
+      "start": 70.5,
+      "end": 73.34,
+      "text": " And when you do that, your hosting site would create an RSS feed.",
+      "tokens": [
+        51060,
+        400,
+        562,
+        291,
+        360,
+        300,
+        11,
+        428,
+        16058,
+        3621,
+        576,
+        1884,
+        364,
+        25855,
+        50,
+        3154,
+        13,
+        51194
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.19432408758934508,
+      "compression_ratio": 1.7651006711409396,
+      "no_speech_prob": 0.01411242876201868,
+      "words": [
+        {
+          "word": " And",
+          "start": 70.5,
+          "end": 70.74,
+          "probability": 0.9890835881233215
+        },
+        {
+          "word": " when",
+          "start": 70.74,
+          "end": 70.9,
+          "probability": 0.9953275918960571
+        },
+        {
+          "word": " you",
+          "start": 70.9,
+          "end": 71.04,
+          "probability": 0.9994624257087708
+        },
+        {
+          "word": " do",
+          "start": 71.04,
+          "end": 71.22,
+          "probability": 0.9977499842643738
+        },
+        {
+          "word": " that,",
+          "start": 71.22,
+          "end": 71.42,
+          "probability": 0.9983592629432678
+        },
+        {
+          "word": " your",
+          "start": 71.5,
+          "end": 71.56,
+          "probability": 0.9784061908721924
+        },
+        {
+          "word": " hosting",
+          "start": 71.56,
+          "end": 71.82,
+          "probability": 0.9985743761062622
+        },
+        {
+          "word": " site",
+          "start": 71.82,
+          "end": 72.04,
+          "probability": 0.9982874989509583
+        },
+        {
+          "word": " would",
+          "start": 72.04,
+          "end": 72.16,
+          "probability": 0.9825566411018372
+        },
+        {
+          "word": " create",
+          "start": 72.16,
+          "end": 72.4,
+          "probability": 0.9987704157829285
+        },
+        {
+          "word": " an",
+          "start": 72.4,
+          "end": 72.58,
+          "probability": 0.9805147051811218
+        },
+        {
+          "word": " RSS",
+          "start": 72.58,
+          "end": 73.12,
+          "probability": 0.737858772277832
+        },
+        {
+          "word": " feed.",
+          "start": 73.12,
+          "end": 73.34,
+          "probability": 0.29993101954460144
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "seek": 5696,
+      "start": 73.56,
+      "end": 75.48,
+      "text": " And that just stands for real simple syndication.",
+      "tokens": [
+        51194,
+        400,
+        300,
+        445,
+        7382,
+        337,
+        957,
+        2199,
+        15198,
+        8758,
+        13,
+        51306
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.19432408758934508,
+      "compression_ratio": 1.7651006711409396,
+      "no_speech_prob": 0.01411242876201868,
+      "words": [
+        {
+          "word": " And",
+          "start": 73.56,
+          "end": 73.64,
+          "probability": 0.9913005232810974
+        },
+        {
+          "word": " that",
+          "start": 73.64,
+          "end": 73.78,
+          "probability": 0.9977602958679199
+        },
+        {
+          "word": " just",
+          "start": 73.78,
+          "end": 73.94,
+          "probability": 0.9982351064682007
+        },
+        {
+          "word": " stands",
+          "start": 73.94,
+          "end": 74.12,
+          "probability": 0.9906002283096313
+        },
+        {
+          "word": " for",
+          "start": 74.12,
+          "end": 74.32,
+          "probability": 0.9988133907318115
+        },
+        {
+          "word": " real",
+          "start": 74.32,
+          "end": 74.52,
+          "probability": 0.5336361527442932
+        },
+        {
+          "word": " simple",
+          "start": 74.52,
+          "end": 74.9,
+          "probability": 0.9007896184921265
+        },
+        {
+          "word": " syndication.",
+          "start": 74.9,
+          "end": 75.48,
+          "probability": 0.9937237799167633
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "seek": 5696,
+      "start": 75.82,
+      "end": 79.32,
+      "text": " All this is is a page of raw data that holds all the information about your podcast.",
+      "tokens": [
+        51306,
+        1057,
+        341,
+        307,
+        307,
+        257,
+        3028,
+        295,
+        8936,
+        1412,
+        300,
+        9190,
+        439,
+        264,
+        1589,
+        466,
+        428,
+        7367,
+        13,
+        51496
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.19432408758934508,
+      "compression_ratio": 1.7651006711409396,
+      "no_speech_prob": 0.01411242876201868,
+      "words": [
+        {
+          "word": " All",
+          "start": 75.82,
+          "end": 75.88,
+          "probability": 0.9788886904716492
+        },
+        {
+          "word": " this",
+          "start": 75.88,
+          "end": 76.0,
+          "probability": 0.9929600358009338
+        },
+        {
+          "word": " is",
+          "start": 76.0,
+          "end": 76.2,
+          "probability": 0.9929418563842773
+        },
+        {
+          "word": " is",
+          "start": 76.2,
+          "end": 76.34,
+          "probability": 0.5833993554115295
+        },
+        {
+          "word": " a",
+          "start": 76.34,
+          "end": 76.42,
+          "probability": 0.9898322820663452
+        },
+        {
+          "word": " page",
+          "start": 76.42,
+          "end": 76.6,
+          "probability": 0.9966005682945251
+        },
+        {
+          "word": " of",
+          "start": 76.6,
+          "end": 76.78,
+          "probability": 0.9980823993682861
+        },
+        {
+          "word": " raw",
+          "start": 76.78,
+          "end": 76.98,
+          "probability": 0.9423671960830688
+        },
+        {
+          "word": " data",
+          "start": 76.98,
+          "end": 77.24,
+          "probability": 0.9996089339256287
+        },
+        {
+          "word": " that",
+          "start": 77.24,
+          "end": 77.52,
+          "probability": 0.9942106008529663
+        },
+        {
+          "word": " holds",
+          "start": 77.52,
+          "end": 77.76,
+          "probability": 0.9986026883125305
+        },
+        {
+          "word": " all",
+          "start": 77.76,
+          "end": 78.02,
+          "probability": 0.9986131191253662
+        },
+        {
+          "word": " the",
+          "start": 78.02,
+          "end": 78.14,
+          "probability": 0.9981970191001892
+        },
+        {
+          "word": " information",
+          "start": 78.14,
+          "end": 78.6,
+          "probability": 0.9996471405029297
+        },
+        {
+          "word": " about",
+          "start": 78.6,
+          "end": 78.82,
+          "probability": 0.9994609951972961
+        },
+        {
+          "word": " your",
+          "start": 78.82,
+          "end": 78.94,
+          "probability": 0.9989493489265442
+        },
+        {
+          "word": " podcast.",
+          "start": 78.94,
+          "end": 79.32,
+          "probability": 0.9702712297439575
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "seek": 5696,
+      "start": 79.58,
+      "end": 83.32,
+      "text": " It's title, the cover art, how many episodes, title episodes, the whole shebang.",
+      "tokens": [
+        51496,
+        467,
+        311,
+        4876,
+        11,
+        264,
+        2060,
+        1523,
+        11,
+        577,
+        867,
+        9313,
+        11,
+        4876,
+        9313,
+        11,
+        264,
+        1379,
+        750,
+        20106,
+        13,
+        51690
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.19432408758934508,
+      "compression_ratio": 1.7651006711409396,
+      "no_speech_prob": 0.01411242876201868,
+      "words": [
+        {
+          "word": " It's",
+          "start": 79.58,
+          "end": 79.74,
+          "probability": 0.9876994490623474
+        },
+        {
+          "word": " title,",
+          "start": 79.74,
+          "end": 80.04,
+          "probability": 0.7634917497634888
+        },
+        {
+          "word": " the",
+          "start": 80.24,
+          "end": 80.28,
+          "probability": 0.5212218165397644
+        },
+        {
+          "word": " cover",
+          "start": 80.28,
+          "end": 80.56,
+          "probability": 0.979973554611206
+        },
+        {
+          "word": " art,",
+          "start": 80.56,
+          "end": 80.9,
+          "probability": 0.9453608989715576
+        },
+        {
+          "word": " how",
+          "start": 81.06,
+          "end": 81.16,
+          "probability": 0.9941101670265198
+        },
+        {
+          "word": " many",
+          "start": 81.16,
+          "end": 81.34,
+          "probability": 0.9988868832588196
+        },
+        {
+          "word": " episodes,",
+          "start": 81.34,
+          "end": 81.76,
+          "probability": 0.9993178844451904
+        },
+        {
+          "word": " title",
+          "start": 81.76,
+          "end": 82.18,
+          "probability": 0.6442437171936035
+        },
+        {
+          "word": " episodes,",
+          "start": 82.18,
+          "end": 82.6,
+          "probability": 0.9936461448669434
+        },
+        {
+          "word": " the",
+          "start": 82.6,
+          "end": 82.86,
+          "probability": 0.9724233150482178
+        },
+        {
+          "word": " whole",
+          "start": 82.86,
+          "end": 83.04,
+          "probability": 0.8445896506309509
+        },
+        {
+          "word": " shebang.",
+          "start": 83.04,
+          "end": 83.32,
+          "probability": 0.7036011666059494
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "seek": 8332,
+      "start": 85.82000000000001,
+      "end": 87.04,
+      "text": " So where can you listen to these things?",
+      "tokens": [
+        50406,
+        407,
+        689,
+        393,
+        291,
+        2140,
+        281,
+        613,
+        721,
+        30,
+        50570
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " So",
+          "start": 85.82000000000001,
+          "end": 86.18,
+          "probability": 0.2803853750228882
+        },
+        {
+          "word": " where",
+          "start": 86.18,
+          "end": 86.3,
+          "probability": 0.7816866040229797
+        },
+        {
+          "word": " can",
+          "start": 86.3,
+          "end": 86.42,
+          "probability": 0.991523265838623
+        },
+        {
+          "word": " you",
+          "start": 86.42,
+          "end": 86.5,
+          "probability": 0.9852005243301392
+        },
+        {
+          "word": " listen",
+          "start": 86.5,
+          "end": 86.64,
+          "probability": 0.9916933178901672
+        },
+        {
+          "word": " to",
+          "start": 86.64,
+          "end": 86.74,
+          "probability": 0.7968427538871765
+        },
+        {
+          "word": " these",
+          "start": 86.74,
+          "end": 86.88,
+          "probability": 0.9773141741752625
+        },
+        {
+          "word": " things?",
+          "start": 86.88,
+          "end": 87.04,
+          "probability": 0.9758391380310059
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "seek": 8332,
+      "start": 87.56,
+      "end": 87.92,
+      "text": " Podcasts.",
+      "tokens": [
+        50570,
+        29972,
+        82,
+        13,
+        50620
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " Podcasts.",
+          "start": 87.56,
+          "end": 87.92,
+          "probability": 0.9489540457725525
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "seek": 8332,
+      "start": 87.96,
+      "end": 89.76,
+      "text": " You can listen to podcasts in a couple of different places.",
+      "tokens": [
+        50620,
+        509,
+        393,
+        2140,
+        281,
+        24045,
+        294,
+        257,
+        1916,
+        295,
+        819,
+        3190,
+        13,
+        50696
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " You",
+          "start": 87.96,
+          "end": 88.0,
+          "probability": 0.7758605480194092
+        },
+        {
+          "word": " can",
+          "start": 88.0,
+          "end": 88.1,
+          "probability": 0.9969845414161682
+        },
+        {
+          "word": " listen",
+          "start": 88.1,
+          "end": 88.24,
+          "probability": 0.983759880065918
+        },
+        {
+          "word": " to",
+          "start": 88.24,
+          "end": 88.36,
+          "probability": 0.9988196492195129
+        },
+        {
+          "word": " podcasts",
+          "start": 88.36,
+          "end": 88.64,
+          "probability": 0.954650342464447
+        },
+        {
+          "word": " in",
+          "start": 88.64,
+          "end": 88.9,
+          "probability": 0.9777206182479858
+        },
+        {
+          "word": " a",
+          "start": 88.9,
+          "end": 88.92,
+          "probability": 0.9978094696998596
+        },
+        {
+          "word": " couple",
+          "start": 88.92,
+          "end": 89.12,
+          "probability": 0.9950594902038574
+        },
+        {
+          "word": " of",
+          "start": 89.12,
+          "end": 89.22,
+          "probability": 0.714091956615448
+        },
+        {
+          "word": " different",
+          "start": 89.22,
+          "end": 89.4,
+          "probability": 0.9942910671234131
+        },
+        {
+          "word": " places.",
+          "start": 89.4,
+          "end": 89.76,
+          "probability": 0.9965986609458923
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "seek": 8332,
+      "start": 89.92,
+      "end": 91.52,
+      "text": " So there are podcast listening apps.",
+      "tokens": [
+        50696,
+        407,
+        456,
+        366,
+        7367,
+        4764,
+        7733,
+        13,
+        50784
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " So",
+          "start": 89.92,
+          "end": 89.98,
+          "probability": 0.9599656462669373
+        },
+        {
+          "word": " there",
+          "start": 89.98,
+          "end": 90.1,
+          "probability": 0.8946099281311035
+        },
+        {
+          "word": " are",
+          "start": 90.1,
+          "end": 90.26,
+          "probability": 0.9954692125320435
+        },
+        {
+          "word": " podcast",
+          "start": 90.26,
+          "end": 90.72,
+          "probability": 0.8182094097137451
+        },
+        {
+          "word": " listening",
+          "start": 90.72,
+          "end": 91.22,
+          "probability": 0.9352249503135681
+        },
+        {
+          "word": " apps.",
+          "start": 91.22,
+          "end": 91.52,
+          "probability": 0.9963403940200806
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "seek": 8332,
+      "start": 91.66,
+      "end": 93.14,
+      "text": " We like to call some of them directories.",
+      "tokens": [
+        50784,
+        492,
+        411,
+        281,
+        818,
+        512,
+        295,
+        552,
+        5391,
+        530,
+        13,
+        50862
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " We",
+          "start": 91.66,
+          "end": 91.74,
+          "probability": 0.9947992563247681
+        },
+        {
+          "word": " like",
+          "start": 91.74,
+          "end": 91.86,
+          "probability": 0.9776042699813843
+        },
+        {
+          "word": " to",
+          "start": 91.86,
+          "end": 92.0,
+          "probability": 0.9993751645088196
+        },
+        {
+          "word": " call",
+          "start": 92.0,
+          "end": 92.14,
+          "probability": 0.9943643808364868
+        },
+        {
+          "word": " some",
+          "start": 92.14,
+          "end": 92.32,
+          "probability": 0.9723862409591675
+        },
+        {
+          "word": " of",
+          "start": 92.32,
+          "end": 92.4,
+          "probability": 0.9981468915939331
+        },
+        {
+          "word": " them",
+          "start": 92.4,
+          "end": 92.52,
+          "probability": 0.9974533915519714
+        },
+        {
+          "word": " directories.",
+          "start": 92.52,
+          "end": 93.14,
+          "probability": 0.8686258792877197
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "seek": 8332,
+      "start": 93.26,
+      "end": 97.4,
+      "text": " Apple podcast is one such Google podcast is another directory, but you can also listen",
+      "tokens": [
+        50862,
+        6373,
+        7367,
+        307,
+        472,
+        1270,
+        3329,
+        7367,
+        307,
+        1071,
+        21120,
+        11,
+        457,
+        291,
+        393,
+        611,
+        2140,
+        51072
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " Apple",
+          "start": 93.26,
+          "end": 93.4,
+          "probability": 0.9413577318191528
+        },
+        {
+          "word": " podcast",
+          "start": 93.4,
+          "end": 93.78,
+          "probability": 0.4113328456878662
+        },
+        {
+          "word": " is",
+          "start": 93.78,
+          "end": 94.18,
+          "probability": 0.9771342873573303
+        },
+        {
+          "word": " one",
+          "start": 94.18,
+          "end": 94.36,
+          "probability": 0.9735157489776611
+        },
+        {
+          "word": " such",
+          "start": 94.36,
+          "end": 94.74,
+          "probability": 0.9901372194290161
+        },
+        {
+          "word": " Google",
+          "start": 94.74,
+          "end": 95.14,
+          "probability": 0.8693822026252747
+        },
+        {
+          "word": " podcast",
+          "start": 95.14,
+          "end": 95.58,
+          "probability": 0.7335134148597717
+        },
+        {
+          "word": " is",
+          "start": 95.58,
+          "end": 95.86,
+          "probability": 0.8424890041351318
+        },
+        {
+          "word": " another",
+          "start": 95.86,
+          "end": 96.02,
+          "probability": 0.9963245987892151
+        },
+        {
+          "word": " directory,",
+          "start": 96.02,
+          "end": 96.54,
+          "probability": 0.9751912951469421
+        },
+        {
+          "word": " but",
+          "start": 96.68,
+          "end": 96.74,
+          "probability": 0.9567162990570068
+        },
+        {
+          "word": " you",
+          "start": 96.74,
+          "end": 96.84,
+          "probability": 0.9986997842788696
+        },
+        {
+          "word": " can",
+          "start": 96.84,
+          "end": 96.92,
+          "probability": 0.9849269390106201
+        },
+        {
+          "word": " also",
+          "start": 96.92,
+          "end": 97.14,
+          "probability": 0.9976456761360168
+        },
+        {
+          "word": " listen",
+          "start": 97.14,
+          "end": 97.4,
+          "probability": 0.9958080053329468
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "seek": 8332,
+      "start": 97.4,
+      "end": 99.14,
+      "text": " to podcasts and a lot of music listening apps.",
+      "tokens": [
+        51072,
+        281,
+        24045,
+        293,
+        257,
+        688,
+        295,
+        1318,
+        4764,
+        7733,
+        13,
+        51164
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " to",
+          "start": 97.4,
+          "end": 97.58,
+          "probability": 0.9995675683021545
+        },
+        {
+          "word": " podcasts",
+          "start": 97.58,
+          "end": 97.9,
+          "probability": 0.9093082547187805
+        },
+        {
+          "word": " and",
+          "start": 97.9,
+          "end": 98.14,
+          "probability": 0.6210074424743652
+        },
+        {
+          "word": " a",
+          "start": 98.14,
+          "end": 98.2,
+          "probability": 0.9967229962348938
+        },
+        {
+          "word": " lot",
+          "start": 98.2,
+          "end": 98.3,
+          "probability": 0.9994361996650696
+        },
+        {
+          "word": " of",
+          "start": 98.3,
+          "end": 98.4,
+          "probability": 0.9988977909088135
+        },
+        {
+          "word": " music",
+          "start": 98.4,
+          "end": 98.6,
+          "probability": 0.9959723353385925
+        },
+        {
+          "word": " listening",
+          "start": 98.6,
+          "end": 98.94,
+          "probability": 0.9844346642494202
+        },
+        {
+          "word": " apps.",
+          "start": 98.94,
+          "end": 99.14,
+          "probability": 0.9442422986030579
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "seek": 8332,
+      "start": 99.36,
+      "end": 104.6,
+      "text": " So Spotify is made podcasts available in their app, Amazon, Stitcher is a podcast specific",
+      "tokens": [
+        51164,
+        407,
+        29036,
+        307,
+        1027,
+        24045,
+        2435,
+        294,
+        641,
+        724,
+        11,
+        6795,
+        11,
+        44871,
+        260,
+        307,
+        257,
+        7367,
+        2685,
+        51434
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " So",
+          "start": 99.36,
+          "end": 99.42,
+          "probability": 0.9919557571411133
+        },
+        {
+          "word": " Spotify",
+          "start": 99.42,
+          "end": 100.02,
+          "probability": 0.9542118310928345
+        },
+        {
+          "word": " is",
+          "start": 100.02,
+          "end": 100.32,
+          "probability": 0.6412477493286133
+        },
+        {
+          "word": " made",
+          "start": 100.32,
+          "end": 100.42,
+          "probability": 0.9978814721107483
+        },
+        {
+          "word": " podcasts",
+          "start": 100.42,
+          "end": 100.84,
+          "probability": 0.7354261875152588
+        },
+        {
+          "word": " available",
+          "start": 100.84,
+          "end": 101.28,
+          "probability": 0.9802020192146301
+        },
+        {
+          "word": " in",
+          "start": 101.28,
+          "end": 101.6,
+          "probability": 0.9316830635070801
+        },
+        {
+          "word": " their",
+          "start": 101.6,
+          "end": 101.78,
+          "probability": 0.9913485646247864
+        },
+        {
+          "word": " app,",
+          "start": 101.78,
+          "end": 102.1,
+          "probability": 0.9870309233665466
+        },
+        {
+          "word": " Amazon,",
+          "start": 102.24,
+          "end": 102.62,
+          "probability": 0.9877135753631592
+        },
+        {
+          "word": " Stitcher",
+          "start": 102.88,
+          "end": 103.42,
+          "probability": 0.9577526748180389
+        },
+        {
+          "word": " is",
+          "start": 103.42,
+          "end": 103.54,
+          "probability": 0.9474639296531677
+        },
+        {
+          "word": " a",
+          "start": 103.54,
+          "end": 103.62,
+          "probability": 0.9939203262329102
+        },
+        {
+          "word": " podcast",
+          "start": 103.62,
+          "end": 104.02,
+          "probability": 0.9880622625350952
+        },
+        {
+          "word": " specific",
+          "start": 104.02,
+          "end": 104.6,
+          "probability": 0.7882508635520935
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "seek": 8332,
+      "start": 104.6,
+      "end": 106.44,
+      "text": " app that you can listen to podcasts on.",
+      "tokens": [
+        51434,
+        724,
+        300,
+        291,
+        393,
+        2140,
+        281,
+        24045,
+        322,
+        13,
+        51534
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " app",
+          "start": 104.6,
+          "end": 104.94,
+          "probability": 0.9958947896957397
+        },
+        {
+          "word": " that",
+          "start": 104.94,
+          "end": 105.12,
+          "probability": 0.9744299054145813
+        },
+        {
+          "word": " you",
+          "start": 105.12,
+          "end": 105.24,
+          "probability": 0.9989190101623535
+        },
+        {
+          "word": " can",
+          "start": 105.24,
+          "end": 105.36,
+          "probability": 0.9992918968200684
+        },
+        {
+          "word": " listen",
+          "start": 105.36,
+          "end": 105.54,
+          "probability": 0.9957446455955505
+        },
+        {
+          "word": " to",
+          "start": 105.54,
+          "end": 105.74,
+          "probability": 0.9996067881584167
+        },
+        {
+          "word": " podcasts",
+          "start": 105.74,
+          "end": 106.04,
+          "probability": 0.8315001726150513
+        },
+        {
+          "word": " on.",
+          "start": 106.04,
+          "end": 106.44,
+          "probability": 0.9794101715087891
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "seek": 8332,
+      "start": 106.58,
+      "end": 109.3,
+      "text": " Some people even have their podcasts embedded on their website.",
+      "tokens": [
+        51534,
+        2188,
+        561,
+        754,
+        362,
+        641,
+        24045,
+        16741,
+        322,
+        641,
+        3144,
+        13,
+        51674
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " Some",
+          "start": 106.58,
+          "end": 106.7,
+          "probability": 0.9960566759109497
+        },
+        {
+          "word": " people",
+          "start": 106.7,
+          "end": 106.96,
+          "probability": 0.9992996454238892
+        },
+        {
+          "word": " even",
+          "start": 106.96,
+          "end": 107.28,
+          "probability": 0.994134247303009
+        },
+        {
+          "word": " have",
+          "start": 107.28,
+          "end": 107.52,
+          "probability": 0.9992241859436035
+        },
+        {
+          "word": " their",
+          "start": 107.52,
+          "end": 107.7,
+          "probability": 0.9984264373779297
+        },
+        {
+          "word": " podcasts",
+          "start": 107.7,
+          "end": 108.06,
+          "probability": 0.8484097123146057
+        },
+        {
+          "word": " embedded",
+          "start": 108.06,
+          "end": 108.52,
+          "probability": 0.9965108036994934
+        },
+        {
+          "word": " on",
+          "start": 108.52,
+          "end": 108.8,
+          "probability": 0.9983088970184326
+        },
+        {
+          "word": " their",
+          "start": 108.8,
+          "end": 108.96,
+          "probability": 0.9989641904830933
+        },
+        {
+          "word": " website.",
+          "start": 108.96,
+          "end": 109.3,
+          "probability": 0.9438295364379883
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "seek": 8332,
+      "start": 109.42,
+      "end": 112.26,
+      "text": " So there are embedded players where you can listen to podcasts that aren't necessarily",
+      "tokens": [
+        51674,
+        407,
+        456,
+        366,
+        16741,
+        4150,
+        689,
+        291,
+        393,
+        2140,
+        281,
+        24045,
+        300,
+        3212,
+        380,
+        4725,
+        51812
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.17298127545250785,
+      "compression_ratio": 2.057823129251701,
+      "no_speech_prob": 0.10725358873605728,
+      "words": [
+        {
+          "word": " So",
+          "start": 109.42,
+          "end": 109.54,
+          "probability": 0.9971152544021606
+        },
+        {
+          "word": " there",
+          "start": 109.54,
+          "end": 109.66,
+          "probability": 0.7405293583869934
+        },
+        {
+          "word": " are",
+          "start": 109.66,
+          "end": 109.78,
+          "probability": 0.9815681576728821
+        },
+        {
+          "word": " embedded",
+          "start": 109.78,
+          "end": 110.04,
+          "probability": 0.9975237250328064
+        },
+        {
+          "word": " players",
+          "start": 110.04,
+          "end": 110.44,
+          "probability": 0.9969711303710938
+        },
+        {
+          "word": " where",
+          "start": 110.44,
+          "end": 110.6,
+          "probability": 0.9416879415512085
+        },
+        {
+          "word": " you",
+          "start": 110.6,
+          "end": 110.66,
+          "probability": 0.9990041851997375
+        },
+        {
+          "word": " can",
+          "start": 110.66,
+          "end": 110.78,
+          "probability": 0.998601496219635
+        },
+        {
+          "word": " listen",
+          "start": 110.78,
+          "end": 110.98,
+          "probability": 0.9962485432624817
+        },
+        {
+          "word": " to",
+          "start": 110.98,
+          "end": 111.12,
+          "probability": 0.999431312084198
+        },
+        {
+          "word": " podcasts",
+          "start": 111.12,
+          "end": 111.44,
+          "probability": 0.9732125997543335
+        },
+        {
+          "word": " that",
+          "start": 111.44,
+          "end": 111.74,
+          "probability": 0.9917623996734619
+        },
+        {
+          "word": " aren't",
+          "start": 111.74,
+          "end": 111.88,
+          "probability": 0.9945335686206818
+        },
+        {
+          "word": " necessarily",
+          "start": 111.88,
+          "end": 112.26,
+          "probability": 0.9978128671646118
+        }
+      ]
+    },
+    {
+      "id": 40,
+      "seek": 11226,
+      "start": 112.26,
+      "end": 112.88,
+      "text": " in a directory.",
+      "tokens": [
+        50364,
+        294,
+        257,
+        21120,
+        13,
+        50414
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.15429173746416647,
+      "compression_ratio": 1.8127340823970037,
+      "no_speech_prob": 0.0239697378128767,
+      "words": [
+        {
+          "word": " in",
+          "start": 112.26,
+          "end": 112.38,
+          "probability": 0.6154429316520691
+        },
+        {
+          "word": " a",
+          "start": 112.38,
+          "end": 112.46,
+          "probability": 0.9816469550132751
+        },
+        {
+          "word": " directory.",
+          "start": 112.46,
+          "end": 112.88,
+          "probability": 0.9917789101600647
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "seek": 11226,
+      "start": 113.22,
+      "end": 118.34,
+      "text": " And if you are a bus route user, we actually give you a podcast listening website, all",
+      "tokens": [
+        50414,
+        400,
+        498,
+        291,
+        366,
+        257,
+        1255,
+        7955,
+        4195,
+        11,
+        321,
+        767,
+        976,
+        291,
+        257,
+        7367,
+        4764,
+        3144,
+        11,
+        439,
+        50668
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.15429173746416647,
+      "compression_ratio": 1.8127340823970037,
+      "no_speech_prob": 0.0239697378128767,
+      "words": [
+        {
+          "word": " And",
+          "start": 113.22,
+          "end": 113.4,
+          "probability": 0.9204953908920288
+        },
+        {
+          "word": " if",
+          "start": 113.4,
+          "end": 113.8,
+          "probability": 0.8720214366912842
+        },
+        {
+          "word": " you",
+          "start": 113.8,
+          "end": 113.94,
+          "probability": 0.9982981085777283
+        },
+        {
+          "word": " are",
+          "start": 113.94,
+          "end": 114.08,
+          "probability": 0.983937680721283
+        },
+        {
+          "word": " a",
+          "start": 114.08,
+          "end": 114.24,
+          "probability": 0.9974379539489746
+        },
+        {
+          "word": " bus",
+          "start": 114.24,
+          "end": 114.62,
+          "probability": 0.5121179819107056
+        },
+        {
+          "word": " route",
+          "start": 114.62,
+          "end": 114.8,
+          "probability": 0.6617579460144043
+        },
+        {
+          "word": " user,",
+          "start": 114.8,
+          "end": 115.24,
+          "probability": 0.9927774667739868
+        },
+        {
+          "word": " we",
+          "start": 115.44,
+          "end": 115.52,
+          "probability": 0.9950084686279297
+        },
+        {
+          "word": " actually",
+          "start": 115.52,
+          "end": 115.84,
+          "probability": 0.9830575585365295
+        },
+        {
+          "word": " give",
+          "start": 115.84,
+          "end": 116.06,
+          "probability": 0.9887378215789795
+        },
+        {
+          "word": " you",
+          "start": 116.06,
+          "end": 116.24,
+          "probability": 0.9967828989028931
+        },
+        {
+          "word": " a",
+          "start": 116.24,
+          "end": 116.38,
+          "probability": 0.9938949942588806
+        },
+        {
+          "word": " podcast",
+          "start": 116.38,
+          "end": 116.82,
+          "probability": 0.9756962656974792
+        },
+        {
+          "word": " listening",
+          "start": 116.82,
+          "end": 117.32,
+          "probability": 0.9241085052490234
+        },
+        {
+          "word": " website,",
+          "start": 117.32,
+          "end": 117.94,
+          "probability": 0.9915834069252014
+        },
+        {
+          "word": " all",
+          "start": 118.18,
+          "end": 118.34,
+          "probability": 0.9635855555534363
+        }
+      ]
+    },
+    {
+      "id": 42,
+      "seek": 11226,
+      "start": 118.34,
+      "end": 119.5,
+      "text": " your own for your podcast.",
+      "tokens": [
+        50668,
+        428,
+        1065,
+        337,
+        428,
+        7367,
+        13,
+        50742
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.15429173746416647,
+      "compression_ratio": 1.8127340823970037,
+      "no_speech_prob": 0.0239697378128767,
+      "words": [
+        {
+          "word": " your",
+          "start": 118.34,
+          "end": 118.52,
+          "probability": 0.9900926947593689
+        },
+        {
+          "word": " own",
+          "start": 118.52,
+          "end": 118.8,
+          "probability": 0.9965260624885559
+        },
+        {
+          "word": " for",
+          "start": 118.8,
+          "end": 118.96,
+          "probability": 0.6434101462364197
+        },
+        {
+          "word": " your",
+          "start": 118.96,
+          "end": 119.08,
+          "probability": 0.9970870614051819
+        },
+        {
+          "word": " podcast.",
+          "start": 119.08,
+          "end": 119.5,
+          "probability": 0.6800757646560669
+        }
+      ]
+    },
+    {
+      "id": 43,
+      "seek": 11226,
+      "start": 119.76,
+      "end": 121.08,
+      "text": " So people can listen there as well.",
+      "tokens": [
+        50742,
+        407,
+        561,
+        393,
+        2140,
+        456,
+        382,
+        731,
+        13,
+        50818
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.15429173746416647,
+      "compression_ratio": 1.8127340823970037,
+      "no_speech_prob": 0.0239697378128767,
+      "words": [
+        {
+          "word": " So",
+          "start": 119.76,
+          "end": 119.8,
+          "probability": 0.9912669062614441
+        },
+        {
+          "word": " people",
+          "start": 119.8,
+          "end": 119.96,
+          "probability": 0.8373546600341797
+        },
+        {
+          "word": " can",
+          "start": 119.96,
+          "end": 120.14,
+          "probability": 0.9985448122024536
+        },
+        {
+          "word": " listen",
+          "start": 120.14,
+          "end": 120.32,
+          "probability": 0.9881722331047058
+        },
+        {
+          "word": " there",
+          "start": 120.32,
+          "end": 120.6,
+          "probability": 0.9825602173805237
+        },
+        {
+          "word": " as",
+          "start": 120.6,
+          "end": 120.88,
+          "probability": 0.9715744853019714
+        },
+        {
+          "word": " well.",
+          "start": 120.88,
+          "end": 121.08,
+          "probability": 0.9988296627998352
+        }
+      ]
+    },
+    {
+      "id": 44,
+      "seek": 11226,
+      "start": 121.3,
+      "end": 122.52,
+      "text": " So now let's know what a podcast is.",
+      "tokens": [
+        50818,
+        407,
+        586,
+        718,
+        311,
+        458,
+        437,
+        257,
+        7367,
+        307,
+        13,
+        50888
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.15429173746416647,
+      "compression_ratio": 1.8127340823970037,
+      "no_speech_prob": 0.0239697378128767,
+      "words": [
+        {
+          "word": " So",
+          "start": 121.3,
+          "end": 121.38,
+          "probability": 0.9690949320793152
+        },
+        {
+          "word": " now",
+          "start": 121.38,
+          "end": 121.5,
+          "probability": 0.9569123983383179
+        },
+        {
+          "word": " let's",
+          "start": 121.5,
+          "end": 121.62,
+          "probability": 0.875287652015686
+        },
+        {
+          "word": " know",
+          "start": 121.62,
+          "end": 121.72,
+          "probability": 0.3178485035896301
+        },
+        {
+          "word": " what",
+          "start": 121.72,
+          "end": 121.8,
+          "probability": 0.8830087780952454
+        },
+        {
+          "word": " a",
+          "start": 121.8,
+          "end": 121.84,
+          "probability": 0.9661155939102173
+        },
+        {
+          "word": " podcast",
+          "start": 121.84,
+          "end": 122.14,
+          "probability": 0.9938327074050903
+        },
+        {
+          "word": " is.",
+          "start": 122.14,
+          "end": 122.52,
+          "probability": 0.9955847859382629
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "seek": 11226,
+      "start": 122.68,
+      "end": 126.46,
+      "text": " If you're interested in starting a podcast, check this video out over here that's going",
+      "tokens": [
+        50888,
+        759,
+        291,
+        434,
+        3102,
+        294,
+        2891,
+        257,
+        7367,
+        11,
+        1520,
+        341,
+        960,
+        484,
+        670,
+        510,
+        300,
+        311,
+        516,
+        51074
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.15429173746416647,
+      "compression_ratio": 1.8127340823970037,
+      "no_speech_prob": 0.0239697378128767,
+      "words": [
+        {
+          "word": " If",
+          "start": 122.68,
+          "end": 122.8,
+          "probability": 0.9935059547424316
+        },
+        {
+          "word": " you're",
+          "start": 122.8,
+          "end": 122.88,
+          "probability": 0.9926656484603882
+        },
+        {
+          "word": " interested",
+          "start": 122.88,
+          "end": 123.16,
+          "probability": 0.999373733997345
+        },
+        {
+          "word": " in",
+          "start": 123.16,
+          "end": 123.3,
+          "probability": 0.9967984557151794
+        },
+        {
+          "word": " starting",
+          "start": 123.3,
+          "end": 123.78,
+          "probability": 0.9921956062316895
+        },
+        {
+          "word": " a",
+          "start": 123.78,
+          "end": 124.04,
+          "probability": 0.9926676154136658
+        },
+        {
+          "word": " podcast,",
+          "start": 124.04,
+          "end": 124.44,
+          "probability": 0.9974076151847839
+        },
+        {
+          "word": " check",
+          "start": 124.78,
+          "end": 125.0,
+          "probability": 0.9978638291358948
+        },
+        {
+          "word": " this",
+          "start": 125.0,
+          "end": 125.2,
+          "probability": 0.9972571730613708
+        },
+        {
+          "word": " video",
+          "start": 125.2,
+          "end": 125.48,
+          "probability": 0.9990013241767883
+        },
+        {
+          "word": " out",
+          "start": 125.48,
+          "end": 125.72,
+          "probability": 0.9989168643951416
+        },
+        {
+          "word": " over",
+          "start": 125.72,
+          "end": 126.0,
+          "probability": 0.9837634563446045
+        },
+        {
+          "word": " here",
+          "start": 126.0,
+          "end": 126.14,
+          "probability": 0.9991129040718079
+        },
+        {
+          "word": " that's",
+          "start": 126.14,
+          "end": 126.36,
+          "probability": 0.9541144371032715
+        },
+        {
+          "word": " going",
+          "start": 126.36,
+          "end": 126.46,
+          "probability": 0.6937721967697144
+        }
+      ]
+    },
+    {
+      "id": 46,
+      "seek": 11226,
+      "start": 126.46,
+      "end": 129.36,
+      "text": " to give you all the information that you need to know to start a podcast.",
+      "tokens": [
+        51074,
+        281,
+        976,
+        291,
+        439,
+        264,
+        1589,
+        300,
+        291,
+        643,
+        281,
+        458,
+        281,
+        722,
+        257,
+        7367,
+        13,
+        51248
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.15429173746416647,
+      "compression_ratio": 1.8127340823970037,
+      "no_speech_prob": 0.0239697378128767,
+      "words": [
+        {
+          "word": " to",
+          "start": 126.46,
+          "end": 126.54,
+          "probability": 0.9984684586524963
+        },
+        {
+          "word": " give",
+          "start": 126.54,
+          "end": 126.64,
+          "probability": 0.9987666606903076
+        },
+        {
+          "word": " you",
+          "start": 126.64,
+          "end": 126.8,
+          "probability": 0.9981305003166199
+        },
+        {
+          "word": " all",
+          "start": 126.8,
+          "end": 127.0,
+          "probability": 0.9986022114753723
+        },
+        {
+          "word": " the",
+          "start": 127.0,
+          "end": 127.14,
+          "probability": 0.997713565826416
+        },
+        {
+          "word": " information",
+          "start": 127.14,
+          "end": 127.66,
+          "probability": 0.9997052550315857
+        },
+        {
+          "word": " that",
+          "start": 127.66,
+          "end": 127.84,
+          "probability": 0.9964792132377625
+        },
+        {
+          "word": " you",
+          "start": 127.84,
+          "end": 128.0,
+          "probability": 0.9995436072349548
+        },
+        {
+          "word": " need",
+          "start": 128.0,
+          "end": 128.14,
+          "probability": 0.9934778213500977
+        },
+        {
+          "word": " to",
+          "start": 128.14,
+          "end": 128.3,
+          "probability": 0.9982011318206787
+        },
+        {
+          "word": " know",
+          "start": 128.3,
+          "end": 128.42,
+          "probability": 0.9990707635879517
+        },
+        {
+          "word": " to",
+          "start": 128.42,
+          "end": 128.58,
+          "probability": 0.9929800629615784
+        },
+        {
+          "word": " start",
+          "start": 128.58,
+          "end": 128.82,
+          "probability": 0.9980465173721313
+        },
+        {
+          "word": " a",
+          "start": 128.82,
+          "end": 128.94,
+          "probability": 0.9750598073005676
+        },
+        {
+          "word": " podcast.",
+          "start": 128.94,
+          "end": 129.36,
+          "probability": 0.9985260963439941
+        }
+      ]
+    },
+    {
+      "id": 47,
+      "seek": 11226,
+      "start": 129.74,
+      "end": 132.78,
+      "text": " We hope this video answered your questions about what a podcast is.",
+      "tokens": [
+        51248,
+        492,
+        1454,
+        341,
+        960,
+        10103,
+        428,
+        1651,
+        466,
+        437,
+        257,
+        7367,
+        307,
+        13,
+        51426
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.15429173746416647,
+      "compression_ratio": 1.8127340823970037,
+      "no_speech_prob": 0.0239697378128767,
+      "words": [
+        {
+          "word": " We",
+          "start": 129.74,
+          "end": 129.96,
+          "probability": 0.996885359287262
+        },
+        {
+          "word": " hope",
+          "start": 129.96,
+          "end": 130.1,
+          "probability": 0.9984446167945862
+        },
+        {
+          "word": " this",
+          "start": 130.1,
+          "end": 130.28,
+          "probability": 0.9965927004814148
+        },
+        {
+          "word": " video",
+          "start": 130.28,
+          "end": 130.52,
+          "probability": 0.9994298815727234
+        },
+        {
+          "word": " answered",
+          "start": 130.52,
+          "end": 130.8,
+          "probability": 0.9884273409843445
+        },
+        {
+          "word": " your",
+          "start": 130.8,
+          "end": 130.98,
+          "probability": 0.9963288903236389
+        },
+        {
+          "word": " questions",
+          "start": 130.98,
+          "end": 131.32,
+          "probability": 0.9963085055351257
+        },
+        {
+          "word": " about",
+          "start": 131.32,
+          "end": 131.58,
+          "probability": 0.9940217137336731
+        },
+        {
+          "word": " what",
+          "start": 131.58,
+          "end": 131.84,
+          "probability": 0.9914280772209167
+        },
+        {
+          "word": " a",
+          "start": 131.84,
+          "end": 131.94,
+          "probability": 0.9982197880744934
+        },
+        {
+          "word": " podcast",
+          "start": 131.94,
+          "end": 132.28,
+          "probability": 0.997812032699585
+        },
+        {
+          "word": " is.",
+          "start": 132.28,
+          "end": 132.78,
+          "probability": 0.9979469180107117
+        }
+      ]
+    },
+    {
+      "id": 48,
+      "seek": 11226,
+      "start": 133.18,
+      "end": 136.06,
+      "text": " As always, thanks for watching and keep podcasting.",
+      "tokens": [
+        51426,
+        1018,
+        1009,
+        11,
+        3231,
+        337,
+        1976,
+        293,
+        1066,
+        7367,
+        278,
+        13,
+        51558
+      ],
+      "temperature": 0.0,
+      "avg_logprob": -0.15429173746416647,
+      "compression_ratio": 1.8127340823970037,
+      "no_speech_prob": 0.0239697378128767,
+      "words": [
+        {
+          "word": " As",
+          "start": 133.18,
+          "end": 133.46,
+          "probability": 0.9938876032829285
+        },
+        {
+          "word": " always,",
+          "start": 133.46,
+          "end": 133.96,
+          "probability": 0.9979714751243591
+        },
+        {
+          "word": " thanks",
+          "start": 134.22,
+          "end": 134.38,
+          "probability": 0.986048698425293
+        },
+        {
+          "word": " for",
+          "start": 134.38,
+          "end": 134.48,
+          "probability": 0.9990527033805847
+        },
+        {
+          "word": " watching",
+          "start": 134.48,
+          "end": 134.8,
+          "probability": 0.9989894032478333
+        },
+        {
+          "word": " and",
+          "start": 134.8,
+          "end": 135.16,
+          "probability": 0.879768431186676
+        },
+        {
+          "word": " keep",
+          "start": 135.16,
+          "end": 135.36,
+          "probability": 0.9953997731208801
+        },
+        {
+          "word": " podcasting.",
+          "start": 135.36,
+          "end": 136.06,
+          "probability": 0.9397121071815491
+        }
+      ]
+    }
+  ]
+}

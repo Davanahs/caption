@@ -1,0 +1,33 @@
+{
+  "clip_path": "d:\\automation video clips\\clipforge\\outputs\\d34750ad-f9e8-44ce-bbc3-2941c91073dd\\clips\\43691cd8-bd54-4d90-a871-b06b743b9949\\final.mp4",
+  "size_bytes": 2374210,
+  "sha256": "2DFE1E81C1D494841C5BD525221288A50121F1567E7073E6E3BCB58EAB43628F",
+  "ffprobe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "index": 0,
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1080,
+        "height": 1920,
+        "pix_fmt": "yuv420p",
+        "r_frame_rate": "30/1"
+      },
+      {
+        "index": 1,
+        "codec_name": "aac",
+        "codec_type": "audio",
+        "r_frame_rate": "0/0"
+      }
+    ],
+    "format": {
+      "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+      "duration": "20.015011",
+      "size": "2374210",
+      "bit_rate": "948971"
+    }
+  },
+  "subtitle_streams_count": 0
+}

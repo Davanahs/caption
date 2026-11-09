@@ -1,0 +1,72 @@
+{
+  "overall_verdict": "FAIL",
+  "disposition": "PARTIALLY VERIFIED (CUT DETECTOR VERIFIED / IDENTITY BENCHMARK BLOCKED ON GROUND TRUTH PROVENANCE)",
+  "duration_sec": 180.0,
+  "metrics": {
+    "shot_precision": {
+      "value": 1.0,
+      "threshold": ">= 0.95",
+      "passed": true
+    },
+    "shot_recall": {
+      "value": 1.0,
+      "threshold": ">= 0.9",
+      "passed": true
+    },
+    "active_speaker_accuracy": {
+      "value": 0.6431,
+      "threshold": ">= 0.92",
+      "passed": false,
+      "note": "Evaluated against independent baseline benchmark ground truth (backend/benchmarks/authentic_podcast_ground_truth.json). Result against modified upload ground truth is 0.5182. Both breach >= 0.92 threshold due to fundamental participant identity inversion and lack of independent audio diarization grounding."
+    },
+    "false_switch_rate": {
+      "value": 0.0,
+      "threshold": "<= 0.05 switches/s",
+      "passed": true
+    },
+    "crop_jitter_rms_px": {
+      "value": 1.75,
+      "threshold": "<= 2.5 px/frame",
+      "passed": true
+    },
+    "manual_review_rate": {
+      "value": 0.0291,
+      "threshold": "<= 0.08",
+      "passed": true
+    }
+  },
+  "media_sha256": "8144a74a30ddebbbdb1946c43bbddd018e4b7891aedd31ddcb846d326ff7e4c0",
+  "media_size_bytes": 243392976,
+  "ground_truth_sha256": "bc563dadc014d2d57e364bb20cceac7eb19f4eb87c0c77eefaa209d85a5b56ea",
+  "input_file": "uploads/authentic_podcast_test.mp4",
+  "ground_truth_file": "backend/benchmarks/authentic_podcast_ground_truth.json",
+  "subtitles_prohibited": true,
+  "output_geometry": "1080x1920",
+  "total_schedule_shots": 93,
+  "rendered_output": {
+    "output_path": "outputs/authentic_podcast_acceptance_rendered.mp4",
+    "file_size_bytes": 57839371,
+    "sha256": "79409f330fefb92e810acd234a60621b2865cdf82aa14455456fdcb1ed3b20b3",
+    "width": 1080,
+    "height": 1920,
+    "aspect_ratio": "9:16",
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "subtitle_stream_count": 0,
+    "zero_subtitles_verified": true
+  },
+  "audit_findings": {
+    "camera_cut_detector": "VERIFIED (100% precision, 100% recall, 0.0s timing error against 21 cuts in first 180s; 93 cuts across entire 981s video)",
+    "benchmark_contamination": "CONFIRMED (uploads/authentic_podcast_ground_truth.json was aligned to model predictions using backend/scripts/align_gt.py; original baseline in backend/benchmarks/authentic_podcast_ground_truth.json inverted left/right identities)",
+    "participant_spatial_grounding": {
+      "screen_left": "Raj Shamani (Host, male, black t-shirt, no glasses)",
+      "screen_right": "Dr. Sweta Adatia (Guest, neurologist, female, glasses, dark blue vest, light pink polo)",
+      "solo_shots_0_to_180s": "100% Dr. Sweta Adatia. Zero solo close-ups of Raj Shamani exist in the first 180s."
+    },
+    "python_runtime": {
+      "windows_host": "Python 3.12.10 (development host CLI)",
+      "docker_backend": "Python 3.11.16 (production container, FROZEN)",
+      "docker_worker": "Python 3.11.16 (production Celery container, FROZEN)"
+    }
+  }
+}

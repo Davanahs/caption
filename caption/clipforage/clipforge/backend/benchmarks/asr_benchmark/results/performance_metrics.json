@@ -1,0 +1,338 @@
+{
+  "benchmark_metadata": {
+    "timestamp": "2026-11-02 01:07:26",
+    "device": "Intel Core 5 210H (8 cores, 12 threads) CPU",
+    "os": "Windows 11 (64-bit)",
+    "whisper_version": "openai-whisper 20250625",
+    "whisper_model": "base (multilingual, 74M params, 139MB)",
+    "whistle_version": "cactus-needle 3.2.9 / Whistle 2.0.0",
+    "whistle_model": "whistle.cact (16.9MB)",
+    "test_videos": {
+      "video1": {
+        "id": "video1_cleantech",
+        "title": "How to generate videos with AI for Movies and Products! | Wan vs Seedance",
+        "category": "Clean Technical Explanation",
+        "audio_path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\audio_video1_cleantech.wav",
+        "keywords": [
+          "Wan",
+          "Seedance",
+          "ComfyUI",
+          "LoRA",
+          "HuggingFace",
+          "diffusion",
+          "checkpoint",
+          "upscaling",
+          "keyframes",
+          "rendering",
+          "motion",
+          "prompt",
+          "latent",
+          "FLUX",
+          "Midjourney",
+          "Kling",
+          "Luma"
+        ]
+      },
+      "video2": {
+        "id": "video2_podcast",
+        "title": "What is a podcast?",
+        "category": "Multi-Speaker Podcast",
+        "audio_path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\audio_video2_podcast.wav",
+        "keywords": [
+          "podcast",
+          "podcasting",
+          "podcasts",
+          "RSS",
+          "feed",
+          "episodes",
+          "subscribers",
+          "iTunes",
+          "Spotify",
+          "microphone",
+          "broadcasting",
+          "audio",
+          "syndication",
+          "Apple",
+          "Google",
+          "download"
+        ]
+      },
+      "video3": {
+        "id": "video3_indian_tech",
+        "title": "Kimi K3 Is INSANE! Can It Beat Claude?",
+        "category": "Difficult Indian-English Technical Content",
+        "audio_path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\audio_video3_indian_tech.wav",
+        "keywords": [
+          "Kimi",
+          "Claude",
+          "Sonnet",
+          "Moonshot",
+          "SWE-bench",
+          "tokens",
+          "reasoning",
+          "benchmark",
+          "context window",
+          "OpenAI",
+          "API",
+          "coding",
+          "Python",
+          "agentic",
+          "pricing",
+          "deepseek",
+          "Chinese"
+        ]
+      }
+    }
+  },
+  "whisper": {
+    "loading": {
+      "cold_load_time_s": 2.3155,
+      "warm_load_time_s": 3.8954,
+      "peak_ram_mb": 646.05
+    },
+    "runs": {
+      "video1": {
+        "duration_s": 619.67,
+        "cold_run": {
+          "run_type": "cold",
+          "prep_time_s": 0.9426,
+          "infer_time_s": 85.3793,
+          "total_time_s": 86.3219,
+          "rtf": 0.1378,
+          "peak_ram_mb": 883.48
+        },
+        "warm_runs": [
+          {
+            "run_type": "warm_run_1",
+            "infer_time_s": 88.3549,
+            "rtf": 0.1426,
+            "peak_ram_mb": 880.0
+          }
+        ],
+        "avg_warm_infer_time_s": 88.3549,
+        "avg_warm_rtf": 0.1426,
+        "words_detected": 1832,
+        "text_length": 9430
+      },
+      "video2": {
+        "duration_s": 138.16,
+        "cold_run": {
+          "run_type": "cold",
+          "prep_time_s": 0.2078,
+          "infer_time_s": 23.0145,
+          "total_time_s": 23.2224,
+          "rtf": 0.1666,
+          "peak_ram_mb": 771.41
+        },
+        "warm_runs": [
+          {
+            "run_type": "warm_run_1",
+            "infer_time_s": 23.3793,
+            "rtf": 0.1692,
+            "peak_ram_mb": 666.79
+          },
+          {
+            "run_type": "warm_run_2",
+            "infer_time_s": 21.2772,
+            "rtf": 0.154,
+            "peak_ram_mb": 666.79
+          },
+          {
+            "run_type": "warm_run_3",
+            "infer_time_s": 21.9348,
+            "rtf": 0.1588,
+            "peak_ram_mb": 548.41
+          }
+        ],
+        "avg_warm_infer_time_s": 22.1971,
+        "avg_warm_rtf": 0.1607,
+        "words_detected": 516,
+        "text_length": 2804
+      },
+      "video3": {
+        "duration_s": 798.33,
+        "cold_run": {
+          "run_type": "cold",
+          "prep_time_s": 0.5823,
+          "infer_time_s": 129.322,
+          "total_time_s": 129.9043,
+          "rtf": 0.162,
+          "peak_ram_mb": 548.44
+        },
+        "warm_runs": [
+          {
+            "run_type": "warm_run_1",
+            "infer_time_s": 123.8794,
+            "rtf": 0.1552,
+            "peak_ram_mb": 483.69
+          }
+        ],
+        "avg_warm_infer_time_s": 123.8794,
+        "avg_warm_rtf": 0.1552,
+        "words_detected": 2691,
+        "text_length": 14017
+      }
+    }
+  },
+  "whistle": {
+    "loading": {
+      "cold_load_time_s": 1.558,
+      "warm_load_time_s": 0.5588,
+      "peak_ram_mb": 446.17
+    },
+    "runs": {
+      "video1": {
+        "duration_s": 619.67,
+        "cold_run": {
+          "run_type": "cold",
+          "infer_time_s": 143.4688,
+          "rtf": 0.2315,
+          "peak_ram_mb": 446.43
+        },
+        "warm_runs": [
+          {
+            "run_type": "warm_run_1",
+            "infer_time_s": 208.6634,
+            "rtf": 0.3367,
+            "peak_ram_mb": 356.68
+          }
+        ],
+        "avg_warm_infer_time_s": 208.6634,
+        "avg_warm_rtf": 0.3367,
+        "words_detected": 1813,
+        "text_length": 9436
+      },
+      "video2": {
+        "duration_s": 138.16,
+        "cold_run": {
+          "run_type": "cold",
+          "infer_time_s": 28.9395,
+          "rtf": 0.2095,
+          "peak_ram_mb": 65.97
+        },
+        "warm_runs": [
+          {
+            "run_type": "warm_run_1",
+            "infer_time_s": 28.9053,
+            "rtf": 0.2092,
+            "peak_ram_mb": 65.99
+          },
+          {
+            "run_type": "warm_run_2",
+            "infer_time_s": 27.1497,
+            "rtf": 0.1965,
+            "peak_ram_mb": 66.18
+          },
+          {
+            "run_type": "warm_run_3",
+            "infer_time_s": 26.7288,
+            "rtf": 0.1935,
+            "peak_ram_mb": 66.19
+          }
+        ],
+        "avg_warm_infer_time_s": 27.5946,
+        "avg_warm_rtf": 0.1997,
+        "words_detected": 508,
+        "text_length": 2794
+      },
+      "video3": {
+        "duration_s": 798.33,
+        "cold_run": {
+          "run_type": "cold",
+          "infer_time_s": 142.7121,
+          "rtf": 0.1788,
+          "peak_ram_mb": 70.38
+        },
+        "warm_runs": [
+          {
+            "run_type": "warm_run_1",
+            "infer_time_s": 140.7263,
+            "rtf": 0.1763,
+            "peak_ram_mb": 70.38
+          }
+        ],
+        "avg_warm_infer_time_s": 140.7263,
+        "avg_warm_rtf": 0.1763,
+        "words_detected": 2689,
+        "text_length": 13845
+      }
+    },
+    "keyword_biased_runs": {
+      "video1": {
+        "keywords": [
+          "Wan",
+          "Seedance",
+          "ComfyUI",
+          "LoRA",
+          "HuggingFace",
+          "diffusion",
+          "checkpoint",
+          "upscaling",
+          "keyframes",
+          "rendering",
+          "motion",
+          "prompt",
+          "latent",
+          "FLUX",
+          "Midjourney",
+          "Kling",
+          "Luma"
+        ],
+        "infer_time_s": 122.5402,
+        "rtf": 0.1978,
+        "words_detected": 1797,
+        "text_length": 9371
+      },
+      "video2": {
+        "keywords": [
+          "podcast",
+          "podcasting",
+          "podcasts",
+          "RSS",
+          "feed",
+          "episodes",
+          "subscribers",
+          "iTunes",
+          "Spotify",
+          "microphone",
+          "broadcasting",
+          "audio",
+          "syndication",
+          "Apple",
+          "Google",
+          "download"
+        ],
+        "infer_time_s": 26.0888,
+        "rtf": 0.1888,
+        "words_detected": 509,
+        "text_length": 2790
+      },
+      "video3": {
+        "keywords": [
+          "Kimi",
+          "Claude",
+          "Sonnet",
+          "Moonshot",
+          "SWE-bench",
+          "tokens",
+          "reasoning",
+          "benchmark",
+          "context window",
+          "OpenAI",
+          "API",
+          "coding",
+          "Python",
+          "agentic",
+          "pricing",
+          "deepseek",
+          "Chinese"
+        ],
+        "infer_time_s": 148.1735,
+        "rtf": 0.1856,
+        "words_detected": 2675,
+        "text_length": 13887
+      }
+    }
+  },
+  "total_experiment_duration_s": 1579.23
+}

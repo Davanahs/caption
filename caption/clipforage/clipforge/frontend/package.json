@@ -1,0 +1,31 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "node --test test/advanced_podcast.test.mjs test/api_contract.test.mjs test/automation_batch_selection.test.mjs test/def_ui_01_numeric_settings.test.mjs test/discovered_video_thumbnails.test.mjs test/layout_modal_optimization.test.mjs test/layout_preview_selector.test.mjs test/layout_selector_standardization.test.mjs test/monitoring_audit_repairs.test.mjs test/phase_2_accessibility.test.mjs test/podcast_async_polling.test.mjs test/podcast_coordinates.test.mjs test/podcast_selection_modal.test.mjs test/process_video_modal.test.mjs test/publish_visual_previews.test.mjs test/routes.test.mjs test/validation.test.mjs",
+    "test:unit": "npm test",
+    "test:browser:mocked": "node --test test/automation_browser_real_verification.test.mjs test/studio_functional.test.mjs",
+    "test:e2e:live": "node --test test/phase_1_2_browser_verification.test.mjs test/phase_2_1_browser_verification.test.mjs test/studio_backend_e2e.test.mjs test/studio_real_browser_e2e.test.mjs"
+  },
+  "dependencies": {
+    "next": "16.2.7",
+    "playwright": "^1.63.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.7",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

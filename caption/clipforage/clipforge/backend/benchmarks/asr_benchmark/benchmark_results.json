@@ -1,0 +1,1240 @@
+{
+  "benchmark_metadata": {
+    "timestamp": "2026-11-02 01:07:26",
+    "device": "Intel Core 5 210H (8 cores, 12 threads) CPU",
+    "os": "Windows 11 (64-bit)",
+    "whisper_version": "openai-whisper 20250625",
+    "whisper_model": "base (multilingual, 74M params, 139MB)",
+    "whistle_version": "cactus-needle 3.2.9 / Whistle 2.0.0",
+    "whistle_model": "whistle.cact (16.9MB)",
+    "test_videos": {
+      "video1": {
+        "id": "video1_cleantech",
+        "title": "How to generate videos with AI for Movies and Products! | Wan vs Seedance",
+        "category": "Clean Technical Explanation",
+        "audio_path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\audio_video1_cleantech.wav",
+        "keywords": [
+          "Wan",
+          "Seedance",
+          "ComfyUI",
+          "LoRA",
+          "HuggingFace",
+          "diffusion",
+          "checkpoint",
+          "upscaling",
+          "keyframes",
+          "rendering",
+          "motion",
+          "prompt",
+          "latent",
+          "FLUX",
+          "Midjourney",
+          "Kling",
+          "Luma"
+        ]
+      },
+      "video2": {
+        "id": "video2_podcast",
+        "title": "What is a podcast?",
+        "category": "Multi-Speaker Podcast",
+        "audio_path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\audio_video2_podcast.wav",
+        "keywords": [
+          "podcast",
+          "podcasting",
+          "podcasts",
+          "RSS",
+          "feed",
+          "episodes",
+          "subscribers",
+          "iTunes",
+          "Spotify",
+          "microphone",
+          "broadcasting",
+          "audio",
+          "syndication",
+          "Apple",
+          "Google",
+          "download"
+        ]
+      },
+      "video3": {
+        "id": "video3_indian_tech",
+        "title": "Kimi K3 Is INSANE! Can It Beat Claude?",
+        "category": "Difficult Indian-English Technical Content",
+        "audio_path": "D:\\automation video clips\\clipforge\\backend\\benchmarks\\asr_benchmark\\data\\audio_video3_indian_tech.wav",
+        "keywords": [
+          "Kimi",
+          "Claude",
+          "Sonnet",
+          "Moonshot",
+          "SWE-bench",
+          "tokens",
+          "reasoning",
+          "benchmark",
+          "context window",
+          "OpenAI",
+          "API",
+          "coding",
+          "Python",
+          "agentic",
+          "pricing",
+          "deepseek",
+          "Chinese"
+        ]
+      }
+    }
+  },
+  "performance_metrics": {
+    "whisper": {
+      "loading": {
+        "cold_load_time_s": 2.3155,
+        "warm_load_time_s": 3.8954,
+        "peak_ram_mb": 646.05
+      },
+      "runs": {
+        "video1": {
+          "duration_s": 619.67,
+          "cold_run": {
+            "run_type": "cold",
+            "prep_time_s": 0.9426,
+            "infer_time_s": 85.3793,
+            "total_time_s": 86.3219,
+            "rtf": 0.1378,
+            "peak_ram_mb": 883.48
+          },
+          "warm_runs": [
+            {
+              "run_type": "warm_run_1",
+              "infer_time_s": 88.3549,
+              "rtf": 0.1426,
+              "peak_ram_mb": 880.0
+            }
+          ],
+          "avg_warm_infer_time_s": 88.3549,
+          "avg_warm_rtf": 0.1426,
+          "words_detected": 1832,
+          "text_length": 9430
+        },
+        "video2": {
+          "duration_s": 138.16,
+          "cold_run": {
+            "run_type": "cold",
+            "prep_time_s": 0.2078,
+            "infer_time_s": 23.0145,
+            "total_time_s": 23.2224,
+            "rtf": 0.1666,
+            "peak_ram_mb": 771.41
+          },
+          "warm_runs": [
+            {
+              "run_type": "warm_run_1",
+              "infer_time_s": 23.3793,
+              "rtf": 0.1692,
+              "peak_ram_mb": 666.79
+            },
+            {
+              "run_type": "warm_run_2",
+              "infer_time_s": 21.2772,
+              "rtf": 0.154,
+              "peak_ram_mb": 666.79
+            },
+            {
+              "run_type": "warm_run_3",
+              "infer_time_s": 21.9348,
+              "rtf": 0.1588,
+              "peak_ram_mb": 548.41
+            }
+          ],
+          "avg_warm_infer_time_s": 22.1971,
+          "avg_warm_rtf": 0.1607,
+          "words_detected": 516,
+          "text_length": 2804
+        },
+        "video3": {
+          "duration_s": 798.33,
+          "cold_run": {
+            "run_type": "cold",
+            "prep_time_s": 0.5823,
+            "infer_time_s": 129.322,
+            "total_time_s": 129.9043,
+            "rtf": 0.162,
+            "peak_ram_mb": 548.44
+          },
+          "warm_runs": [
+            {
+              "run_type": "warm_run_1",
+              "infer_time_s": 123.8794,
+              "rtf": 0.1552,
+              "peak_ram_mb": 483.69
+            }
+          ],
+          "avg_warm_infer_time_s": 123.8794,
+          "avg_warm_rtf": 0.1552,
+          "words_detected": 2691,
+          "text_length": 14017
+        }
+      }
+    },
+    "whistle": {
+      "loading": {
+        "cold_load_time_s": 1.558,
+        "warm_load_time_s": 0.5588,
+        "peak_ram_mb": 446.17
+      },
+      "runs": {
+        "video1": {
+          "duration_s": 619.67,
+          "cold_run": {
+            "run_type": "cold",
+            "infer_time_s": 143.4688,
+            "rtf": 0.2315,
+            "peak_ram_mb": 446.43
+          },
+          "warm_runs": [
+            {
+              "run_type": "warm_run_1",
+              "infer_time_s": 208.6634,
+              "rtf": 0.3367,
+              "peak_ram_mb": 356.68
+            }
+          ],
+          "avg_warm_infer_time_s": 208.6634,
+          "avg_warm_rtf": 0.3367,
+          "words_detected": 1813,
+          "text_length": 9436
+        },
+        "video2": {
+          "duration_s": 138.16,
+          "cold_run": {
+            "run_type": "cold",
+            "infer_time_s": 28.9395,
+            "rtf": 0.2095,
+            "peak_ram_mb": 65.97
+          },
+          "warm_runs": [
+            {
+              "run_type": "warm_run_1",
+              "infer_time_s": 28.9053,
+              "rtf": 0.2092,
+              "peak_ram_mb": 65.99
+            },
+            {
+              "run_type": "warm_run_2",
+              "infer_time_s": 27.1497,
+              "rtf": 0.1965,
+              "peak_ram_mb": 66.18
+            },
+            {
+              "run_type": "warm_run_3",
+              "infer_time_s": 26.7288,
+              "rtf": 0.1935,
+              "peak_ram_mb": 66.19
+            }
+          ],
+          "avg_warm_infer_time_s": 27.5946,
+          "avg_warm_rtf": 0.1997,
+          "words_detected": 508,
+          "text_length": 2794
+        },
+        "video3": {
+          "duration_s": 798.33,
+          "cold_run": {
+            "run_type": "cold",
+            "infer_time_s": 142.7121,
+            "rtf": 0.1788,
+            "peak_ram_mb": 70.38
+          },
+          "warm_runs": [
+            {
+              "run_type": "warm_run_1",
+              "infer_time_s": 140.7263,
+              "rtf": 0.1763,
+              "peak_ram_mb": 70.38
+            }
+          ],
+          "avg_warm_infer_time_s": 140.7263,
+          "avg_warm_rtf": 0.1763,
+          "words_detected": 2689,
+          "text_length": 13845
+        }
+      },
+      "keyword_biased_runs": {
+        "video1": {
+          "keywords": [
+            "Wan",
+            "Seedance",
+            "ComfyUI",
+            "LoRA",
+            "HuggingFace",
+            "diffusion",
+            "checkpoint",
+            "upscaling",
+            "keyframes",
+            "rendering",
+            "motion",
+            "prompt",
+            "latent",
+            "FLUX",
+            "Midjourney",
+            "Kling",
+            "Luma"
+          ],
+          "infer_time_s": 122.5402,
+          "rtf": 0.1978,
+          "words_detected": 1797,
+          "text_length": 9371
+        },
+        "video2": {
+          "keywords": [
+            "podcast",
+            "podcasting",
+            "podcasts",
+            "RSS",
+            "feed",
+            "episodes",
+            "subscribers",
+            "iTunes",
+            "Spotify",
+            "microphone",
+            "broadcasting",
+            "audio",
+            "syndication",
+            "Apple",
+            "Google",
+            "download"
+          ],
+          "infer_time_s": 26.0888,
+          "rtf": 0.1888,
+          "words_detected": 509,
+          "text_length": 2790
+        },
+        "video3": {
+          "keywords": [
+            "Kimi",
+            "Claude",
+            "Sonnet",
+            "Moonshot",
+            "SWE-bench",
+            "tokens",
+            "reasoning",
+            "benchmark",
+            "context window",
+            "OpenAI",
+            "API",
+            "coding",
+            "Python",
+            "agentic",
+            "pricing",
+            "deepseek",
+            "Chinese"
+          ],
+          "infer_time_s": 148.1735,
+          "rtf": 0.1856,
+          "words_detected": 2675,
+          "text_length": 13887
+        }
+      }
+    },
+    "total_experiment_duration_s": 1579.23
+  },
+  "accuracy_evaluations": {
+    "video1": {
+      "num_reference_words": 1767,
+      "num_reference_chars": 9150,
+      "normalized_metrics": {
+        "whisper_base": {
+          "wer": 9.85,
+          "cer": 4.85,
+          "substitutions": 115,
+          "deletions": 6,
+          "insertions": 53,
+          "hits": 1646
+        },
+        "cactus_whistle_baseline": {
+          "wer": 17.26,
+          "cer": 8.68,
+          "substitutions": 175,
+          "deletions": 42,
+          "insertions": 88,
+          "hits": 1550
+        },
+        "cactus_whistle_biased": {
+          "wer": 16.13,
+          "cer": 8.23,
+          "substitutions": 160,
+          "deletions": 47,
+          "insertions": 78,
+          "hits": 1560
+        }
+      },
+      "raw_metrics": {
+        "whisper_base_raw_wer": 13.32,
+        "whistle_baseline_raw_wer": 28.51
+      },
+      "technical_vocabulary": {
+        "terms_tested": 18,
+        "whisper_accuracy_pct": 72.22,
+        "whistle_baseline_accuracy_pct": 50.0,
+        "whistle_biased_accuracy_pct": 61.11,
+        "details": {
+          "whisper": {
+            "AI": {
+              "expected": "AI",
+              "found": true
+            },
+            "Wan": {
+              "expected": "Wan",
+              "found": true
+            },
+            "Seedance": {
+              "expected": "Seedance",
+              "found": false
+            },
+            "TopView": {
+              "expected": "TopView",
+              "found": false
+            },
+            "Nishant": {
+              "expected": "Nishant",
+              "found": false
+            },
+            "Alibaba": {
+              "expected": "Alibaba",
+              "found": true
+            },
+            "ByteDance": {
+              "expected": "ByteDance",
+              "found": false
+            },
+            "TikTok": {
+              "expected": "TikTok",
+              "found": true
+            },
+            "Google": {
+              "expected": "Google",
+              "found": true
+            },
+            "photorealistic": {
+              "expected": "photorealistic",
+              "found": true
+            },
+            "Maya": {
+              "expected": "Maya",
+              "found": true
+            },
+            "kurta": {
+              "expected": "kurta",
+              "found": true
+            },
+            "prompt": {
+              "expected": "prompt",
+              "found": true
+            },
+            "duration": {
+              "expected": "duration",
+              "found": true
+            },
+            "resolution": {
+              "expected": "resolution",
+              "found": true
+            },
+            "product": {
+              "expected": "product",
+              "found": true
+            },
+            "e-commerce": {
+              "expected": "e-commerce",
+              "found": false
+            },
+            "cinematic": {
+              "expected": "cinematic",
+              "found": true
+            }
+          },
+          "whistle": {
+            "AI": {
+              "expected": "AI",
+              "found": true
+            },
+            "Wan": {
+              "expected": "Wan",
+              "found": true
+            },
+            "Seedance": {
+              "expected": "Seedance",
+              "found": false
+            },
+            "TopView": {
+              "expected": "TopView",
+              "found": false
+            },
+            "Nishant": {
+              "expected": "Nishant",
+              "found": false
+            },
+            "Alibaba": {
+              "expected": "Alibaba",
+              "found": true
+            },
+            "ByteDance": {
+              "expected": "ByteDance",
+              "found": false
+            },
+            "TikTok": {
+              "expected": "TikTok",
+              "found": false
+            },
+            "Google": {
+              "expected": "Google",
+              "found": true
+            },
+            "photorealistic": {
+              "expected": "photorealistic",
+              "found": false
+            },
+            "Maya": {
+              "expected": "Maya",
+              "found": false
+            },
+            "kurta": {
+              "expected": "kurta",
+              "found": false
+            },
+            "prompt": {
+              "expected": "prompt",
+              "found": true
+            },
+            "duration": {
+              "expected": "duration",
+              "found": true
+            },
+            "resolution": {
+              "expected": "resolution",
+              "found": true
+            },
+            "product": {
+              "expected": "product",
+              "found": true
+            },
+            "e-commerce": {
+              "expected": "e-commerce",
+              "found": false
+            },
+            "cinematic": {
+              "expected": "cinematic",
+              "found": true
+            }
+          },
+          "whistle_biased": {
+            "AI": {
+              "expected": "AI",
+              "found": true
+            },
+            "Wan": {
+              "expected": "Wan",
+              "found": true
+            },
+            "Seedance": {
+              "expected": "Seedance",
+              "found": true
+            },
+            "TopView": {
+              "expected": "TopView",
+              "found": false
+            },
+            "Nishant": {
+              "expected": "Nishant",
+              "found": false
+            },
+            "Alibaba": {
+              "expected": "Alibaba",
+              "found": true
+            },
+            "ByteDance": {
+              "expected": "ByteDance",
+              "found": false
+            },
+            "TikTok": {
+              "expected": "TikTok",
+              "found": false
+            },
+            "Google": {
+              "expected": "Google",
+              "found": true
+            },
+            "photorealistic": {
+              "expected": "photorealistic",
+              "found": false
+            },
+            "Maya": {
+              "expected": "Maya",
+              "found": true
+            },
+            "kurta": {
+              "expected": "kurta",
+              "found": false
+            },
+            "prompt": {
+              "expected": "prompt",
+              "found": true
+            },
+            "duration": {
+              "expected": "duration",
+              "found": true
+            },
+            "resolution": {
+              "expected": "resolution",
+              "found": true
+            },
+            "product": {
+              "expected": "product",
+              "found": true
+            },
+            "e-commerce": {
+              "expected": "e-commerce",
+              "found": false
+            },
+            "cinematic": {
+              "expected": "cinematic",
+              "found": true
+            }
+          }
+        }
+      },
+      "number_recognition": {
+        "numbers_tested": 11,
+        "whisper_accuracy_pct": 81.82,
+        "whistle_baseline_accuracy_pct": 72.73,
+        "whistle_biased_accuracy_pct": 72.73
+      }
+    },
+    "video2": {
+      "num_reference_words": 516,
+      "num_reference_chars": 2753,
+      "normalized_metrics": {
+        "whisper_base": {
+          "wer": 2.13,
+          "cer": 1.05,
+          "substitutions": 9,
+          "deletions": 1,
+          "insertions": 1,
+          "hits": 506
+        },
+        "cactus_whistle_baseline": {
+          "wer": 5.81,
+          "cer": 2.4,
+          "substitutions": 18,
+          "deletions": 10,
+          "insertions": 2,
+          "hits": 488
+        },
+        "cactus_whistle_biased": {
+          "wer": 5.62,
+          "cer": 2.25,
+          "substitutions": 18,
+          "deletions": 9,
+          "insertions": 2,
+          "hits": 489
+        }
+      },
+      "raw_metrics": {
+        "whisper_base_raw_wer": 4.46,
+        "whistle_baseline_raw_wer": 9.3
+      },
+      "technical_vocabulary": {
+        "terms_tested": 16,
+        "whisper_accuracy_pct": 93.75,
+        "whistle_baseline_accuracy_pct": 87.5,
+        "whistle_biased_accuracy_pct": 87.5,
+        "details": {
+          "whisper": {
+            "podcast": {
+              "expected": "podcast",
+              "found": true
+            },
+            "podcasting": {
+              "expected": "podcasting",
+              "found": true
+            },
+            "podcasts": {
+              "expected": "podcasts",
+              "found": true
+            },
+            "podcaster": {
+              "expected": "podcaster",
+              "found": true
+            },
+            "audio": {
+              "expected": "audio",
+              "found": true
+            },
+            "Netflix": {
+              "expected": "Netflix",
+              "found": true
+            },
+            "RSS": {
+              "expected": "RSS",
+              "found": true
+            },
+            "feed": {
+              "expected": "feed",
+              "found": true
+            },
+            "Syndication": {
+              "expected": "Syndication",
+              "found": true
+            },
+            "Apple": {
+              "expected": "Apple",
+              "found": true
+            },
+            "Google": {
+              "expected": "Google",
+              "found": true
+            },
+            "Spotify": {
+              "expected": "Spotify",
+              "found": true
+            },
+            "Amazon": {
+              "expected": "Amazon",
+              "found": true
+            },
+            "Stitcher": {
+              "expected": "Stitcher",
+              "found": true
+            },
+            "Buzzsprout": {
+              "expected": "Buzzsprout",
+              "found": false
+            },
+            "directory": {
+              "expected": "directory",
+              "found": true
+            }
+          },
+          "whistle": {
+            "podcast": {
+              "expected": "podcast",
+              "found": true
+            },
+            "podcasting": {
+              "expected": "podcasting",
+              "found": true
+            },
+            "podcasts": {
+              "expected": "podcasts",
+              "found": true
+            },
+            "podcaster": {
+              "expected": "podcaster",
+              "found": true
+            },
+            "audio": {
+              "expected": "audio",
+              "found": true
+            },
+            "Netflix": {
+              "expected": "Netflix",
+              "found": true
+            },
+            "RSS": {
+              "expected": "RSS",
+              "found": false
+            },
+            "feed": {
+              "expected": "feed",
+              "found": true
+            },
+            "Syndication": {
+              "expected": "Syndication",
+              "found": true
+            },
+            "Apple": {
+              "expected": "Apple",
+              "found": true
+            },
+            "Google": {
+              "expected": "Google",
+              "found": true
+            },
+            "Spotify": {
+              "expected": "Spotify",
+              "found": true
+            },
+            "Amazon": {
+              "expected": "Amazon",
+              "found": true
+            },
+            "Stitcher": {
+              "expected": "Stitcher",
+              "found": true
+            },
+            "Buzzsprout": {
+              "expected": "Buzzsprout",
+              "found": false
+            },
+            "directory": {
+              "expected": "directory",
+              "found": true
+            }
+          },
+          "whistle_biased": {
+            "podcast": {
+              "expected": "podcast",
+              "found": true
+            },
+            "podcasting": {
+              "expected": "podcasting",
+              "found": true
+            },
+            "podcasts": {
+              "expected": "podcasts",
+              "found": true
+            },
+            "podcaster": {
+              "expected": "podcaster",
+              "found": true
+            },
+            "audio": {
+              "expected": "audio",
+              "found": true
+            },
+            "Netflix": {
+              "expected": "Netflix",
+              "found": true
+            },
+            "RSS": {
+              "expected": "RSS",
+              "found": false
+            },
+            "feed": {
+              "expected": "feed",
+              "found": true
+            },
+            "Syndication": {
+              "expected": "Syndication",
+              "found": true
+            },
+            "Apple": {
+              "expected": "Apple",
+              "found": true
+            },
+            "Google": {
+              "expected": "Google",
+              "found": true
+            },
+            "Spotify": {
+              "expected": "Spotify",
+              "found": true
+            },
+            "Amazon": {
+              "expected": "Amazon",
+              "found": true
+            },
+            "Stitcher": {
+              "expected": "Stitcher",
+              "found": true
+            },
+            "Buzzsprout": {
+              "expected": "Buzzsprout",
+              "found": false
+            },
+            "directory": {
+              "expected": "directory",
+              "found": true
+            }
+          }
+        }
+      },
+      "number_recognition": {
+        "numbers_tested": 3,
+        "whisper_accuracy_pct": 100.0,
+        "whistle_baseline_accuracy_pct": 100.0,
+        "whistle_biased_accuracy_pct": 100.0
+      }
+    },
+    "video3": {
+      "num_reference_words": 2667,
+      "num_reference_chars": 13564,
+      "normalized_metrics": {
+        "whisper_base": {
+          "wer": 4.16,
+          "cer": 1.75,
+          "substitutions": 69,
+          "deletions": 11,
+          "insertions": 31,
+          "hits": 2587
+        },
+        "cactus_whistle_baseline": {
+          "wer": 10.99,
+          "cer": 5.37,
+          "substitutions": 192,
+          "deletions": 36,
+          "insertions": 65,
+          "hits": 2439
+        },
+        "cactus_whistle_biased": {
+          "wer": 9.6,
+          "cer": 4.84,
+          "substitutions": 164,
+          "deletions": 40,
+          "insertions": 52,
+          "hits": 2463
+        }
+      },
+      "raw_metrics": {
+        "whisper_base_raw_wer": 12.11,
+        "whistle_baseline_raw_wer": 20.5
+      },
+      "technical_vocabulary": {
+        "terms_tested": 22,
+        "whisper_accuracy_pct": 77.27,
+        "whistle_baseline_accuracy_pct": 72.73,
+        "whistle_biased_accuracy_pct": 77.27,
+        "details": {
+          "whisper": {
+            "Anthropic": {
+              "expected": "Anthropic",
+              "found": true
+            },
+            "Claude": {
+              "expected": "Claude",
+              "found": true
+            },
+            "Cowork": {
+              "expected": "Cowork",
+              "found": true
+            },
+            "Kimi": {
+              "expected": "Kimi",
+              "found": true
+            },
+            "Moonshot": {
+              "expected": "Moonshot",
+              "found": true
+            },
+            "ChatGPT": {
+              "expected": "ChatGPT",
+              "found": false
+            },
+            "OpenAI": {
+              "expected": "OpenAI",
+              "found": false
+            },
+            "Codex": {
+              "expected": "Codex",
+              "found": true
+            },
+            "Hermes": {
+              "expected": "Hermes",
+              "found": true
+            },
+            "mixture of experts": {
+              "expected": "mixture of experts",
+              "found": false
+            },
+            "context window": {
+              "expected": "context window",
+              "found": true
+            },
+            "Gemini": {
+              "expected": "Gemini",
+              "found": true
+            },
+            "tokens": {
+              "expected": "tokens",
+              "found": true
+            },
+            "open weights": {
+              "expected": "open weights",
+              "found": true
+            },
+            "compute": {
+              "expected": "compute",
+              "found": true
+            },
+            "Swarm": {
+              "expected": "Swarm",
+              "found": true
+            },
+            "Gamma": {
+              "expected": "Gamma",
+              "found": true
+            },
+            "Perplexity": {
+              "expected": "Perplexity",
+              "found": false
+            },
+            "Sonnet": {
+              "expected": "Sonnet",
+              "found": true
+            },
+            "Opus": {
+              "expected": "Opus",
+              "found": true
+            },
+            "Figma": {
+              "expected": "Figma",
+              "found": true
+            },
+            "Jio": {
+              "expected": "Jio",
+              "found": false
+            }
+          },
+          "whistle": {
+            "Anthropic": {
+              "expected": "Anthropic",
+              "found": true
+            },
+            "Claude": {
+              "expected": "Claude",
+              "found": true
+            },
+            "Cowork": {
+              "expected": "Cowork",
+              "found": false
+            },
+            "Kimi": {
+              "expected": "Kimi",
+              "found": true
+            },
+            "Moonshot": {
+              "expected": "Moonshot",
+              "found": true
+            },
+            "ChatGPT": {
+              "expected": "ChatGPT",
+              "found": false
+            },
+            "OpenAI": {
+              "expected": "OpenAI",
+              "found": true
+            },
+            "Codex": {
+              "expected": "Codex",
+              "found": true
+            },
+            "Hermes": {
+              "expected": "Hermes",
+              "found": true
+            },
+            "mixture of experts": {
+              "expected": "mixture of experts",
+              "found": false
+            },
+            "context window": {
+              "expected": "context window",
+              "found": true
+            },
+            "Gemini": {
+              "expected": "Gemini",
+              "found": true
+            },
+            "tokens": {
+              "expected": "tokens",
+              "found": true
+            },
+            "open weights": {
+              "expected": "open weights",
+              "found": false
+            },
+            "compute": {
+              "expected": "compute",
+              "found": true
+            },
+            "Swarm": {
+              "expected": "Swarm",
+              "found": true
+            },
+            "Gamma": {
+              "expected": "Gamma",
+              "found": true
+            },
+            "Perplexity": {
+              "expected": "Perplexity",
+              "found": false
+            },
+            "Sonnet": {
+              "expected": "Sonnet",
+              "found": true
+            },
+            "Opus": {
+              "expected": "Opus",
+              "found": true
+            },
+            "Figma": {
+              "expected": "Figma",
+              "found": true
+            },
+            "Jio": {
+              "expected": "Jio",
+              "found": false
+            }
+          },
+          "whistle_biased": {
+            "Anthropic": {
+              "expected": "Anthropic",
+              "found": true
+            },
+            "Claude": {
+              "expected": "Claude",
+              "found": true
+            },
+            "Cowork": {
+              "expected": "Cowork",
+              "found": true
+            },
+            "Kimi": {
+              "expected": "Kimi",
+              "found": true
+            },
+            "Moonshot": {
+              "expected": "Moonshot",
+              "found": true
+            },
+            "ChatGPT": {
+              "expected": "ChatGPT",
+              "found": false
+            },
+            "OpenAI": {
+              "expected": "OpenAI",
+              "found": true
+            },
+            "Codex": {
+              "expected": "Codex",
+              "found": true
+            },
+            "Hermes": {
+              "expected": "Hermes",
+              "found": true
+            },
+            "mixture of experts": {
+              "expected": "mixture of experts",
+              "found": false
+            },
+            "context window": {
+              "expected": "context window",
+              "found": true
+            },
+            "Gemini": {
+              "expected": "Gemini",
+              "found": true
+            },
+            "tokens": {
+              "expected": "tokens",
+              "found": true
+            },
+            "open weights": {
+              "expected": "open weights",
+              "found": false
+            },
+            "compute": {
+              "expected": "compute",
+              "found": true
+            },
+            "Swarm": {
+              "expected": "Swarm",
+              "found": true
+            },
+            "Gamma": {
+              "expected": "Gamma",
+              "found": true
+            },
+            "Perplexity": {
+              "expected": "Perplexity",
+              "found": false
+            },
+            "Sonnet": {
+              "expected": "Sonnet",
+              "found": true
+            },
+            "Opus": {
+              "expected": "Opus",
+              "found": true
+            },
+            "Figma": {
+              "expected": "Figma",
+              "found": true
+            },
+            "Jio": {
+              "expected": "Jio",
+              "found": false
+            }
+          }
+        }
+      },
+      "number_recognition": {
+        "numbers_tested": 10,
+        "whisper_accuracy_pct": 100.0,
+        "whistle_baseline_accuracy_pct": 100.0,
+        "whistle_biased_accuracy_pct": 100.0
+      }
+    }
+  },
+  "corpus_level_summary": {
+    "whisper": {
+      "total_reference_words": 4950,
+      "substitutions": 193,
+      "deletions": 18,
+      "insertions": 85,
+      "hits": 4739,
+      "corpus_wer": 5.98,
+      "total_reference_chars": 25467,
+      "corpus_cer": 2.79
+    },
+    "whistle": {
+      "total_reference_words": 4950,
+      "substitutions": 385,
+      "deletions": 88,
+      "insertions": 155,
+      "hits": 4477,
+      "corpus_wer": 12.69,
+      "total_reference_chars": 25467,
+      "corpus_cer": 6.24
+    },
+    "whistle_biased": {
+      "total_reference_words": 4950,
+      "substitutions": 342,
+      "deletions": 96,
+      "insertions": 132,
+      "hits": 4512,
+      "corpus_wer": 11.52,
+      "total_reference_chars": 25467,
+      "corpus_cer": 5.78
+    }
+  },
+  "timestamp_and_confidence_analysis": {
+    "video1": {
+      "whisper_words_count": 1832,
+      "whisper_monotonic": true,
+      "whisper_avg_probability": 0.8744,
+      "whistle_words_count": 1813,
+      "whistle_monotonic": true,
+      "whistle_avg_probability": 0.921,
+      "whistle_ttft_ms": 3983.7,
+      "whistle_decode_tps": 110.8
+    },
+    "video2": {
+      "whisper_words_count": 516,
+      "whisper_monotonic": true,
+      "whisper_avg_probability": 0.9505,
+      "whistle_words_count": 508,
+      "whistle_monotonic": true,
+      "whistle_avg_probability": 0.9616,
+      "whistle_ttft_ms": 4019.4,
+      "whistle_decode_tps": 116.5
+    },
+    "video3": {
+      "whisper_words_count": 2691,
+      "whisper_monotonic": true,
+      "whisper_avg_probability": 0.9101,
+      "whistle_words_count": 2689,
+      "whistle_monotonic": true,
+      "whistle_avg_probability": 0.9404,
+      "whistle_ttft_ms": 4030.5,
+      "whistle_decode_tps": 127.2
+    }
+  }
+}

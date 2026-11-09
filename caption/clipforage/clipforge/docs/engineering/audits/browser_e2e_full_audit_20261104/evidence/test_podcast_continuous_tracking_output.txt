@@ -1,0 +1,30 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: d:\automation video clips\clipforge\backend
+configfile: pytest.ini
+plugins: anyio-4.13.0, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 12 items
+
+backend\tests\test_podcast_continuous_tracking.py::TestIntraShotCropExpression::test_single_point_or_empty_returns_default PASSED [  8%]
+backend\tests\test_podcast_continuous_tracking.py::TestIntraShotCropExpression::test_constant_points_returns_static_x PASSED [ 16%]
+backend\tests\test_podcast_continuous_tracking.py::TestIntraShotCropExpression::test_linear_interpolation_expression_structure PASSED [ 25%]
+backend\tests\test_podcast_continuous_tracking.py::TestIntraShotCropExpression::test_ffmpeg_evaluates_expression_cleanly PASSED [ 33%]
+backend\tests\test_podcast_continuous_tracking.py::TestContinuousTrajectoryGeneration::test_intra_shot_sampling_produces_multiple_points PASSED [ 41%]
+backend\tests\test_podcast_continuous_tracking.py::TestContinuousTrajectoryGeneration::test_trajectory_contained_within_outer_boundary PASSED [ 50%]
+backend\tests\test_podcast_continuous_tracking.py::TestContinuousTrajectoryGeneration::test_continuous_crop_tracking_follows_moving_participant PASSED [ 58%]
+backend\tests\test_podcast_continuous_tracking.py::TestContinuousTrajectoryGeneration::test_camera_cut_resets_smoother_without_drag PASSED [ 66%]
+backend\tests\test_podcast_continuous_tracking.py::TestContinuousTrajectoryGeneration::test_no_solo_collapse_when_participants_far_apart PASSED [ 75%]
+backend\tests\test_podcast_continuous_tracking.py::TestRealRenderContinuousTracking::test_real_render_executes_with_dynamic_intra_shot_crop PASSED [ 83%]
+backend\tests\test_podcast_continuous_tracking.py::TestRealRenderContinuousTracking::test_rendered_frames_visibly_change_within_same_shot PASSED [ 91%]
+backend\tests\test_podcast_continuous_tracking.py::TestPerformanceBenchmark::test_benchmark_tracking_overhead_is_bounded PASSED [100%]
+
+============================== warnings summary ===============================
+backend\core\config.py:5
+  d:\automation video clips\clipforge\backend\core\config.py:5: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Settings(BaseSettings):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 12 passed, 1 warning in 6.48s ========================
+

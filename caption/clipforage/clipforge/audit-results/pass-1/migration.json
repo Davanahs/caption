@@ -1,0 +1,6 @@
+{
+  "status": "SUCCESS",
+  "steps": {
+    "sqlite_to_postgres": "SUCCESS"
+  }
+}

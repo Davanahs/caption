@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ClipForge Celery Registration & Processing Evidence Reconciliation",
+  "version": "1.0.0",
+  "work_item": "AUDIT-CELERY-EVIDENCE-013",
+  "logic_domain": "L5",
+  "status": "DELIVERED & VERIFIED",
+  "timestamp_utc": "2026-11-03T07:05:00Z",
+  "worker_environment": {
+    "container_name": "clipforge_worker",
+    "container_id": "f7a2f51bf5db6df4fbdece07bce2bc6922a248d6b7f01edbb5b624b54e050217",
+    "node_name": "celery@f7a2f51bf5db",
+    "runtime": "Python 3.11.16, Celery 5.4.0",
+    "startup_command": "celery -A backend.tasks.process_video.celery_app worker --loglevel=info --concurrency=4",
+    "concurrency": 4,
+    "pool": "prefork (ForkPoolWorker)"
+  },
+  "broker_and_backend": {
+    "broker_url_redacted": "redis://redis:6379/0",
+    "result_backend_redacted": "redis://redis:6379/1",
+    "default_queue": "celery",
+    "serializer": "json"
+  },
+  "evidence_tiers": {
+    "tier_1_fresh_process_import": {
+      "status": "VERIFIED",
+      "import_statement": "from backend.tasks.analysis_tasks import analyze_podcast_shots_task",
+      "task_name": "analyze_podcast_shots_task",
+      "proof": "Python import smoke test confirms eager registration via TASK_MODULES in backend.tasks.celery_app."
+    },
+    "tier_2_live_worker_registration": {
+      "status": "VERIFIED",
+      "total_registered_tasks": 34,
+      "target_task_registered": true,
+      "task_name": "analyze_podcast_shots_task",
+      "registered_tasks_sample": [
+        "analyze_hook_opportunities",
+        "analyze_podcast_shots_task",
+        "apply_autofix",
+        "apply_broll",
+        "apply_hook_plan",
+        "apply_sfx",
+        "candidate_generation",
+        "clip_selection",
+        "download_task",
+        "extract_audio_task",
+        "handle_pipeline_failure",
+        "job_completion_aggregation",
+        "orchestration_callback",
+        "publish_clip",
+        "publish_clip_task",
+        "recover_stranded_publish_jobs",
+        "reframe_clip",
+        "render_clip",
+        "resolve_video_decision_countdown",
+        "scene_detection_task",
+        "scoring",
+        "start_video_processing",
+        "track_and_optimize_clips",
+        "transcription_task",
+        "validate_media_task",
+        "validate_output"
+      ]
+    },
+    "tier_3_dispatch_to_worker": {
+      "status": "VERIFIED",
+      "dispatch_method": "analyze_podcast_shots_task.delay(url=..., regions_json=..., ref_timestamp=0.0, composition='advanced_podcast')",
+      "queue": "celery"
+    },
+    "tier_4_task_execution": {
+      "status": "VERIFIED_CORROBORATED_BY_LIVE_LOGS",
+      "historical_task_id": "4a905c3c-ad6b-4f8a-9319-5a57ece28204",
+      "received_timestamp_utc": "2026-11-02T21:37:53.950Z",
+      "succeeded_timestamp_utc": "2026-11-02T21:37:56.180Z",
+      "elapsed_duration_seconds": 2.22850500200002,
+      "executing_worker": "ForkPoolWorker-4",
+      "state_transitions": ["PENDING", "STARTED", "SUCCESS"]
+    },
+    "tier_5_result_persistence": {
+      "status": "VERIFIED_PERSISTED_IN_REDIS",
+      "redis_db": 1,
+      "redis_key": "celery-task-meta-4a905c3c-ad6b-4f8a-9319-5a57ece28204",
+      "result_status": "SUCCESS",
+      "date_done": "2026-11-02T21:37:56.178482+00:00",
+      "ttl_seconds_remaining": 52564
+    },
+    "tier_6_media_input_provenance": {
+      "status": "RECONCILED_VIA_PROMPT_8",
+      "historical_limitation": "The historical task 4a905c3c-ad6b-4f8a-9319-5a57ece28204 consumed a simulated YouTube URL which triggered legacy synthetic fallback. Registration and execution did not prove local media provenance.",
+      "remediation_delivered": "Work item CELERY-FIXTURE-PROVENANCE-008 completely excised the synthetic fallback from analysis_tasks.py and videos.py, adding multi-tier resolution and byte/SHA-256 verification at the FFmpeg decode boundary. Verified by 10/10 passed tests in test_celery_fixture_provenance.py."
+    }
+  },
+  "safety_attestation": {
+    "zero_services_restarted": true,
+    "zero_queues_altered": true,
+    "zero_database_mutations": true
+  }
+}

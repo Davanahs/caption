@@ -1,0 +1,41 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\python.exe
+cachedir: .pytest_cache
+rootdir: d:\automation video clips\clipforge\backend
+configfile: pytest.ini
+plugins: anyio-4.13.0, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 9 items
+
+backend\tests\test_podcast_layout_pipeline.py::TestPodcastApiValidation::test_valid_podcast_regions_accepted PASSED [ 11%]
+backend\tests\test_podcast_layout_pipeline.py::TestPodcastApiValidation::test_invalid_regions_json_rejected PASSED [ 22%]
+backend\tests\test_podcast_layout_pipeline.py::TestPodcastApiValidation::test_negative_coordinates_rejected PASSED [ 33%]
+backend\tests\test_podcast_layout_pipeline.py::TestPodcastApiValidation::test_zero_dimension_region_rejected PASSED [ 44%]
+backend\tests\test_podcast_layout_pipeline.py::TestPodcastApiValidation::test_standard_url_processing_preserved PASSED [ 55%]
+backend\tests\test_podcast_layout_pipeline.py::TestPodcastLayoutPlan::test_single_speaker_focus_plan PASSED [ 66%]
+backend\tests\test_podcast_layout_pipeline.py::TestPodcastLayoutPlan::test_two_speaker_stacked_plan PASSED [ 77%]
+backend\tests\test_podcast_layout_pipeline.py::TestPodcastLayoutPlan::test_ffmpeg_filtergraph_contains_both_crops_and_overlays PASSED [ 88%]
+backend\tests\test_podcast_layout_pipeline.py::TestPodcastWorkerReframeRouting::test_reframe_task_builds_podcast_plan_when_regions_present PASSED [100%]
+
+============================== warnings summary ===============================
+backend\models\layout.py:100
+  d:\automation video clips\clipforge\backend\models\layout.py:100: PydanticDeprecatedSince20: `min_items` is deprecated and will be removed, use `min_length` instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    regions: List[RegionModel] = Field(min_items=1)
+
+tests/test_podcast_layout_pipeline.py::TestPodcastApiValidation::test_valid_podcast_regions_accepted
+  d:\automation video clips\clipforge\backend\core\config.py:5: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.13/migration/
+    class Settings(BaseSettings):
+
+tests/test_podcast_layout_pipeline.py::TestPodcastApiValidation::test_standard_url_processing_preserved
+  d:\automation video clips\clipforge\backend\api\routes\videos.py:302: RuntimeWarning: coroutine 'AsyncMockMixin._execute_mock_call' was never awaited
+    db.add(job)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_podcast_layout_pipeline.py::TestPodcastWorkerReframeRouting::test_reframe_task_builds_podcast_plan_when_regions_present
+  C:\Users\Chinmaygouda\AppData\Local\Programs\Python\Python312\Lib\site-packages\google\api_core\_python_package_support.py:206: FutureWarning: Package google.api_core depends on grpcio, currently installed at version 1.80.0. grpcio < 1.83.0 does not support Post-Quantum Cryptography (PQC). Support for non-PQC environments is deprecated. In October 2026, Google Cloud Python packages will raise their minimum requirements (including google-api-core, grpcio, and grpcio-status) to enforce grpcio >= 1.83.0. For more details on Google Cloud's post-quantum security migration, visit: https://cloud.google.com/security/resources/post-quantum-cryptography
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 9 passed, 4 warnings in 5.90s ========================
+

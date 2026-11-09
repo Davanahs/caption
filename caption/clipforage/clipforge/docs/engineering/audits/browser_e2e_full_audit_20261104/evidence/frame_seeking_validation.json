@@ -1,0 +1,42 @@
+[
+  {
+    "input_timestamp": "5.0",
+    "url": "http://127.0.0.1:8000/api/videos/d34750ad-f9e8-44ce-bbc3-2941c91073dd/frame?timestamp=5.0",
+    "status": 200,
+    "x_frame_cache": "HIT",
+    "content_type": "image/jpeg",
+    "content_length": 13085
+  },
+  {
+    "input_timestamp": "12.5",
+    "url": "http://127.0.0.1:8000/api/videos/d34750ad-f9e8-44ce-bbc3-2941c91073dd/frame?timestamp=12.5",
+    "status": 200,
+    "x_frame_cache": "HIT",
+    "content_type": "image/jpeg",
+    "content_length": 13259
+  },
+  {
+    "input_timestamp": "-1.0",
+    "url": "http://127.0.0.1:8000/api/videos/d34750ad-f9e8-44ce-bbc3-2941c91073dd/frame?timestamp=-1.0",
+    "status": 400,
+    "error_detail": "{\"detail\":\"Timestamp must be non-negative (>= 0.0).\"}"
+  },
+  {
+    "input_timestamp": "99999.0",
+    "url": "http://127.0.0.1:8000/api/videos/d34750ad-f9e8-44ce-bbc3-2941c91073dd/frame?timestamp=99999.0",
+    "status": 400,
+    "error_detail": "{\"detail\":\"Timestamp exceeds maximum allowed media duration (86400s).\"}"
+  },
+  {
+    "input_timestamp": "50.0",
+    "url": "http://127.0.0.1:8000/api/videos/d34750ad-f9e8-44ce-bbc3-2941c91073dd/frame?timestamp=50.0",
+    "status": 400,
+    "error_detail": "{\"detail\":\"Requested timestamp 50.00s exceeds video duration 20.00s.\"}"
+  },
+  {
+    "input_timestamp": "NaN",
+    "url": "http://127.0.0.1:8000/api/videos/d34750ad-f9e8-44ce-bbc3-2941c91073dd/frame?timestamp=NaN",
+    "status": 400,
+    "error_detail": "{\"detail\":\"Timestamp must be a finite numeric value.\"}"
+  }
+]
