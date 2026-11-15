@@ -32,7 +32,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.config import settings
 from backend.models.database import get_db
-from backend.models.models import Clip, Video
+from backend.models.models import Clip, Video, PublishTarget
 
 logger = logging.getLogger(__name__)
 
@@ -1225,6 +1225,18 @@ async def save_rendered_caption_clip(
     clip.publish_status = "draft"
     clip.publish_error = None
     clip.publish_stage = None
+    clip.youtube_short_id = None
+    clip.publish_idempotency_key = None
+
+    # Reset any existing PublishTarget rows for this clip so stale uploads don't block republish
+    target_res = await db.execute(select(PublishTarget).where(PublishTarget.clip_id == clip.id))
+    for pt in target_res.scalars().all():
+        pt.status = "pending"
+        pt.publish_stage = "pending"
+        pt.publish_progress = 0.0
+        pt.youtube_video_id = None
+        pt.error_message = None
+        pt.idempotency_key = f"pub_{clip.id}_{pt.destination_id}_{uuid.uuid4().hex[:8]}"
 
     await db.commit()
     await db.refresh(clip)
@@ -1431,6 +1443,18 @@ async def burn_clip_captions_endpoint(
         clip.publish_status = "draft"
         clip.publish_error = None
         clip.publish_stage = None
+        clip.youtube_short_id = None
+        clip.publish_idempotency_key = None
+
+        # Reset any existing PublishTarget rows for this clip so stale uploads don't block republish
+        target_res = await db.execute(select(PublishTarget).where(PublishTarget.clip_id == clip.id))
+        for pt in target_res.scalars().all():
+            pt.status = "pending"
+            pt.publish_stage = "pending"
+            pt.publish_progress = 0.0
+            pt.youtube_video_id = None
+            pt.error_message = None
+            pt.idempotency_key = f"pub_{clip.id}_{pt.destination_id}_{uuid.uuid4().hex[:8]}"
 
         await db.commit()
         await db.refresh(clip)

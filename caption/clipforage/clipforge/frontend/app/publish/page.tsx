@@ -121,6 +121,7 @@ function PublishPageContent() {
   const clipParam = searchParams.get('clip');
   const channelParam = searchParams.get('channel');
   const oauthSuccess = searchParams.get('oauth');
+  const readyParam = searchParams.get('ready');
 
   const [clips, setClips] = useState<any[]>([]);
   const [selectedClip, setSelectedClip] = useState<any>(null);
@@ -217,6 +218,12 @@ function PublishPageContent() {
       // Clean up URL parameter
       router.replace('/publish');
       return;
+    }
+
+    if (readyParam === '1') {
+      setTimeout(() => {
+        setMsg('🎬 Captioned video loaded! Review your title and click "Upload Short" below to upload to your channel.');
+      }, 0);
     }
 
     getAuthStatus().then(setAuthInfo).catch(() => {});
@@ -640,11 +647,12 @@ function PublishPageContent() {
           age_restricted: form.ageRestricted,
           tags: form.tags,
           category: form.category,
-          license: form.license
+          license: form.license,
+          force: true
         });
-        setMsg(`🚀 Upload Successful across ${selectedDestinationIds.length} destination(s)! Video ID: ${res.video_id || res.id}`);
+        setMsg(`🚀 Upload queued successfully! Track real-time upload progress in the Publishing Queue on the right.`);
       }
-      fetchQueue();
+      await fetchQueue();
     } catch (e: any) {
       setError(e.message || 'Publish operations failed');
     }
@@ -667,7 +675,7 @@ function PublishPageContent() {
     
     try {
       await submitOAuthCode(trimmedUrl);
-      setMsg('Γ£à YouTube account connected successfully!');
+      setMsg('✅ YouTube account connected successfully!');
       setOAuthPasteUrl('');
       // Refresh auth status
       await getAuthStatus().then(setAuthInfo).catch(() => {});
@@ -701,14 +709,32 @@ function PublishPageContent() {
 
   return (
     <div className="animate-fade-up">
-      <div style={{ marginBottom: 28 }}>
+      <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 28, fontWeight: 800, fontFamily: "'Space Grotesk', sans-serif" }} className="gradient-text">
-          ≡ƒÜÇ Publish to YouTube Shorts
+          🚀 Publish to YouTube Shorts
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginTop: 4 }}>
           Adjust audience configurations, descriptors, classification categories, and tags via our interactive simulator.
         </p>
       </div>
+
+      {/* Prominent Global Top Alert Banner for Success & Errors */}
+      {(msg || error) && (
+        <div style={{ marginBottom: 24 }}>
+          {msg && (
+            <div style={{ padding: '14px 20px', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', color: '#10b981', borderRadius: 10, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <span>{msg}</span>
+              <button onClick={() => setMsg('')} style={{ background: 'none', border: 'none', color: '#10b981', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>×</button>
+            </div>
+          )}
+          {error && (
+            <div style={{ padding: '14px 20px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', borderRadius: 10, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <span>⚠️ {error}</span>
+              <button onClick={() => setError('')} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}>×</button>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Auth Notification Block */}
       {authInfo && !authInfo.authenticated && (
@@ -716,7 +742,7 @@ function PublishPageContent() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 16 }}>
             <div>
               <h3 style={{ fontSize: 15, fontWeight: 600, color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                ΓÜá∩╕Å YouTube Account Not Connected
+                ⚠️ YouTube Account Not Connected
               </h3>
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
                 OAuth credentials required to submit or schedule direct uploads.
@@ -724,7 +750,7 @@ function PublishPageContent() {
             </div>
             {authInfo.oauth_url && (
               <a href={authInfo.oauth_url} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{ background: 'var(--warning)', boxShadow: 'none', color: '#0d141d' }}>
-                ≡ƒöù Connect Google Account
+                🔗 Connect Google Account
               </a>
             )}
           </div>
@@ -735,7 +761,7 @@ function PublishPageContent() {
       {authInfo && !authInfo.authenticated && (
         <div className="glass" style={{ padding: 20, marginBottom: 28, borderColor: 'rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.05)' }}>
           <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6, color: 'var(--accent)' }}>
-            ≡ƒÆ╗ Or Paste Authorization Code
+            💻 Or Paste Authorization Code
           </h3>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 12 }}>
             If you selected "Desktop application" in Google Cloud Console, paste the full redirect URL or authorization code below:
@@ -773,7 +799,7 @@ function PublishPageContent() {
               opacity: submitAuthLoading || !oauthPasteUrl.trim() ? 0.5 : 1
             }}
           >
-            {submitAuthLoading ? 'ΓÅ│ Authenticating...' : 'Γ£ô Submit Authorization Code'}
+            {submitAuthLoading ? '⏳ Authenticating...' : '✓ Submit Authorization Code'}
           </button>
         </div>
       )}
@@ -972,7 +998,7 @@ function PublishPageContent() {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                   <span style={{ color: 'var(--text-muted)' }}>Scoring:</span>
-                  <span style={{ fontWeight: 600, color: 'var(--accent)' }}>{(selectedClip.score || 0).toFixed(1)} Γÿà</span>
+                  <span style={{ fontWeight: 600, color: 'var(--accent)' }}>{(selectedClip.score || 0).toFixed(1)} ★</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ color: 'var(--text-muted)' }}>Timestamp:</span>
@@ -992,7 +1018,7 @@ function PublishPageContent() {
               )}
               {error && (
                 <div style={{ padding: 12, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: 'var(--danger)', borderRadius: 8, fontSize: 13 }}>
-                  ΓÜá∩╕Å {error}
+                  ⚠️ {error}
                 </div>
               )}
             </div>

@@ -2215,7 +2215,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Action 2: Publish with Captions (Fast & Full-Duration Server-Side Burn -> Redirect)
         if (bridgePublishClipBtn && clipId) {
           bridgePublishClipBtn.addEventListener('click', async () => {
-            await burnClipOnServer(clipId, bridgePublishClipBtn, `/publish?clip=${clipId}`);
+            await burnClipOnServer(clipId, bridgePublishClipBtn, `/publish?clip=${clipId}&ready=1`);
           });
         }
       }

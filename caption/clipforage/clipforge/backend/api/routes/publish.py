@@ -29,6 +29,7 @@ class PublishRequest(BaseModel):
     license: str = "youtube"
     destination_channel_id: str | None = None
     destination_ids: list[str] | None = None
+    force: bool = False
 
 
 class ClipDestinationsUpdateRequest(BaseModel):
@@ -787,9 +788,15 @@ async def publish_now(body: PublishRequest, response: Response, db: AsyncSession
             detail="Publish destination channel is required. Please select an authorized destination.",
         )
 
+    is_republish = (
+        clip.publish_status == PublishStatus.DRAFT.value 
+        or getattr(body, "force", False)
+        or not clip.youtube_short_id
+    )
+
     # Single-destination or legacy already-published check
     done_statuses = {"completed", "published"}
-    if body.destination_ids is None and clip.publish_status == PublishStatus.PUBLISHED.value and clip.youtube_short_id:
+    if not is_republish and body.destination_ids is None and clip.publish_status == PublishStatus.PUBLISHED.value and clip.youtube_short_id:
         if not existing_targets or all(t.status in done_statuses for t in existing_targets):
             response.status_code = status.HTTP_200_OK
             return {
@@ -828,7 +835,7 @@ async def publish_now(body: PublishRequest, response: Response, db: AsyncSession
     resolved_channels = await _validate_active_destinations(raw_dest_ids, db)
 
     # If user passed destination_ids and ALL of those targets are already published, return 200 cleanly
-    if all(
+    if not is_republish and all(
         (d.id in existing_by_dest and existing_by_dest[d.id].status in done_statuses and existing_by_dest[d.id].youtube_video_id)
         for d in resolved_channels
     ):
@@ -859,11 +866,13 @@ async def publish_now(body: PublishRequest, response: Response, db: AsyncSession
     queued_targets: list[PublishTarget] = []
     for dest_ch in resolved_channels:
         pt = existing_by_dest.get(dest_ch.id)
-        if pt and pt.status in done_statuses and pt.youtube_video_id:
-            continue
+        if not is_republish:
+            if pt and pt.status in done_statuses and pt.youtube_video_id:
+                continue
         if pt and pt.status in ("queued", "uploading", "finalizing", "publishing"):
             continue
-        idemp = f"pub_{clip.id}_{dest_ch.id}"
+        fresh_suffix = uuid.uuid4().hex[:8]
+        idemp = f"pub_{clip.id}_{dest_ch.id}_{fresh_suffix}" if is_republish else (pt.idempotency_key if pt and pt.idempotency_key else f"pub_{clip.id}_{dest_ch.id}")
         if not pt:
             pt = PublishTarget(
                 id=str(uuid.uuid4()),
@@ -890,8 +899,9 @@ async def publish_now(body: PublishRequest, response: Response, db: AsyncSession
             pt.made_for_kids = bool(body.made_for_kids)
             pt.age_restricted = bool(body.age_restricted)
             pt.error_message = None
+            pt.youtube_video_id = None
             pt.publish_started_at = now
-            pt.idempotency_key = pt.idempotency_key or idemp
+            pt.idempotency_key = idemp
         queued_targets.append(pt)
 
     # Remove stale pending/draft targets not in the explicit multi-destination selection
@@ -901,8 +911,10 @@ async def publish_now(body: PublishRequest, response: Response, db: AsyncSession
             if existing_dest_id not in selected_ids and existing_pt.status in ("pending", "cancelled"):
                 await db.delete(existing_pt)
 
-    primary_idemp = clip.publish_idempotency_key or f"pub_{clip.id}_{resolved_channels[0].id}"
+    primary_idemp = queued_targets[0].idempotency_key if queued_targets else f"pub_{clip.id}_{resolved_channels[0].id}_{uuid.uuid4().hex[:8]}"
     clip.publish_idempotency_key = primary_idemp
+    if is_republish:
+        clip.youtube_short_id = None
     if queued_targets:
         clip.publish_status = PublishStatus.QUEUED.value
         clip.publish_stage = "queued"
