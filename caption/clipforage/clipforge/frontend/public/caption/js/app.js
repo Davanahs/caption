@@ -1889,80 +1889,205 @@ document.addEventListener('DOMContentLoaded', () => {
     a.click();
   });
 
+  // ─── Composite Video Recording Helper (Burns Captions + Video + Audio) ──────
+  async function renderCompositeVideo(onProgress) {
+    if (!captionData.blocks || captionData.blocks.length === 0) {
+      throw new Error('Please ensure caption blocks are loaded before rendering.');
+    }
+    if (!window.MediaRecorder) {
+      throw new Error('MediaRecorder is not supported in this browser.');
+    }
+
+    pausePlayback();
+    currentTime = 0.0;
+    timeScrubber.value = 0;
+    renderCurrentFrame();
+
+    const compCanvas = document.createElement('canvas');
+    compCanvas.width = videoNaturalWidth || 1080;
+    compCanvas.height = videoNaturalHeight || 1920;
+    const compCtx = compCanvas.getContext('2d');
+
+    const stream = compCanvas.captureStream(60);
+
+    // Attach audio track from video player if present
+    if (previewVideoPlayer) {
+      try {
+        let audioTracks = [];
+        if (typeof previewVideoPlayer.captureStream === 'function') {
+          audioTracks = previewVideoPlayer.captureStream().getAudioTracks();
+        } else if (typeof previewVideoPlayer.mozCaptureStream === 'function') {
+          audioTracks = previewVideoPlayer.mozCaptureStream().getAudioTracks();
+        }
+        if (audioTracks && audioTracks.length > 0) {
+          audioTracks.forEach(t => stream.addTrack(t));
+        }
+      } catch (aErr) {
+        console.debug('Audio stream track attach note:', aErr);
+      }
+    }
+
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9'
+      : 'video/webm';
+
+    const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8000000 });
+    const chunks = [];
+
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+
+    return new Promise((resolve, reject) => {
+      let renderFrameId = null;
+      let checkInterval = null;
+
+      function cleanup() {
+        if (renderFrameId) cancelAnimationFrame(renderFrameId);
+        if (checkInterval) clearInterval(checkInterval);
+        pausePlayback();
+        currentTime = 0.0;
+        timeScrubber.value = 0;
+        renderCurrentFrame();
+      }
+
+      recorder.onstop = () => {
+        cleanup();
+        const finalBlob = new Blob(chunks, { type: mimeType });
+        resolve(finalBlob);
+      };
+
+      recorder.onerror = (e) => {
+        cleanup();
+        reject(e);
+      };
+
+      recorder.start(100);
+      startPlayback();
+
+      function drawComp() {
+        if (!isPlaying) return;
+        compCtx.clearRect(0, 0, compCanvas.width, compCanvas.height);
+
+        // 1. Draw source video or image background
+        if (currentMode === 'video' && previewVideoPlayer && !previewVideoPlayer.paused) {
+          compCtx.drawImage(previewVideoPlayer, 0, 0, compCanvas.width, compCanvas.height);
+        } else if (currentMode === 'image' && previewImagePlayer) {
+          compCtx.drawImage(previewImagePlayer, 0, 0, compCanvas.width, compCanvas.height);
+        }
+
+        // 2. Draw styled kinetic captions on top
+        compCtx.drawImage(canvas, 0, 0, compCanvas.width, compCanvas.height);
+
+        // 3. Draw person cutout if behind-person mode is active
+        if (behindPersonEnabled && personCutoutCanvas && !personCutoutCanvas.classList.contains('hidden')) {
+          compCtx.drawImage(personCutoutCanvas, 0, 0, compCanvas.width, compCanvas.height);
+        }
+
+        if (typeof onProgress === 'function' && totalDuration > 0) {
+          const pct = Math.min(99, Math.round((currentTime / totalDuration) * 100));
+          onProgress(pct);
+        }
+
+        renderFrameId = requestAnimationFrame(drawComp);
+      }
+      renderFrameId = requestAnimationFrame(drawComp);
+
+      checkInterval = setInterval(() => {
+        if (!isPlaying || currentTime >= totalDuration) {
+          clearInterval(checkInterval);
+          if (recorder.state === 'recording') {
+            recorder.stop();
+          }
+        }
+      }, 100);
+    });
+  }
+
+  // ── Upload & Persist Rendered Video to Backend ────────────────────────────
+  async function saveRenderedClipToServer(clipId, blob, buttonEl, redirectUrl = null) {
+    const origText = buttonEl ? buttonEl.textContent : '';
+    if (buttonEl) {
+      buttonEl.textContent = '⚡ Saving to Library...';
+      buttonEl.disabled = true;
+    }
+    statusText.textContent = '⚡ Uploading and transcoding video on server with FFmpeg...';
+
+    const formData = new FormData();
+    formData.append('video', blob, `captioned_${clipId}.webm`);
+    formData.append('caption_blocks', JSON.stringify(captionData.blocks));
+    formData.append('preset_style', captionData.styleId || 'hormozi');
+
+    try {
+      const res = await fetch(`/api/caption/save-rendered-clip/${clipId}`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.detail || 'Server failed to save rendered clip.');
+      }
+
+      const resData = await res.json();
+      console.log('[CaptionForge] Saved rendered clip successfully:', resData);
+
+      if (redirectUrl) {
+        if (buttonEl) buttonEl.textContent = '🚀 Opening Publish...';
+        statusText.textContent = '✅ Saved! Opening Publish screen with your captioned video...';
+        setTimeout(() => {
+          window.top.location.href = redirectUrl;
+        }, 600);
+      } else {
+        if (buttonEl) buttonEl.textContent = '✅ Saved to Library!';
+        statusText.textContent = '✅ Video with kinetic captions saved as Draft in Clips Library!';
+        setTimeout(() => {
+          if (buttonEl) {
+            buttonEl.textContent = origText;
+            buttonEl.disabled = false;
+          }
+        }, 3000);
+      }
+      return resData;
+    } catch (err) {
+      console.error('[CaptionForge] Save rendered clip error:', err);
+      alert('Failed to save rendered video: ' + err.message);
+      if (buttonEl) {
+        buttonEl.textContent = '❌ Failed';
+        setTimeout(() => {
+          buttonEl.textContent = origText;
+          buttonEl.disabled = false;
+        }, 2500);
+      }
+      throw err;
+    }
+  }
+
   exportVideoBtn.addEventListener('click', async () => {
     if (!captionData.blocks || captionData.blocks.length === 0) {
       alert('Please generate or transcribe caption blocks first.');
       return;
     }
 
-    if (!window.MediaRecorder) {
-      alert('MediaRecorder is not supported in this browser.');
-      return;
-    }
-
     exportVideoBtn.disabled = true;
     const btnSpan = exportVideoBtn.querySelector('span');
-    if (btnSpan) btnSpan.textContent = '🎬 Rendering Video...';
-
-    pausePlayback();
-    currentTime = 0.0;
-    renderCurrentFrame();
+    if (btnSpan) btnSpan.textContent = '🎬 Rendering 0%...';
 
     try {
-      const stream = canvas.captureStream(60);
-      // Combine video element's audio track if present so export has both kinetic text AND audio
-      if (previewVideoPlayer) {
-        try {
-          let audioTracks = [];
-          if (typeof previewVideoPlayer.captureStream === 'function') {
-            audioTracks = previewVideoPlayer.captureStream().getAudioTracks();
-          } else if (typeof previewVideoPlayer.mozCaptureStream === 'function') {
-            audioTracks = previewVideoPlayer.mozCaptureStream().getAudioTracks();
-          }
-          if (audioTracks && audioTracks.length > 0) {
-            audioTracks.forEach(track => stream.addTrack(track));
-          }
-        } catch (audioTrackErr) {
-          console.debug('Audio stream track attach note:', audioTrackErr);
-        }
-      }
-
-      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-        ? 'video/webm;codecs=vp9'
-        : 'video/webm';
-
-      const recorder = new MediaRecorder(stream, { mimeType });
-      const chunks = [];
-
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data);
-      };
-
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `caption_video_${Date.now()}.webm`;
-        a.click();
-        exportVideoBtn.disabled = false;
-        if (btnSpan) btnSpan.textContent = '🎥 Export Video';
-        statusText.textContent = '✅ Animated kinetic caption video exported with synchronized audio!';
-      };
-
-      recorder.start();
-      startPlayback();
-
-      const checkInterval = setInterval(() => {
-        if (!isPlaying || currentTime >= totalDuration) {
-          clearInterval(checkInterval);
-          recorder.stop();
-        }
-      }, 200);
-
+      const blob = await renderCompositeVideo((pct) => {
+        if (btnSpan) btnSpan.textContent = `🎬 Rendering ${pct}%...`;
+        statusText.textContent = `🎬 Rendering video with kinetic captions (${pct}%)...`;
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `caption_video_${Date.now()}.webm`;
+      a.click();
+      statusText.textContent = '✅ Animated kinetic caption video exported with synchronized audio!';
     } catch (err) {
       console.error('Video export error:', err);
       alert('Video export failed: ' + err.message);
+    } finally {
       exportVideoBtn.disabled = false;
       if (btnSpan) btnSpan.textContent = '🎥 Export Video';
     }
@@ -2001,9 +2126,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <span>Clip <b>#${clipId || 'Active'}</b> ${clipTitle ? `· <i>${clipTitle}</i>` : ''}</span>
           </div>
           <div style="display:flex; gap:8px; align-items:center;">
-            ${clipId ? `<button id="bridgeSaveClipBtn" style="background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.5); color: #4ade80; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer; transition: all 0.2s;">💾 Save to Clip</button>` : ''}
-            ${clipId ? `<a href="/publish?clip=${clipId}" target="_top" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-weight: 700; font-size: 11px;">🚀 Send to Publish</a>` : ''}
-            <a href="/clips" target="_top" style="background: rgba(255,255,255,0.08); color: #cbd5e1; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 11px;">Clips Library</a>
+            ${clipId ? `<button id="bridgeSaveClipBtn" style="background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.5); color: #4ade80; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; transition: all 0.2s;" title="Burn captions into video and save as Draft in Clips Library">💾 Save Draft to Library</button>` : ''}
+            ${clipId ? `<button id="bridgePublishClipBtn" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; color: #fff; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 11px; cursor: pointer; transition: all 0.2s;" title="Burn captions into video and open Publish screen">🚀 Publish with Captions</button>` : ''}
+            <a href="/clips" target="_top" style="background: rgba(255,255,255,0.08); color: #cbd5e1; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 11px;">Clips Library</a>
           </div>
         `;
         const appHeader = document.querySelector('.app-header');
@@ -2012,39 +2137,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const bridgeSaveClipBtn = document.getElementById('bridgeSaveClipBtn');
+        const bridgePublishClipBtn = document.getElementById('bridgePublishClipBtn');
+
+        // Action 1: Save Draft to Library
         if (bridgeSaveClipBtn && clipId) {
           bridgeSaveClipBtn.addEventListener('click', async () => {
-            bridgeSaveClipBtn.textContent = 'Saving...';
             bridgeSaveClipBtn.disabled = true;
+            bridgeSaveClipBtn.textContent = '🎬 Rendering 0%...';
+            statusText.textContent = '🎬 Rendering kinetic captions into video...';
             try {
-              const res = await fetch(`/api/caption/clip-data/${clipId}/save`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  blocks: captionData.blocks,
-                  full_text: scriptInput.value
-                })
+              const blob = await renderCompositeVideo((pct) => {
+                bridgeSaveClipBtn.textContent = `🎬 Rendering ${pct}%`;
+                statusText.textContent = `🎬 Rendering kinetic captions into video (${pct}%)...`;
               });
-              if (res.ok) {
-                bridgeSaveClipBtn.textContent = '✅ Saved!';
-                setTimeout(() => {
-                  bridgeSaveClipBtn.textContent = '💾 Save to Clip';
-                  bridgeSaveClipBtn.disabled = false;
-                }, 2000);
-              } else {
-                bridgeSaveClipBtn.textContent = '❌ Failed';
-                setTimeout(() => {
-                  bridgeSaveClipBtn.textContent = '💾 Save to Clip';
-                  bridgeSaveClipBtn.disabled = false;
-                }, 2000);
-              }
+              await saveRenderedClipToServer(clipId, blob, bridgeSaveClipBtn, null);
             } catch (err) {
-              console.error('Save captions error:', err);
-              bridgeSaveClipBtn.textContent = '❌ Error';
-              setTimeout(() => {
-                bridgeSaveClipBtn.textContent = '💾 Save to Clip';
-                bridgeSaveClipBtn.disabled = false;
-              }, 2000);
+              console.error('Save draft error:', err);
+              bridgeSaveClipBtn.disabled = false;
+              bridgeSaveClipBtn.textContent = '💾 Save Draft to Library';
+            }
+          });
+        }
+
+        // Action 2: Publish with Captions
+        if (bridgePublishClipBtn && clipId) {
+          bridgePublishClipBtn.addEventListener('click', async () => {
+            bridgePublishClipBtn.disabled = true;
+            bridgePublishClipBtn.textContent = '🎬 Rendering 0%...';
+            statusText.textContent = '🎬 Rendering kinetic captions into video...';
+            try {
+              const blob = await renderCompositeVideo((pct) => {
+                bridgePublishClipBtn.textContent = `🎬 Rendering ${pct}%`;
+                statusText.textContent = `🎬 Rendering kinetic captions into video (${pct}%)...`;
+              });
+              await saveRenderedClipToServer(clipId, blob, bridgePublishClipBtn, `/publish?clip=${clipId}`);
+            } catch (err) {
+              console.error('Publish with captions error:', err);
+              bridgePublishClipBtn.disabled = false;
+              bridgePublishClipBtn.textContent = '🚀 Publish with Captions';
             }
           });
         }

@@ -1131,3 +1131,103 @@ async def save_clip_caption_data(
     await db.refresh(clip)
     return {"status": "success", "clip_id": clip_id, "blocks_count": len(payload.blocks)}
 
+
+@router.post("/save-rendered-clip/{clip_id}")
+async def save_rendered_caption_clip(
+    clip_id: str,
+    video: UploadFile = File(...),
+    caption_blocks: Optional[str] = Form(None),
+    preset_style: Optional[str] = Form(None),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Saves the user's client-side rendered video (with kinetic captions burned in)
+    directly to the clip's output location, transcodes to MP4 with FFmpeg,
+    updates the thumbnail, and sets status to draft for library and publishing.
+    """
+    clip_result = await db.execute(select(Clip).where(Clip.id == clip_id))
+    clip = clip_result.scalar_one_or_none()
+    if not clip:
+        raise HTTPException(status_code=404, detail="Clip not found")
+
+    # Determine clip output directory
+    orig_output_path = Path(clip.output_path) if clip.output_path else None
+    if orig_output_path and orig_output_path.parent.exists():
+        clip_dir = orig_output_path.parent
+    else:
+        clip_dir = Path(settings.OUTPUT_DIR) / "caption_renders" / clip_id
+        clip_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save incoming video to temp file
+    temp_suffix = Path(video.filename or "render.webm").suffix or ".webm"
+    temp_input = clip_dir / f"incoming_render_{uuid.uuid4().hex[:8]}{temp_suffix}"
+    with open(temp_input, "wb") as f:
+        content = await video.read()
+        f.write(content)
+
+    # Destination MP4 & thumbnail
+    final_mp4 = clip_dir / "final.mp4"
+    thumb_path = clip_dir / "thumb_a.jpg"
+
+    # Transcode / remux with FFmpeg to guarantee clean MP4 + AAC
+    try:
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", str(temp_input),
+            "-c:v", "libx264",
+            "-preset", "fast",
+            "-crf", "18",
+            "-pix_fmt", "yuv420p",
+            "-c:a", "aac",
+            "-b:a", "192k",
+            "-movflags", "+faststart",
+            str(final_mp4)
+        ]
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=120)
+        if proc.returncode != 0:
+            logger.warning(f"FFmpeg transcode note: {proc.stderr}")
+            if temp_suffix == ".mp4":
+                shutil.copyfile(temp_input, final_mp4)
+    finally:
+        if temp_input.exists():
+            try:
+                temp_input.unlink(missing_ok=True)
+            except Exception:
+                pass
+
+    # Generate updated thumbnail with burned captions at 2 seconds
+    try:
+        thumb_cmd = [
+            "ffmpeg", "-y",
+            "-ss", "00:00:02",
+            "-i", str(final_mp4),
+            "-vframes", "1",
+            "-q:v", "2",
+            str(thumb_path)
+        ]
+        subprocess.run(thumb_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=15)
+        if thumb_path.exists():
+            clip.thumbnail_path = str(thumb_path)
+    except Exception as th_err:
+        logger.warning(f"Thumbnail generation note: {th_err}")
+
+    # Update clip record
+    clip.output_path = str(final_mp4)
+    if caption_blocks:
+        clip.transcript_segment = caption_blocks
+    clip.publish_status = "draft"
+    clip.publish_error = None
+    clip.publish_stage = None
+
+    await db.commit()
+    await db.refresh(clip)
+
+    return {
+        "status": "success",
+        "clip_id": clip_id,
+        "output_path": str(final_mp4),
+        "thumbnail_path": clip.thumbnail_path,
+        "publish_status": clip.publish_status,
+        "message": "Captioned video successfully saved, drafted to library, and ready to publish!"
+    }
+
