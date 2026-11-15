@@ -24,13 +24,18 @@ SCOPES = [
 
 def _resolve_token_dir() -> Path:
     """Resolve the directory containing YouTube tokens (Docker /app or host filesystem)."""
-    base = Path(settings.YOUTUBE_TOKEN_FILE).parent
-    if base.exists():
-        return base
+    p = Path(settings.YOUTUBE_TOKEN_FILE)
+    if p.is_dir() and p.exists():
+        return p
+    if p.parent.exists() and str(p.parent) not in (".", ""):
+        return p.parent
+    docker_tokens = Path("/app/tokens")
+    if docker_tokens.exists():
+        return docker_tokens
     workspace_dir = Path(__file__).resolve().parent.parent.parent / "tokens"
     if workspace_dir.exists():
         return workspace_dir
-    return base
+    return p.parent
 
 
 def _resolve_token_file(channel_id: str = None) -> Path:
