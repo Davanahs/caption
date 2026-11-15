@@ -1,8 +1,13 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-export default function CaptionsPage() {
+function CaptionsFrame() {
+  const searchParams = useSearchParams();
+  const queryString = searchParams ? searchParams.toString() : '';
+  const iframeSrc = queryString ? `/caption/index.html?${queryString}` : '/caption/index.html';
+
   return (
     <div
       style={{
@@ -15,7 +20,7 @@ export default function CaptionsPage() {
       }}
     >
       <iframe
-        src="/caption/index.html"
+        src={iframeSrc}
         style={{
           width: '100%',
           height: '100%',
@@ -27,5 +32,13 @@ export default function CaptionsPage() {
         allow="microphone; camera; autoplay; encrypted-media; fullscreen"
       />
     </div>
+  );
+}
+
+export default function CaptionsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: 40, color: '#94a3b8' }}>Loading Caption Studio...</div>}>
+      <CaptionsFrame />
+    </Suspense>
   );
 }

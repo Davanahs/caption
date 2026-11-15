@@ -372,7 +372,7 @@ input[type="range"] { accent-color: var(--accent-neon); cursor: pointer; width: 
 /* ============= STYLE PRESETS ============= */
 .style-presets-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
   gap: 8px;
   margin-top: 6px;
   margin-bottom: 12px;

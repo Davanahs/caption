@@ -1129,6 +1129,13 @@ function PreviewModal({ clip, onClose, onRestyled }: { clip: any; onClose: () =>
 
           {/* Actions */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+            <a href={`/captions?clipId=${clip.id}&videoUrl=${encodeURIComponent(activeVideoUrl)}&title=${encodeURIComponent(clip.title || 'Clip')}`}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                padding: '10px 14px', borderRadius: 10, background: 'rgba(168,85,247,0.18)',
+                border: '1px solid rgba(168,85,247,0.4)', color: '#c084fc',
+                fontWeight: 600, fontSize: 13, textDecoration: 'none',
+              }}>💬 Style Captions in Studio</a>
             <a href={downloadClipUrl(clip.id)} download
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -1895,6 +1902,14 @@ export default function ClipsPage() {
                           className="btn-ghost"
                           style={{ flex: 1, justifyContent: 'center', fontSize: 12, padding: '7px 8px' }}
                         >▶ Preview</button>
+                        <a
+                          href={`/captions?clipId=${clip.id}&videoUrl=${encodeURIComponent(downloadClipUrl(clip.id))}&title=${encodeURIComponent(clip.title || 'Clip')}`}
+                          className="btn-ghost"
+                          title="Style with Kinetic Captions"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, padding: '7px 8px', color: '#c084fc', textDecoration: 'none' }}
+                        >
+                          💬
+                        </a>
                         <a href={downloadClipUrl(clip.id)} download
                           className="btn-ghost"
                           style={{ flex: 1, justifyContent: 'center', fontSize: 12, padding: '7px 8px' }}>

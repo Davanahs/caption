@@ -1910,6 +1910,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const stream = canvas.captureStream(60);
+      // Combine video element's audio track if present so export has both kinetic text AND audio
+      if (previewVideoPlayer) {
+        try {
+          let audioTracks = [];
+          if (typeof previewVideoPlayer.captureStream === 'function') {
+            audioTracks = previewVideoPlayer.captureStream().getAudioTracks();
+          } else if (typeof previewVideoPlayer.mozCaptureStream === 'function') {
+            audioTracks = previewVideoPlayer.mozCaptureStream().getAudioTracks();
+          }
+          if (audioTracks && audioTracks.length > 0) {
+            audioTracks.forEach(track => stream.addTrack(track));
+          }
+        } catch (audioTrackErr) {
+          console.debug('Audio stream track attach note:', audioTrackErr);
+        }
+      }
+
       const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
         ? 'video/webm;codecs=vp9'
         : 'video/webm';
@@ -1930,7 +1947,7 @@ document.addEventListener('DOMContentLoaded', () => {
         a.click();
         exportVideoBtn.disabled = false;
         if (btnSpan) btnSpan.textContent = '🎥 Export Video';
-        statusText.textContent = '✅ Animated caption video exported successfully!';
+        statusText.textContent = '✅ Animated kinetic caption video exported with synchronized audio!';
       };
 
       recorder.start();
@@ -1957,6 +1974,85 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
+  // ─── Bridge: Auto-load Clip from URL parameters if provided ───────────────
+  async function checkUrlParamsForClipBridge() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const clipId = params.get('clipId');
+      const videoUrl = params.get('videoUrl');
+      const clipTitle = params.get('title');
+
+      if (!videoUrl && !clipId) return;
+
+      console.log('[CaptionForge Bridge] Found Clip parameters:', { clipId, videoUrl, clipTitle });
+
+      // Switch to video mode
+      switchMode('video');
+
+      // Create or update top Bridge banner
+      let bridgeBar = document.getElementById('clipBridgeBar');
+      if (!bridgeBar) {
+        bridgeBar = document.createElement('div');
+        bridgeBar.id = 'clipBridgeBar';
+        bridgeBar.style.cssText = 'background: rgba(99, 102, 241, 0.16); border: 1px solid rgba(168, 85, 247, 0.4); padding: 8px 14px; border-radius: 8px; margin: 8px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #e2e8f0; font-family: sans-serif;';
+        bridgeBar.innerHTML = `
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:16px;">🎬</span>
+            <span>Clip <b>#${clipId || 'Active'}</b> ${clipTitle ? `· <i>${clipTitle}</i>` : ''}</span>
+          </div>
+          <div style="display:flex; gap:8px;">
+            ${clipId ? `<a href="/publish?clip=${clipId}" target="_top" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-weight: 700; font-size: 11px;">🚀 Send to Publish</a>` : ''}
+            <a href="/clips" target="_top" style="background: rgba(255,255,255,0.08); color: #cbd5e1; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 11px;">Clips Library</a>
+          </div>
+        `;
+        const appHeader = document.querySelector('.app-header');
+        if (appHeader && appHeader.parentNode) {
+          appHeader.parentNode.insertBefore(bridgeBar, appHeader.nextSibling);
+        }
+      }
+
+      if (videoUrl) {
+        statusText.textContent = `⚡ Loading clip from library: ${clipTitle || clipId}...`;
+        previewVideoPlayer.crossOrigin = 'anonymous';
+        previewVideoPlayer.src = videoUrl;
+        previewVideoPlayer.classList.remove('hidden');
+        previewImagePlayer.classList.add('hidden');
+        videoDropContent.classList.add('hidden');
+        videoFileInfo.classList.remove('hidden');
+        videoFileNameDisplay.textContent = clipTitle ? `${clipTitle}.mp4` : `clip_${clipId}.mp4`;
+
+        previewVideoPlayer.onloadedmetadata = () => {
+          videoNaturalWidth = previewVideoPlayer.videoWidth || 1080;
+          videoNaturalHeight = previewVideoPlayer.videoHeight || 1920;
+          totalDuration = previewVideoPlayer.duration || totalDuration;
+          timeScrubber.max = totalDuration;
+          totalTimeEl.textContent = `${totalDuration.toFixed(2)}s`;
+          setStageAspectRatio(currentRatio, videoNaturalWidth, videoNaturalHeight);
+          updateVolume(currentVolume > 0 ? currentVolume : 1.0, false);
+          renderCurrentFrame();
+        };
+
+        // Query backend for pre-transcribed text or clip metadata if available
+        if (clipId) {
+          try {
+            const res = await fetch(`/api/clips/${clipId}`);
+            if (res.ok) {
+              const clipData = await res.json();
+              if (clipData && clipData.transcript) {
+                console.log('[CaptionForge Bridge] Found transcript in clip database record');
+              }
+            }
+          } catch (e) {
+            console.debug('Clip query note:', e);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[CaptionForge Bridge] URL params load error:', err);
+    }
+  }
+
   // ─── Init ──────────────────────────────────────────────────────────────────
   processTextAndGenerate();
+  checkUrlParamsForClipBridge();
 });

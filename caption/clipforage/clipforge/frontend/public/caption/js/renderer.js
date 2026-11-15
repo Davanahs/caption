@@ -104,6 +104,65 @@ const SKINS = {
     strokeColor: '#000000',
     strokeWidthPct: 0.08,
     behindSubject: true
+  },
+  hormozi: {
+    id: 'hormozi',
+    name: 'Hormozi Bold Punch',
+    font: "'Montserrat', 'Impact', 'Archivo Black', sans-serif",
+    fontStyle: 'italic',
+    fontSize: 98,
+    textColor: '#FFFFFF',
+    contextAlpha: 0.82,
+    activeTextColor: '#FFE600', // Electric yellow
+    secondaryActiveColor: '#00FF66', // Neon green
+    chipBg: '#000000',
+    chipPadding: { x: 28, y: 14 },
+    chipRadius: 10,
+    strokeColor: '#000000',
+    strokeWidthPct: 0.12,
+    allCaps: true
+  },
+  submagic: {
+    id: 'submagic',
+    name: 'Submagic Pill',
+    font: "'Outfit', 'Inter', 'Poppins', sans-serif",
+    fontSize: 88,
+    textColor: '#FFFFFF',
+    contextAlpha: 0.78,
+    activeTextColor: '#FFFFFF',
+    chipBg: '#8B5CF6', // Purple pill
+    chipPadding: { x: 26, y: 14 },
+    chipRadius: 26,
+    strokeColor: '#0B0813',
+    strokeWidthPct: 0.06
+  },
+  beast: {
+    id: 'beast',
+    name: 'Beast Impact',
+    font: "'Bangers', 'Impact', 'Montserrat', cursive, sans-serif",
+    fontSize: 106,
+    textColor: '#FFFFFF',
+    contextAlpha: 0.80,
+    activeTextColor: '#FFCC00', // Heat yellow
+    chipBg: '#FF2A00', // Beast red
+    chipPadding: { x: 30, y: 16 },
+    chipRadius: 14,
+    strokeColor: '#000000',
+    strokeWidthPct: 0.14,
+    allCaps: true
+  },
+  neonpulse: {
+    id: 'neonpulse',
+    name: 'Neon Cyber Glow',
+    font: "'Orbitron', 'Audiowide', 'Outfit', sans-serif",
+    fontSize: 86,
+    textColor: '#E2E8F0',
+    contextAlpha: 0.75,
+    activeTextColor: '#00F0FF',
+    glowColor: '#00F0FF',
+    secondaryGlowColor: '#FF007F',
+    strokeColor: '#05020D',
+    strokeWidthPct: 0.09
   }
 };
 
@@ -114,8 +173,42 @@ const PRESETS = {
   'minimal-script': { skin: 'minimalscript', animation: 'minimalScriptHybrid' },
   'create-every-day': { skin: 'script', animation: 'scriptElegance' },
   'retro-triangle': { skin: 'retro', animation: 'neonGlow' },
-  'behind-person': { skin: 'behindperson', animation: 'behindSubjectCutout' }
+  'behind-person': { skin: 'behindperson', animation: 'behindSubjectCutout' },
+  'hormozi': { skin: 'hormozi', animation: 'hormoziPunch' },
+  'submagic': { skin: 'submagic', animation: 'submagicPill' },
+  'beast': { skin: 'beast', animation: 'beastExplosion' },
+  'neonpulse': { skin: 'neonpulse', animation: 'neonPulseGlow' }
 };
+
+/**
+ * OpenMotion-Inspired Kinetic Spring Physics Helpers
+ * Damped harmonic oscillation curve for high-energy word pops.
+ */
+function getKineticSpringScale(progress, intensity = 1.0) {
+  if (progress <= 0 || progress >= 1.0) return 1.0;
+  const t = Math.min(Math.max(progress, 0), 1.0);
+  if (t < 0.32) {
+    const attack = t / 0.32;
+    const easeOut = 1 - Math.pow(1 - attack, 3);
+    return 0.88 + (0.34 * easeOut * intensity);
+  } else {
+    const settle = (t - 0.32) / 0.68;
+    const dampedWave = Math.cos(settle * Math.PI * 1.5) * Math.exp(-settle * 3.4);
+    return 1.0 + (0.22 * dampedWave * intensity);
+  }
+}
+
+function getKineticVerticalOffset(progress, maxOffset = 6) {
+  if (progress <= 0 || progress >= 1.0) return 0;
+  const t = Math.min(Math.max(progress, 0), 1.0);
+  if (t < 0.28) {
+    const attack = t / 0.28;
+    return -maxOffset * (1 - Math.pow(1 - attack, 2));
+  } else {
+    const settle = (t - 0.28) / 0.72;
+    return -maxOffset * Math.exp(-settle * 3.6) * Math.cos(settle * Math.PI);
+  }
+}
 
 class LightningComicRenderer {
   constructor(canvasElement, overlayContainer) {
@@ -472,36 +565,121 @@ class LightningComicRenderer {
             ctx.restore();
 
           } 
-          // 2. Neon Dual Glow
-          else if (animType === 'neonGlow') {
-            const popScale = 1.0 + Math.sin(Math.min(activeProgress, 1.0) * Math.PI) * 0.16;
-            ctx.scale(popScale, popScale);
+          // 2. Hormozi Bold Punch (Kinetic Spring + Electric Yellow/Green + Thick Black Shadow)
+          else if (animType === 'hormoziPunch') {
+            const springScale = getKineticSpringScale(activeProgress, 1.30);
+            const yHop = getKineticVerticalOffset(activeProgress, 8);
+            ctx.translate(0, yHop);
+            ctx.scale(springScale, springScale);
 
+            const isKeyColor = (w.colorTag && w.colorTag !== 'neutral') || (block.colorTag && block.colorTag !== 'neutral');
+            const highlightColor = isKeyColor ? (skin.secondaryActiveColor || '#00FF66') : (skin.activeTextColor || '#FFE600');
+            const displayText = wordText.toUpperCase();
+
+            // Heavy shadow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+            ctx.shadowBlur = 18;
+            ctx.shadowOffsetX = 3;
+            ctx.shadowOffsetY = 6;
+
+            // Thick Black Stroke (pass 1: 14px outer border)
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.lineWidth = strokeWidth * 1.35;
+            ctx.strokeStyle = '#000000';
+            ctx.strokeText(displayText, 0, 0);
+
+            // Vibrant Electric Fill
+            ctx.fillStyle = highlightColor;
+            ctx.fillText(displayText, 0, 0);
+          }
+          // 3. Submagic Pill (Smooth Rounded Pill + Kinetic Micro-hop)
+          else if (animType === 'submagicPill') {
+            const springScale = getKineticSpringScale(activeProgress, 1.18);
+            const yHop = getKineticVerticalOffset(activeProgress, 5);
+            ctx.translate(0, yHop);
+            ctx.scale(springScale, springScale);
+
+            const chipColor = this.getWordHighlightColor(w, block.colorTag) || skin.chipBg || '#8B5CF6';
+            const chipW = m.wordW + (skin.chipPadding?.x || 26) * 2;
+            const chipH = fontSize * 1.28;
+            const chipR = skin.chipRadius !== undefined ? skin.chipRadius : 26;
+
+            ctx.shadowColor = 'rgba(139, 92, 246, 0.45)';
+            ctx.shadowBlur = 18;
+            this.drawWordChip(ctx, 0, 0, chipW, chipH, chipR, chipColor, 0);
+
+            ctx.shadowBlur = 0;
+            ctx.lineWidth = strokeWidth * 0.8;
+            ctx.strokeStyle = skin.strokeColor || '#0B0813';
+            ctx.strokeText(wordText, 0, 0);
+
+            ctx.fillStyle = skin.activeTextColor || '#FFFFFF';
+            ctx.fillText(wordText, 0, 0);
+          }
+          // 4. Beast Impact (Explosive Pop + Slight Dynamic Angle + Heat Colors)
+          else if (animType === 'beastExplosion') {
+            const springScale = getKineticSpringScale(activeProgress, 1.35);
+            const yHop = getKineticVerticalOffset(activeProgress, 9);
+            const dynamicTilt = ((wIdx % 2 === 0 ? 1 : -1) * 2.8) * (Math.PI / 180);
+            ctx.translate(0, yHop);
+            ctx.rotate(dynamicTilt);
+            ctx.scale(springScale, springScale);
+
+            const displayText = wordText.toUpperCase();
+            const chipW = m.wordW + (skin.chipPadding?.x || 30) * 2;
+            const chipH = fontSize * 1.32;
+            const chipR = skin.chipRadius || 12;
+
+            ctx.shadowColor = 'rgba(255, 42, 0, 0.55)';
+            ctx.shadowBlur = 20;
+            this.drawWordChip(ctx, 0, 0, chipW, chipH, chipR, skin.chipBg || '#FF2A00', 0);
+
+            ctx.shadowBlur = 0;
+            ctx.lineWidth = strokeWidth * 1.2;
+            ctx.strokeStyle = '#000000';
+            ctx.strokeText(displayText, 0, 0);
+
+            ctx.fillStyle = skin.activeTextColor || '#FFCC00';
+            ctx.fillText(displayText, 0, 0);
+          }
+          // 5. Neon Dual Glow & Pulse
+          else if (animType === 'neonGlow' || animType === 'neonPulseGlow') {
+            const springScale = getKineticSpringScale(activeProgress, 1.20);
+            const yHop = getKineticVerticalOffset(activeProgress, 4);
+            ctx.translate(0, yHop);
+            ctx.scale(springScale, springScale);
+
+            const glowPulse = 18 + Math.sin(activeProgress * Math.PI) * 16;
             ctx.shadowColor = skin.activeTextColor || '#00F0FF';
-            ctx.shadowBlur = 22;
+            ctx.shadowBlur = glowPulse;
             ctx.lineWidth = strokeWidth;
-            ctx.strokeStyle = skin.strokeColor;
+            ctx.strokeStyle = skin.strokeColor || '#06040C';
             ctx.strokeText(wordText, 0, 0);
 
             ctx.fillStyle = skin.activeTextColor || '#00F0FF';
             ctx.fillText(wordText, 0, 0);
 
           } 
-          // 3. Pretty Pretty Girl Retro Swash (No Background Box)
+          // 6. Pretty Pretty Girl Retro Swash (Upgraded to Kinetic Spring)
           else if (animType === 'prettyGirlRetro') {
-            const popScale = 1.0 + Math.sin(Math.min(activeProgress, 1.0) * Math.PI) * 0.16;
-            ctx.scale(popScale, popScale);
+            const springScale = getKineticSpringScale(activeProgress, 1.18);
+            const yHop = getKineticVerticalOffset(activeProgress, 4);
+            ctx.translate(0, yHop);
+            ctx.scale(springScale, springScale);
 
-            ctx.shadowColor = 'rgba(0,0,0,0.8)';
-            ctx.shadowBlur = 12;
+            ctx.shadowColor = 'rgba(0,0,0,0.85)';
+            ctx.shadowBlur = 14;
             ctx.fillStyle = '#FFFFFF';
             ctx.fillText(wordText, 0, 0);
 
           } 
-          // 4. Fit Check 3D Cyan Glitch with True Sticker Text Outline Contour
+          // 7. Fit Check 3D Cyan Glitch with Kinetic Pop
           else if (animType === 'fitCheckGlitch') {
-            const popScale = 1.0 + Math.sin(Math.min(activeProgress, 1.0) * Math.PI) * 0.16;
-            ctx.scale(popScale, popScale);
+            const springScale = getKineticSpringScale(activeProgress, 1.22);
+            const yHop = getKineticVerticalOffset(activeProgress, 5);
+            ctx.translate(0, yHop);
+            ctx.scale(springScale, springScale);
 
             const outlineWidth = Math.max(16, fontSize * 0.22);
             ctx.lineJoin = 'round';
@@ -515,7 +693,7 @@ class LightningComicRenderer {
 
             // Pass 2: 3D Cyan Glitch Offset
             ctx.shadowColor = '#00F0FF';
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 12;
             ctx.fillStyle = skin.glitchColor || '#00F0FF';
             ctx.fillText(wordText, -5, 4);
 
@@ -525,20 +703,21 @@ class LightningComicRenderer {
             ctx.fillText(wordText, 0, 0);
 
           } 
-          // 5. Newspaper Ransom Note Cutout (Per-letter background tiles)
+          // 8. Newspaper Ransom Note Cutout (Per-letter background tiles)
           else if (animType === 'ransomNoteCutout') {
             const activeProgress = (currentTime - w.start) / Math.max(w.end - w.start, 0.1);
             this.drawRansomWord(ctx, wordText, wIdx, fontSize, true, activeProgress);
           }
-          // 6. Minimalist Script Overlay (Hybrid Sans + Script)
+          // 9. Minimalist Script Overlay (Hybrid Sans + Script)
           else if (animType === 'minimalScriptHybrid') {
-            const activeProgress = (currentTime - w.start) / Math.max(w.end - w.start, 0.1);
-            const popScale = 1.0 + Math.sin(Math.min(activeProgress, 1.0) * Math.PI) * 0.16;
-            ctx.scale(popScale, popScale);
+            const springScale = getKineticSpringScale(activeProgress, 1.16);
+            const yHop = getKineticVerticalOffset(activeProgress, 3);
+            ctx.translate(0, yHop);
+            ctx.scale(springScale, springScale);
 
             const isScriptWord = lineIdx > 0 || (wordLines.length === 1 && wIdx >= Math.floor(lineWords.length / 2));
-            ctx.shadowColor = 'rgba(0,0,0,0.8)';
-            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(0,0,0,0.85)';
+            ctx.shadowBlur = 12;
             ctx.fillStyle = '#FFFFFF';
             if (isScriptWord) {
               ctx.fillText(wordText.toLowerCase(), 0, 0);
@@ -546,14 +725,16 @@ class LightningComicRenderer {
               ctx.fillText(wordText.toUpperCase(), 0, 0);
             }
           }
-          // 7. Text Behind Person (Vibrant Bold Yellow with Black Outline Pop)
+          // 10. Text Behind Person (Vibrant Bold Yellow with Black Outline Pop)
           else if (animType === 'behindSubjectCutout') {
-            const popScale = 1.0 + Math.sin(Math.min(activeProgress, 1.0) * Math.PI) * 0.14;
-            ctx.scale(popScale, popScale);
+            const springScale = getKineticSpringScale(activeProgress, 1.18);
+            const yHop = getKineticVerticalOffset(activeProgress, 5);
+            ctx.translate(0, yHop);
+            ctx.scale(springScale, springScale);
 
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-            ctx.shadowBlur = 18;
-            ctx.lineWidth = strokeWidth * 1.25;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.95)';
+            ctx.shadowBlur = 20;
+            ctx.lineWidth = strokeWidth * 1.3;
             ctx.strokeStyle = '#000000';
             ctx.lineJoin = 'round';
             ctx.strokeText(wordText, 0, 0);
@@ -561,10 +742,12 @@ class LightningComicRenderer {
             ctx.fillStyle = '#FFFFFF';
             ctx.fillText(wordText, 0, 0);
           }
-          // 8. Sticker Chip Highlight Box (Submagic / CapCut / MrBeast)
+          // 11. Sticker Chip Highlight Box (Submagic / CapCut / MrBeast with Kinetic Pop)
           else {
-            const popScale = 1.0 + Math.sin(Math.min(activeProgress, 1.0) * Math.PI) * 0.16;
-            ctx.scale(popScale, popScale);
+            const springScale = getKineticSpringScale(activeProgress, 1.22);
+            const yHop = getKineticVerticalOffset(activeProgress, 5);
+            ctx.translate(0, yHop);
+            ctx.scale(springScale, springScale);
 
             const chipColor = this.getWordHighlightColor(w, block.colorTag) || skin.chipBg || '#FFE600';
             const chipW = m.wordW + (skin.chipPadding?.x || 20) * 2;
@@ -631,6 +814,37 @@ class LightningComicRenderer {
             ctx.strokeText(wordText, 0, 0);
 
             ctx.fillStyle = skin.textColor || '#FFE600';
+            ctx.fillText(wordText, 0, 0);
+          } else if (animType === 'hormoziPunch') {
+            const displayText = wordText.toUpperCase();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+            ctx.shadowBlur = 10;
+            ctx.lineWidth = strokeWidth * 1.1;
+            ctx.strokeStyle = '#000000';
+            ctx.lineJoin = 'round';
+            ctx.strokeText(displayText, 0, 0);
+
+            ctx.fillStyle = skin.textColor || '#FFFFFF';
+            ctx.fillText(displayText, 0, 0);
+          } else if (animType === 'beastExplosion') {
+            const displayText = wordText.toUpperCase();
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+            ctx.shadowBlur = 10;
+            ctx.lineWidth = strokeWidth * 1.1;
+            ctx.strokeStyle = '#000000';
+            ctx.lineJoin = 'round';
+            ctx.strokeText(displayText, 0, 0);
+
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillText(displayText, 0, 0);
+          } else if (animType === 'neonGlow' || animType === 'neonPulseGlow') {
+            ctx.shadowColor = 'rgba(0, 240, 255, 0.4)';
+            ctx.shadowBlur = 10;
+            ctx.lineWidth = strokeWidth;
+            ctx.strokeStyle = skin.strokeColor || '#06040C';
+            ctx.strokeText(wordText, 0, 0);
+
+            ctx.fillStyle = skin.textColor || '#E2E8F0';
             ctx.fillText(wordText, 0, 0);
           } else {
             const wordFillColor = isPast && animType === 'karaokeFill' ? (skin.sweepColor || '#22C55E') : skin.textColor;
@@ -790,6 +1004,10 @@ class LightningComicRenderer {
       if (presetKey === 'ransom-note') sampleText = 'the end';
       if (presetKey === 'minimal-script') sampleText = 'best of me';
       if (presetKey === 'behind-person') sampleText = 'BEHIND';
+      if (presetKey === 'hormozi') sampleText = 'HORMOZI';
+      if (presetKey === 'submagic') sampleText = 'Submagic';
+      if (presetKey === 'beast') sampleText = 'BEAST';
+      if (presetKey === 'neonpulse') sampleText = 'CYBER';
 
       tempRenderer.render({
         styleId: presetKey,
