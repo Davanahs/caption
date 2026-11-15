@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base href="/caption/">
   <title>Caption Forge | Standalone Caption Engine MVP</title>
-  
+
   <!-- Google Fonts for Style Presets -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Anton&family=Archivo+Black&family=Audiowide&family=Bangers&family=Caveat:wght@700&family=Dancing+Script:wght@700&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,700;0,800;1,700&family=Montserrat:ital,wght@0,800;1,800;1,900&family=Orbitron:wght@700;900&family=Outfit:ital,wght@0,500;0,700;0,800;0,900;1,700;1,800&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:ital,wght@1,700;1,900&family=Poppins:ital,wght@0,600;0,700;1,600&family=Quicksand:wght@600;700&family=Shrikhand&family=Space+Mono:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Anton&family=Archivo+Black&family=Audiowide&family=Bangers&family=Caveat:wght@700&family=Dancing+Script:wght@700&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,700;0,800;1,700&family=Montserrat:ital,wght@0,800;1,800;1,900&family=Orbitron:wght@700;900&family=Outfit:ital,wght@0,500;0,700;0,800;0,900;1,700;1,800&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:ital,wght@1,700;1,900&family=Poppins:ital,wght@0,600;0,700;1,600&family=Quicksand:wght@600;700&family=Shrikhand&family=Space+Mono:ital,wght@0,700;1,700&display=swap"
+    rel="stylesheet">
+
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
   <div class="app-container">
     <!-- Top Header -->
@@ -44,7 +48,7 @@
 
     <!-- Main Workspace Layout -->
     <main class="workspace-grid">
-      
+
       <!-- Left Panel: Text Input & Block Editor -->
       <section class="panel editor-panel">
         <div class="panel-header">
@@ -56,11 +60,9 @@
         <div id="textModeContainer" class="mode-section">
           <div class="input-group">
             <label for="scriptInput">Paste Your Script Text</label>
-            <textarea 
-              id="scriptInput" 
+            <textarea id="scriptInput"
               placeholder="Paste your text here... For example:&#10;We are building a standalone caption engine MVP first, so we can create high-quality captions without getting distracted by full video-editor complexity."
-              rows="5"
-            ></textarea>
+              rows="5"></textarea>
           </div>
 
           <div class="controls-row">
@@ -112,7 +114,8 @@
         <!-- Mode 3: Video Upload Area -->
         <div id="videoModeContainer" class="mode-section hidden">
           <div class="video-dropzone" id="videoDropzone">
-            <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/*,image/*" class="file-input-hidden">
+            <input type="file" id="videoFileInput"
+              accept="video/mp4,video/webm,video/quicktime,video/x-matroska,video/*,image/*" class="file-input-hidden">
             <div class="dropzone-content" id="videoDropContent">
               <span class="upload-icon">🎬</span>
               <p><b>Click to Upload Video or Image</b> or Drag & Drop</p>
@@ -167,19 +170,24 @@
           <span>🎨 Select Caption Style Preset</span>
         </div>
         <div class="style-presets-grid">
-          <button id="presetHormozi" class="preset-btn" data-style="hormozi" style="border-color: rgba(255, 230, 0, 0.7); box-shadow: 0 0 10px rgba(255, 230, 0, 0.25);">
+          <button id="presetHormozi" class="preset-btn" data-style="hormozi"
+            style="border-color: rgba(255, 230, 0, 0.7); box-shadow: 0 0 10px rgba(255, 230, 0, 0.25);">
             <span>🔥 Hormozi</span>
           </button>
-          <button id="presetSubmagic" class="preset-btn" data-style="submagic" style="border-color: rgba(139, 92, 246, 0.7); box-shadow: 0 0 10px rgba(139, 92, 246, 0.25);">
+          <button id="presetSubmagic" class="preset-btn" data-style="submagic"
+            style="border-color: rgba(139, 92, 246, 0.7); box-shadow: 0 0 10px rgba(139, 92, 246, 0.25);">
             <span>💊 Submagic</span>
           </button>
-          <button id="presetBeast" class="preset-btn" data-style="beast" style="border-color: rgba(255, 42, 0, 0.7); box-shadow: 0 0 10px rgba(255, 42, 0, 0.25);">
+          <button id="presetBeast" class="preset-btn" data-style="beast"
+            style="border-color: rgba(255, 42, 0, 0.7); box-shadow: 0 0 10px rgba(255, 42, 0, 0.25);">
             <span>⚡ Beast</span>
           </button>
-          <button id="presetNeonPulse" class="preset-btn" data-style="neonpulse" style="border-color: rgba(0, 240, 255, 0.7); box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);">
+          <button id="presetNeonPulse" class="preset-btn" data-style="neonpulse"
+            style="border-color: rgba(0, 240, 255, 0.7); box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);">
             <span>🟣 Cyber Glow</span>
           </button>
-          <button id="presetBehindPerson" class="preset-btn" data-style="behind-person" style="border-color: rgba(255, 230, 0, 0.6); box-shadow: 0 0 10px rgba(255, 230, 0, 0.2);">
+          <button id="presetBehindPerson" class="preset-btn" data-style="behind-person"
+            style="border-color: rgba(255, 230, 0, 0.6); box-shadow: 0 0 10px rgba(255, 230, 0, 0.2);">
             <span>👤 Behind Person</span>
           </button>
           <button id="presetPrettyGirl" class="preset-btn active" data-style="pretty-pretty-girl">
@@ -226,19 +234,23 @@
           <span>👥 Caption Placement / Depth</span>
         </div>
         <div class="depth-segmented-control" role="group" aria-label="Caption Depth Layer">
-          <button id="depthInFrontBtn" class="depth-btn active" type="button" title="Standard caption overlaid in front of video — fully visible anywhere, even across the person's face">
+          <button id="depthInFrontBtn" class="depth-btn active" type="button"
+            title="Standard caption overlaid in front of video — fully visible anywhere, even across the person's face">
             <span>🔲 In Front (Normal)</span>
           </button>
-          <button id="depthBehindPersonBtn" class="depth-btn" type="button" title="3D depth caption behind person using AI segmentation">
+          <button id="depthBehindPersonBtn" class="depth-btn" type="button"
+            title="3D depth caption behind person using AI segmentation">
             <span>👤 Behind Person (Depth)</span>
           </button>
         </div>
         <!-- Quick Alignment Presets for Behind-Person Mode -->
         <div id="depthPositionRow" class="depth-position-row hidden">
-          <button id="posAboveHeadBtn" class="depth-pos-btn active" type="button" title="Place caption in clear background space above head (100% visible & readable)">
+          <button id="posAboveHeadBtn" class="depth-pos-btn active" type="button"
+            title="Place caption in clear background space above head (100% visible & readable)">
             🔝 Above Head (Readable)
           </button>
-          <button id="posShouldersBtn" class="depth-pos-btn" type="button" title="Place caption behind shoulders spanning wide across background">
+          <button id="posShouldersBtn" class="depth-pos-btn" type="button"
+            title="Place caption behind shoulders spanning wide across background">
             👤 Wide Shoulders
           </button>
         </div>
@@ -250,7 +262,8 @@
 
         <!-- Search bar for stickers -->
         <div class="element-search-wrapper" style="margin-bottom: 8px;">
-          <input type="text" id="elementSearch" placeholder="🔍 Search stickers (speaker, star, flower...)" style="width: 100%; padding: 8px 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.8rem; outline: none; transition: border-color 0.2s;">
+          <input type="text" id="elementSearch" placeholder="🔍 Search stickers (speaker, star, flower...)"
+            style="width: 100%; padding: 8px 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.8rem; outline: none; transition: border-color 0.2s;">
         </div>
 
         <div class="elements-selector-grid" id="elementsGrid">
@@ -293,7 +306,8 @@
               <input type="range" id="elRotationSlider" min="-180" max="180" value="0" style="width: 100%;">
             </div>
             <div class="control-item flex-row-btns" style="align-items: flex-end;">
-              <button id="deleteElementBtn" class="btn btn-secondary btn-sm" style="color: #ef4444; border-color: rgba(239,68,68,0.3); width: 100%;">
+              <button id="deleteElementBtn" class="btn btn-secondary btn-sm"
+                style="color: #ef4444; border-color: rgba(239,68,68,0.3); width: 100%;">
                 🗑️ Delete Sticker
               </button>
             </div>
@@ -321,8 +335,10 @@
           <div class="stage-aspect-selector">
             <span class="ratio-label">Ratio:</span>
             <div class="aspect-btns" id="aspectBtnsContainer">
-              <button class="aspect-btn active" data-ratio="auto" title="Auto: Match original video ratio">Auto 🎬</button>
-              <button class="aspect-btn" data-ratio="9:16" title="9:16 Vertical (Reels / TikTok / Shorts)">9:16 📱</button>
+              <button class="aspect-btn active" data-ratio="auto" title="Auto: Match original video ratio">Auto
+                🎬</button>
+              <button class="aspect-btn" data-ratio="9:16" title="9:16 Vertical (Reels / TikTok / Shorts)">9:16
+                📱</button>
               <button class="aspect-btn" data-ratio="16:9" title="16:9 Landscape (YouTube / Desktop)">16:9 🖥️</button>
               <button class="aspect-btn" data-ratio="1:1" title="1:1 Square (Instagram)">1:1 ⏹️</button>
               <button class="aspect-btn" data-ratio="4:5" title="4:5 Portrait (Feed)">4:5 📸</button>
@@ -337,7 +353,7 @@
             <img id="previewImagePlayer" class="preview-image-player hidden" alt="Uploaded Image Preview">
             <canvas id="captionCanvas" width="1080" height="1920"></canvas>
             <canvas id="personCutoutCanvas" class="person-cutout-layer hidden" width="1080" height="1920"></canvas>
-            
+
             <!-- Safe Zone Overlay Lines -->
             <div id="safeZoneOverlay" class="safe-zone-container">
               <div class="safe-zone-top">Top Overlay Safe Zone</div>
@@ -366,7 +382,7 @@
           <button id="resetBtn" class="btn btn-circle btn-secondary" title="Reset">
             <span>↺</span>
           </button>
-          
+
           <div class="scrubber-wrapper">
             <input type="range" id="timeScrubber" min="0" max="100" value="0" step="0.1">
             <div class="time-display">
@@ -379,7 +395,8 @@
             <button id="volumeToggleBtn" class="btn-icon volume-btn" title="Mute / Unmute">
               <span id="volumeIcon">🔊</span>
             </button>
-            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1" title="Adjust Volume">
+            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1"
+              title="Adjust Volume">
           </div>
         </div>
 
@@ -411,7 +428,8 @@
 
   <!-- Scripts -->
   <!-- Google MediaPipe Selfie Segmentation for Text-Behind-Person Cutout (Loaded with defer so it never blocks page init) -->
-  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js"
+    crossorigin="anonymous"></script>
   <script src="js/normalizer.js?v=2.5"></script>
   <script src="js/segmenter.js?v=2.5"></script>
   <script src="js/director.js?v=2.5"></script>
@@ -421,4 +439,5 @@
   <script src="js/renderer.js?v=2.5"></script>
   <script src="js/app.js?v=2.5"></script>
 </body>
+
 </html>

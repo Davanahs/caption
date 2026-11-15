@@ -22,13 +22,17 @@ import subprocess
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status
+from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status, Depends
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import httpx
 import numpy as np
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.config import settings
+from backend.models.database import get_db
+from backend.models.models import Clip, Video
 
 logger = logging.getLogger(__name__)
 
@@ -991,4 +995,139 @@ async def director_pass_endpoint(payload: DirectorPassRequest):
         "durationMs": int((time.time() - t0) * 1000),
         "blocks": annotated
     }
+
+
+# ── Clip Integration: Fetch & Save Clip Captions ─────────────────────────────
+class SaveClipCaptionsRequest(BaseModel):
+    blocks: List[Dict[str, Any]]
+    full_text: Optional[str] = None
+
+
+@router.get("/clip-data/{clip_id}")
+async def get_clip_caption_data(clip_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Fetches clip metadata and aligns transcript segments from the clip or parent video.
+    Returns structured caption blocks with word-level timestamps and timing offsets.
+    """
+    clip_result = await db.execute(select(Clip).where(Clip.id == clip_id))
+    clip = clip_result.scalar_one_or_none()
+    if not clip:
+        raise HTTPException(status_code=404, detail="Clip not found")
+
+    clip_start = float(clip.start_time or 0.0)
+    clip_end = float(clip.end_time or clip.duration or 30.0)
+    clip_dur = float(clip.duration or (clip_end - clip_start))
+
+    blocks = []
+    full_text_parts = []
+
+    # 1. Try clip.transcript_segment
+    if clip.transcript_segment and clip.transcript_segment.strip():
+        raw = clip.transcript_segment.strip()
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, list):
+                blocks = parsed
+            elif isinstance(parsed, dict) and "blocks" in parsed:
+                blocks = parsed["blocks"]
+        except Exception:
+            full_text_parts.append(raw)
+
+    # 2. If no blocks found, slice from parent Video.transcript
+    if not blocks and clip.video_id:
+        video_result = await db.execute(select(Video).where(Video.id == clip.video_id))
+        video = video_result.scalar_one_or_none()
+        if video and video.transcript:
+            t = video.transcript
+            if isinstance(t, str):
+                try:
+                    t = json.loads(t)
+                except Exception:
+                    t = {}
+            segments = t.get("segments", [])
+            for seg in segments:
+                s_start = float(seg.get("start", 0.0))
+                s_end = float(seg.get("end", 0.0))
+                # Check overlap with clip window
+                if s_end > clip_start and s_start < clip_end:
+                    rel_start = round(max(0.0, s_start - clip_start), 2)
+                    rel_end = round(max(rel_start + 0.2, min(clip_dur, s_end - clip_start)), 2)
+                    text = seg.get("text", "").strip()
+                    if text:
+                        words_raw = seg.get("words", [])
+                        words = []
+                        if words_raw:
+                            for w in words_raw:
+                                w_start = float(w.get("start", s_start))
+                                w_end = float(w.get("end", s_end))
+                                rw_start = round(max(0.0, w_start - clip_start), 2)
+                                rw_end = round(max(rw_start + 0.1, min(clip_dur, w_end - clip_start)), 2)
+                                words.append({
+                                    "word": w.get("word", ""),
+                                    "start": rw_start,
+                                    "end": rw_end,
+                                    "isEmphasis": False
+                                })
+                        else:
+                            token_list = text.split()
+                            if token_list:
+                                step = (rel_end - rel_start) / len(token_list)
+                                for i, tok in enumerate(token_list):
+                                    words.append({
+                                        "word": tok,
+                                        "start": round(rel_start + i * step, 2),
+                                        "end": round(rel_start + (i + 1) * step, 2),
+                                        "isEmphasis": False
+                                    })
+                        blocks.append({
+                            "id": f"clip_seg_{seg.get('id', len(blocks))}",
+                            "start": rel_start,
+                            "end": rel_end,
+                            "text": text,
+                            "words": words,
+                        })
+                        full_text_parts.append(text)
+
+    # 3. Fallback segment if still empty
+    if not blocks:
+        fallback_txt = clip.title or "Spoken audio segment"
+        blocks.append({
+            "id": "block_0",
+            "start": 0.0,
+            "end": min(clip_dur, 5.0),
+            "text": fallback_txt,
+            "words": [{"word": w, "start": 0.0, "end": 1.0, "isEmphasis": False} for w in fallback_txt.split()],
+        })
+        full_text_parts.append(fallback_txt)
+
+    full_text = " ".join(full_text_parts) if full_text_parts else " ".join([b["text"] for b in blocks])
+
+    return {
+        "clip_id": clip.id,
+        "title": clip.title or f"Clip {clip.id[:8]}",
+        "duration": clip_dur,
+        "video_url": f"/api/clips/{clip.id}/download",
+        "full_text": full_text,
+        "blocks": blocks,
+    }
+
+
+@router.post("/clip-data/{clip_id}/save")
+async def save_clip_caption_data(
+    clip_id: str,
+    payload: SaveClipCaptionsRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Saves edited caption blocks directly into the clip record.
+    """
+    clip_result = await db.execute(select(Clip).where(Clip.id == clip_id))
+    clip = clip_result.scalar_one_or_none()
+    if not clip:
+        raise HTTPException(status_code=404, detail="Clip not found")
+
+    clip.transcript_segment = json.dumps(payload.blocks)
+    await db.commit()
+    await db.refresh(clip)
+    return {"status": "success", "clip_id": clip_id, "blocks_count": len(payload.blocks)}
 

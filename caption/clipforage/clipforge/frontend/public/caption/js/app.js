@@ -1994,13 +1994,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!bridgeBar) {
         bridgeBar = document.createElement('div');
         bridgeBar.id = 'clipBridgeBar';
-        bridgeBar.style.cssText = 'background: rgba(99, 102, 241, 0.16); border: 1px solid rgba(168, 85, 247, 0.4); padding: 8px 14px; border-radius: 8px; margin: 8px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #e2e8f0; font-family: sans-serif;';
+        bridgeBar.style.cssText = 'background: rgba(99, 102, 241, 0.16); border: 1px solid rgba(168, 85, 247, 0.4); padding: 8px 14px; border-radius: 8px; margin: 8px 16px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #e2e8f0; font-family: sans-serif; flex-wrap: wrap; gap: 8px;';
         bridgeBar.innerHTML = `
           <div style="display:flex; align-items:center; gap:8px;">
             <span style="font-size:16px;">🎬</span>
             <span>Clip <b>#${clipId || 'Active'}</b> ${clipTitle ? `· <i>${clipTitle}</i>` : ''}</span>
           </div>
-          <div style="display:flex; gap:8px;">
+          <div style="display:flex; gap:8px; align-items:center;">
+            ${clipId ? `<button id="bridgeSaveClipBtn" style="background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.5); color: #4ade80; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 11px; cursor: pointer; transition: all 0.2s;">💾 Save to Clip</button>` : ''}
             ${clipId ? `<a href="/publish?clip=${clipId}" target="_top" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; text-decoration: none; padding: 5px 12px; border-radius: 6px; font-weight: 700; font-size: 11px;">🚀 Send to Publish</a>` : ''}
             <a href="/clips" target="_top" style="background: rgba(255,255,255,0.08); color: #cbd5e1; text-decoration: none; padding: 5px 10px; border-radius: 6px; font-size: 11px;">Clips Library</a>
           </div>
@@ -2009,42 +2010,119 @@ document.addEventListener('DOMContentLoaded', () => {
         if (appHeader && appHeader.parentNode) {
           appHeader.parentNode.insertBefore(bridgeBar, appHeader.nextSibling);
         }
+
+        const bridgeSaveClipBtn = document.getElementById('bridgeSaveClipBtn');
+        if (bridgeSaveClipBtn && clipId) {
+          bridgeSaveClipBtn.addEventListener('click', async () => {
+            bridgeSaveClipBtn.textContent = 'Saving...';
+            bridgeSaveClipBtn.disabled = true;
+            try {
+              const res = await fetch(`/api/caption/clip-data/${clipId}/save`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  blocks: captionData.blocks,
+                  full_text: scriptInput.value
+                })
+              });
+              if (res.ok) {
+                bridgeSaveClipBtn.textContent = '✅ Saved!';
+                setTimeout(() => {
+                  bridgeSaveClipBtn.textContent = '💾 Save to Clip';
+                  bridgeSaveClipBtn.disabled = false;
+                }, 2000);
+              } else {
+                bridgeSaveClipBtn.textContent = '❌ Failed';
+                setTimeout(() => {
+                  bridgeSaveClipBtn.textContent = '💾 Save to Clip';
+                  bridgeSaveClipBtn.disabled = false;
+                }, 2000);
+              }
+            } catch (err) {
+              console.error('Save captions error:', err);
+              bridgeSaveClipBtn.textContent = '❌ Error';
+              setTimeout(() => {
+                bridgeSaveClipBtn.textContent = '💾 Save to Clip';
+                bridgeSaveClipBtn.disabled = false;
+              }, 2000);
+            }
+          });
+        }
       }
 
-      if (videoUrl) {
-        statusText.textContent = `⚡ Loading clip from library: ${clipTitle || clipId}...`;
-        previewVideoPlayer.crossOrigin = 'anonymous';
-        previewVideoPlayer.src = videoUrl;
-        previewVideoPlayer.classList.remove('hidden');
-        previewImagePlayer.classList.add('hidden');
+      statusText.textContent = `⚡ Loading clip & spoken transcript: ${clipTitle || clipId}...`;
+
+      // 1. Fetch clip's transcript data and load into blocks
+      if (clipId) {
+        try {
+          const res = await fetch(`/api/caption/clip-data/${clipId}`);
+          if (res.ok) {
+            const clipData = await res.json();
+            if (clipData && clipData.blocks && clipData.blocks.length > 0) {
+              console.log('[CaptionForge Bridge] Loaded', clipData.blocks.length, 'speech blocks from clip data');
+              if (clipData.full_text) {
+                scriptInput.value = clipData.full_text;
+              }
+              loadCaptionData(clipData.blocks, true);
+              if (clipData.duration) {
+                totalDuration = clipData.duration;
+                timeScrubber.max = totalDuration;
+                totalTimeEl.textContent = `${totalDuration.toFixed(2)}s`;
+              }
+              statusText.textContent = `✅ Loaded ${clipData.blocks.length} speech caption blocks for ${clipData.title}!`;
+            }
+          }
+        } catch (e) {
+          console.debug('Clip transcript query note:', e);
+        }
+      }
+
+      // 2. Fetch video file as Blob to make it fully playable and extractable
+      const targetVideoUrl = videoUrl || (clipId ? `/api/clips/${clipId}/download` : null);
+      if (targetVideoUrl) {
         videoDropContent.classList.add('hidden');
         videoFileInfo.classList.remove('hidden');
         videoFileNameDisplay.textContent = clipTitle ? `${clipTitle}.mp4` : `clip_${clipId}.mp4`;
+        videoFileSizeDisplay.textContent = 'Loading video stream...';
 
-        previewVideoPlayer.onloadedmetadata = () => {
-          videoNaturalWidth = previewVideoPlayer.videoWidth || 1080;
-          videoNaturalHeight = previewVideoPlayer.videoHeight || 1920;
-          totalDuration = previewVideoPlayer.duration || totalDuration;
-          timeScrubber.max = totalDuration;
-          totalTimeEl.textContent = `${totalDuration.toFixed(2)}s`;
-          setStageAspectRatio(currentRatio, videoNaturalWidth, videoNaturalHeight);
-          updateVolume(currentVolume > 0 ? currentVolume : 1.0, false);
-          renderCurrentFrame();
-        };
+        try {
+          const vResp = await fetch(targetVideoUrl);
+          if (vResp.ok) {
+            const blob = await vResp.blob();
+            const fileName = clipTitle ? `${clipTitle}.mp4` : `clip_${clipId}.mp4`;
+            videoBlob = new File([blob], fileName, { type: blob.type || 'video/mp4' });
+            videoFileSizeDisplay.textContent = formatFileSize(blob.size);
+            transcribeVideoBtn.disabled = false;
 
-        // Query backend for pre-transcribed text or clip metadata if available
-        if (clipId) {
-          try {
-            const res = await fetch(`/api/clips/${clipId}`);
-            if (res.ok) {
-              const clipData = await res.json();
-              if (clipData && clipData.transcript) {
-                console.log('[CaptionForge Bridge] Found transcript in clip database record');
+            const blobUrl = URL.createObjectURL(blob);
+            previewVideoPlayer.crossOrigin = 'anonymous';
+            previewVideoPlayer.src = blobUrl;
+            previewVideoPlayer.classList.remove('hidden');
+            previewImagePlayer.classList.add('hidden');
+
+            previewVideoPlayer.onloadedmetadata = () => {
+              videoNaturalWidth = previewVideoPlayer.videoWidth || 1080;
+              videoNaturalHeight = previewVideoPlayer.videoHeight || 1920;
+              if (previewVideoPlayer.duration && !isNaN(previewVideoPlayer.duration)) {
+                totalDuration = previewVideoPlayer.duration;
+                timeScrubber.max = totalDuration;
+                totalTimeEl.textContent = `${totalDuration.toFixed(2)}s`;
               }
-            }
-          } catch (e) {
-            console.debug('Clip query note:', e);
+              setStageAspectRatio(currentRatio, videoNaturalWidth, videoNaturalHeight);
+              updateVolume(currentVolume > 0 ? currentVolume : 1.0, false);
+              renderCurrentFrame();
+            };
+          } else {
+            // Direct URL fallback if fetch blob fails
+            previewVideoPlayer.crossOrigin = 'anonymous';
+            previewVideoPlayer.src = targetVideoUrl;
+            previewVideoPlayer.classList.remove('hidden');
           }
+        } catch (vErr) {
+          console.warn('[CaptionForge Bridge] Blob fetch fallback to direct src:', vErr);
+          previewVideoPlayer.crossOrigin = 'anonymous';
+          previewVideoPlayer.src = targetVideoUrl;
+          previewVideoPlayer.classList.remove('hidden');
         }
       }
     } catch (err) {
