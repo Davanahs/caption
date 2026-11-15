@@ -72,79 +72,7 @@ export const LAYOUT_OPTIONS: LayoutOption[] = [
     ),
   },
 
-  // ── 3. Split — Two speakers side by side ───────────────────────────────────
-  {
-    id: 'split_screen',
-    aliases: ['split_screen', 'split'],
-    name: 'Split',
-    subtitle: 'Two speakers side by side (9:16)',
-    description: 'Two speakers side by side (9:16).',
-    renderPreview: () => (
-      <img
-        src={LAYOUT_PREVIEW_IMAGES['split_screen']}
-        alt="Split layout preview — Two speakers side by side (9:16)"
-        style={{
-          maxHeight: 96,
-          width: 'auto',
-          maxWidth: '100%',
-          objectFit: 'contain',
-          borderRadius: 4,
-          boxShadow: '0 3px 10px rgba(0, 0, 0, 0.55)',
-          display: 'block',
-        }}
-      />
-    ),
-  },
-
-  // ── 4. Multi Split — Four speakers in a 2x2 grid ───────────────────────────
-  {
-    id: 'multi_split',
-    aliases: ['multi_split'],
-    name: 'Multi Split',
-    subtitle: 'Four speakers in a 2x2 grid (9:16)',
-    description: 'Four speakers in a 2x2 grid (9:16).',
-    renderPreview: () => (
-      <img
-        src={LAYOUT_PREVIEW_IMAGES['multi_split']}
-        alt="Multi Split layout preview — Four speakers in a 2x2 grid (9:16)"
-        style={{
-          maxHeight: 96,
-          width: 'auto',
-          maxWidth: '100%',
-          objectFit: 'contain',
-          borderRadius: 4,
-          boxShadow: '0 3px 10px rgba(0, 0, 0, 0.55)',
-          display: 'block',
-        }}
-      />
-    ),
-  },
-
-  // ── 5. Stacked — Two speakers arranged vertically ──────────────────────────
-  {
-    id: 'stacked_16_9',
-    aliases: ['stacked_16_9', 'stacked'],
-    name: 'Stacked',
-    subtitle: 'Two speakers stacked (9:16)',
-    description: 'Two speakers stacked (9:16).',
-    renderPreview: () => (
-      <img
-        src={LAYOUT_PREVIEW_IMAGES['stacked_16_9']}
-        alt="Stacked layout preview — Two speakers stacked (9:16)"
-        style={{
-          maxHeight: 96,
-          width: 'auto',
-          maxWidth: '100%',
-          objectFit: 'contain',
-          borderRadius: 4,
-          boxShadow: '0 3px 10px rgba(0, 0, 0, 0.55)',
-          display: 'block',
-        }}
-      />
-    ),
-  },
-
-  // ── 6. Transform — AI-tracked dynamic framing ──────────────────────────────
+  // ── 3. Transform — AI-tracked dynamic framing ──────────────────────────────
   {
     id: 'creative_transform',
     aliases: ['creative_transform', 'transform'],
@@ -169,16 +97,22 @@ export const LAYOUT_OPTIONS: LayoutOption[] = [
   },
 ];
 
-// Helper to resolve any incoming value to one of the 6 canonical IDs
+// Helper to resolve any incoming value to one of the 3 canonical IDs
 export function resolveLayoutOptionId(val: string | undefined): string {
-  if (!val) return 'center_crop';
+  if (!val) return 'fill_blur';
   const clean = val.toLowerCase().trim();
   for (const opt of LAYOUT_OPTIONS) {
     if (opt.id === clean || opt.aliases.includes(clean)) {
       return opt.id;
     }
   }
-  if (clean === 'fit_black' || clean === 'static_wide') {
+  // Any legacy or unrecognized layout gracefully normalizes to fill_blur
+  if (
+    clean === 'fit_black' ||
+    clean === 'static_wide' ||
+    clean.includes('split') ||
+    clean.includes('stacked')
+  ) {
     return 'fill_blur';
   }
   return 'center_crop';
@@ -242,13 +176,13 @@ export default function LayoutPreviewSelector({
         </div>
       )}
 
-      {/* 6-Card Responsive Grid (3 columns x 2 rows on desktop) */}
+      {/* 3-Card Responsive Grid (Crop, Blur, Transform) */}
       <div
         role="radiogroup"
         aria-label={title || 'Layout Mode (Reframe)'}
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
           gap: 8,
           marginBottom: 8,
         }}

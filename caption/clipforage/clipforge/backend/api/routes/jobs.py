@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisco
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, desc, func, case
 from backend.models.database import get_db, AsyncSessionLocal
-from backend.models.models import Job, JobStatus, Video
+from backend.models.models import Job, JobStatus, Video, UploadBatch, VideoProcessingStatus, UploadBatchStatus
 from backend.services.downloader import extract_youtube_id
 from backend.core.sanitizer import sanitize_user_facing_error
 
@@ -350,6 +350,41 @@ async def cancel_job(job_id: str, db: AsyncSession = Depends(get_db)):
     return {"message": "Job cancelled successfully", "job_id": job_id, "status": "cancelled"}
 
 
+@router.post("/cancel-all-failed")
+async def cancel_all_failed_jobs(include_test: bool = True, db: AsyncSession = Depends(get_db)):
+    """
+    Cancel all jobs currently in FAILED state.
+    Transitions their status to CANCELLED and marks error_message as 'Cancelled by user'.
+    """
+    now = datetime.now(timezone.utc)
+    query = select(Job).where(Job.status == JobStatus.FAILED.value)
+    if not include_test:
+        query = query.where(Job.is_test == False)
+
+    result = await db.execute(query)
+    failed_jobs = result.scalars().all()
+
+    cancelled_count = 0
+    for job in failed_jobs:
+        job.status = JobStatus.CANCELLED.value
+        job.current_step = "Cancelled"
+        job.error_message = "Cancelled by user"
+        job.completed_at = now
+        job.updated_at = now
+        cancelled_count += 1
+
+        if job.video_id:
+            from backend.models.models import Video, VideoProcessingStatus
+            v_res = await db.execute(select(Video).where(Video.id == job.video_id))
+            video = v_res.scalar_one_or_none()
+            if video and video.processing_status in (VideoProcessingStatus.FAILED.value, VideoProcessingStatus.PROCESSING.value):
+                video.processing_status = VideoProcessingStatus.CANCELLED.value
+                video.processing_error = "Cancelled by user"
+
+    await db.commit()
+    return {"message": f"Successfully cancelled {cancelled_count} failed job(s)", "cancelled_count": cancelled_count}
+
+
 @router.websocket("/ws/{job_id}")
 async def job_status_ws(websocket: WebSocket, job_id: str):
     """
@@ -472,12 +507,25 @@ async def retry_failed_job(job_id: str, db: AsyncSession = Depends(get_db)):
             if vid_rec and vid_rec.local_path:
                 candidate_paths.append(Path(vid_rec.local_path))
                 candidate_paths.append(settings.UPLOAD_DIR / vid_rec.local_path)
-                candidate_paths.append(settings.STORAGE_DIR / vid_rec.local_path)
+                if hasattr(settings, "STORAGE_DIR") and settings.STORAGE_DIR:
+                    candidate_paths.append(settings.STORAGE_DIR / vid_rec.local_path)
+                candidate_paths.append(settings.BASE_DIR / vid_rec.local_path)
+                try:
+                    from backend.core.storage import storage_service
+                    resolved = storage_service._resolve_path(vid_rec.local_path)
+                    if resolved:
+                        candidate_paths.append(resolved)
+                except Exception:
+                    pass
+            # Also check if video was part of an upload batch
+            if vid_rec and vid_rec.upload_batch_id:
+                candidate_paths.append(settings.UPLOAD_DIR / "studio" / "batches" / vid_rec.upload_batch_id / f"{vid_rec.id}.mp4")
 
         # Check standard upload dir by job_id
         candidate_paths.append(settings.UPLOAD_DIR / job_id / "video.mp4")
         if job.video_id:
             candidate_paths.append(settings.UPLOAD_DIR / job.video_id / "video.mp4")
+            candidate_paths.append(settings.UPLOAD_DIR / job.video_id / "source.mp4")
 
         # Check raw_source as path
         if raw_source:
@@ -505,6 +553,25 @@ async def retry_failed_job(job_id: str, db: AsyncSession = Depends(get_db)):
     job.progress = 0
     job.current_step = "Re-queued for retry"
     job.error_message = None
+
+    # Synchronize linked Video and UploadBatch if present
+    if job.video_id:
+        vq = await db.execute(select(Video).where(Video.id == job.video_id))
+        vid_rec = vq.scalar_one_or_none()
+        if vid_rec:
+            vid_rec.processing_status = VideoProcessingStatus.PROCESSING.value
+            vid_rec.processing_error = None
+            vid_rec.processing_step = "Re-queued for retry"
+            vid_rec.processing_progress = 5
+            vid_rec.processing_job_id = job.id
+            if vid_rec.upload_batch_id:
+                bq = await db.execute(select(UploadBatch).where(UploadBatch.id == vid_rec.upload_batch_id))
+                batch_rec = bq.scalar_one_or_none()
+                if batch_rec and batch_rec.status == UploadBatchStatus.FAILED.value:
+                    batch_rec.status = UploadBatchStatus.PROCESSING.value
+                    batch_rec.batch_error = None
+                    batch_rec.active_video_id = vid_rec.id
+
     await db.commit()
 
     # Re-queue as a fresh Celery task
@@ -513,6 +580,7 @@ async def retry_failed_job(job_id: str, db: AsyncSession = Depends(get_db)):
 
         kwargs = {
             "job_id": job.id,
+            "video_id": job.video_id,
             "clip_mode": config.get("clip_mode", "ai_highlights"),
             "max_clip_duration": config.get("max_clip_duration"),
             "target_duration": config.get("target_duration"),
@@ -525,6 +593,10 @@ async def retry_failed_job(job_id: str, db: AsyncSession = Depends(get_db)):
             "num_clips": config.get("clips_count"),
             "publish_destination_id": config.get("publish_destination_id"),
         }
+        if config.get("studio_batch_id"):
+            kwargs["studio_batch_id"] = config.get("studio_batch_id")
+        if config.get("destination_ids"):
+            kwargs["destination_ids"] = config.get("destination_ids")
 
         if is_youtube:
             kwargs["youtube_url"] = raw_source

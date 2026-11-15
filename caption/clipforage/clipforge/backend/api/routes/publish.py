@@ -1,13 +1,16 @@
 """API Routes — YouTube Publishing"""
+import asyncio
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks, Body, Response, status
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse, FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc, func
+from sqlalchemy import select, desc, func, delete
 from pydantic import BaseModel
 from backend.models.database import get_db
-from backend.models.models import Clip, VideoMetadata, PublishStatus
+from backend.models.models import Clip, Channel, DestinationOutro, PublishStatus, PublishTarget, VideoMetadata
 from backend.core.config import settings
 
 router = APIRouter(prefix="/api/publish", tags=["publish"])
@@ -25,6 +28,11 @@ class PublishRequest(BaseModel):
     category: str = "22"
     license: str = "youtube"
     destination_channel_id: str | None = None
+    destination_ids: list[str] | None = None
+
+
+class ClipDestinationsUpdateRequest(BaseModel):
+    destination_ids: list[str]
 
 
 class OAuthCallbackRequest(BaseModel):
@@ -171,7 +179,7 @@ async def get_clip_publish_metadata(clip_id: str, db: AsyncSession = Depends(get
         "tags": tags,
         "category": category,
         "license": clip.license or "youtube",
-        "privacy": clip.privacy or "public",
+        "privacy": clip.privacy or "private",
         "made_for_kids": clip.made_for_kids if clip.made_for_kids is not None else False,
         "age_restricted": clip.age_restricted if clip.age_restricted is not None else False,
         "pinned_comment": clip.pinned_comment or "",
@@ -291,7 +299,7 @@ async def update_clip_publish_metadata(
             "tags": tags,
             "category": clip.category or "22",
             "license": clip.license or "youtube",
-            "privacy": clip.privacy or "public",
+            "privacy": clip.privacy or "private",
             "made_for_kids": clip.made_for_kids if clip.made_for_kids is not None else False,
             "age_restricted": clip.age_restricted if clip.age_restricted is not None else False,
             "pinned_comment": clip.pinned_comment or "",
@@ -329,9 +337,31 @@ async def get_destinations(include_test: bool = False, db: AsyncSession = Depend
     )
     channels = result.scalars().all()
 
+    outro_ids = [c.active_outro_id for c in channels if getattr(c, "active_outro_id", None)]
+    outros_by_id: dict[str, DestinationOutro] = {}
+    if outro_ids:
+        outro_res = await db.execute(
+            select(DestinationOutro).where(DestinationOutro.id.in_(outro_ids), DestinationOutro.is_active == True)
+        )
+        for o in outro_res.scalars().all():
+            outros_by_id[o.id] = o
+
     destinations = []
     for c in channels:
         is_auth = check_channel_authorization(c.youtube_channel_id)
+        outro = outros_by_id.get(c.active_outro_id) if c.active_outro_id else None
+        outro_summary = (
+            {
+                "id": outro.id,
+                "outro_type": outro.outro_type,
+                "duration_seconds": float(outro.duration_seconds),
+                "version": int(outro.version or 1),
+                "original_filename": outro.original_filename,
+                "preview_url": f"/api/youtube-channels/{c.id}/outro/preview",
+            }
+            if outro
+            else None
+        )
         destinations.append({
             "id": c.id,
             "youtube_channel_id": c.youtube_channel_id,
@@ -340,8 +370,13 @@ async def get_destinations(include_test: bool = False, db: AsyncSession = Depend
             "thumbnail_url": c.thumbnail_url,
             "is_default_destination": c.is_default_destination,
             "default_destination_expires_at": c.default_destination_expires_at.isoformat() if c.default_destination_expires_at else None,
+            "is_active": bool(c.is_active),
             "is_authorized": is_auth,
-            "status": "connected" if is_auth else "needs_reauth",
+            "status": "disconnected" if not c.is_active else ("connected" if is_auth else "needs_reauth"),
+            "ready_for_publishing": bool(c.is_active and is_auth),
+            "active_outro_id": outro.id if outro else None,
+            "has_outro": outro is not None,
+            "outro": outro_summary,
         })
 
     return destinations
@@ -523,34 +558,258 @@ class RetryPublishRequest(BaseModel):
     force: bool = False
 
 
+def _resolve_clip_local_path(output_path: str | None) -> Path | None:
+    if not output_path or not isinstance(output_path, str):
+        return None
+    direct = Path(output_path)
+    if direct.exists():
+        return direct
+    try:
+        from backend.services.outro_service import resolve_clip_base_video_path
+        resolved = resolve_clip_base_video_path(output_path)
+        if resolved.exists():
+            return resolved
+    except Exception:
+        pass
+    return None
+
+
+async def _validate_active_destinations(raw_refs: list[str], db: AsyncSession) -> list[Channel]:
+    """Validate and resolve canonical Channel objects in request order with zero silent substitution."""
+    from backend.services.publisher import check_channel_authorization
+
+    resolved: list[Channel] = []
+    seen: set[str] = set()
+    for ref in raw_refs:
+        if not ref or not isinstance(ref, str):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid destination channel reference.",
+            )
+        dest_res = await db.execute(
+            select(Channel).where(
+                (Channel.id == ref) | (Channel.youtube_channel_id == ref),
+                Channel.is_destination == True,
+                Channel.is_active == True,
+            )
+        )
+        dest_ch = dest_res.scalar_one_or_none()
+        if not dest_ch:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid destination channel '{ref}': not found, inactive, or not an authorized destination.",
+            )
+        if not check_channel_authorization(dest_ch.youtube_channel_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Destination channel '{dest_ch.channel_name}' is not authorized or OAuth credentials are invalid.",
+            )
+        if dest_ch.id not in seen:
+            seen.add(dest_ch.id)
+            resolved.append(dest_ch)
+    return resolved
+
+
+async def _serialize_targets_for_clips(clip_ids: list[str], db: AsyncSession) -> dict[str, list[dict]]:
+    """Batch-load PublishTarget rows + Channel + active DestinationOutro summaries for clips."""
+    out: dict[str, list[dict]] = {cid: [] for cid in clip_ids}
+    if not clip_ids:
+        return out
+
+    pt_res = await db.execute(
+        select(PublishTarget)
+        .where(PublishTarget.clip_id.in_(clip_ids))
+        .order_by(PublishTarget.created_at.asc())
+    )
+    targets = pt_res.scalars().all()
+    if not targets:
+        return out
+
+    dest_ids = list({t.destination_id for t in targets if t.destination_id})
+    channels_by_id: dict[str, Channel] = {}
+    outros_by_id: dict[str, DestinationOutro] = {}
+    if dest_ids:
+        ch_res = await db.execute(select(Channel).where(Channel.id.in_(dest_ids)))
+        for ch in ch_res.scalars().all():
+            channels_by_id[ch.id] = ch
+
+        outro_ids = list({
+            ch.active_outro_id
+            for ch in channels_by_id.values()
+            if getattr(ch, "active_outro_id", None)
+        } | {
+            t.outro_applied_id
+            for t in targets
+            if getattr(t, "outro_applied_id", None)
+        })
+        if outro_ids:
+            o_res = await db.execute(select(DestinationOutro).where(DestinationOutro.id.in_(outro_ids)))
+            for o in o_res.scalars().all():
+                outros_by_id[o.id] = o
+
+    for t in targets:
+        ch = channels_by_id.get(t.destination_id)
+        active_outro = outros_by_id.get(ch.active_outro_id) if (ch and ch.active_outro_id) else None
+        if active_outro and not active_outro.is_active:
+            active_outro = None
+        applied_outro = outros_by_id.get(t.outro_applied_id) if t.outro_applied_id else None
+
+        active_outro_summary = (
+            {
+                "id": active_outro.id,
+                "outro_type": active_outro.outro_type,
+                "duration_seconds": float(active_outro.duration_seconds),
+                "version": int(active_outro.version or 1),
+                "original_filename": active_outro.original_filename,
+                "preview_url": f"/api/youtube-channels/{ch.id}/outro/preview" if ch else None,
+            }
+            if active_outro
+            else None
+        )
+        out[t.clip_id].append({
+            "id": t.id,
+            "clip_id": t.clip_id,
+            "destination_id": t.destination_id,
+            "destination_name": ch.channel_name if ch else "Unknown Destination",
+            "destination_youtube_channel_id": ch.youtube_channel_id if ch else None,
+            "destination_thumbnail_url": ch.thumbnail_url if ch else None,
+            "is_active": bool(ch.is_active) if ch else False,
+            "status": t.status,
+            "publish_stage": t.publish_stage or t.status,
+            "publish_progress": float(t.publish_progress or 0.0),
+            "youtube_video_id": t.youtube_video_id,
+            "youtube_url": f"https://www.youtube.com/shorts/{t.youtube_video_id}" if t.youtube_video_id else None,
+            "error_message": t.error_message,
+            "retry_count": int(t.retry_count or 0),
+            "privacy": t.privacy or "private",
+            "scheduled_at": t.scheduled_at.isoformat() if t.scheduled_at else None,
+            "published_at": t.published_at.isoformat() if t.published_at else None,
+            "publish_started_at": t.publish_started_at.isoformat() if t.publish_started_at else None,
+            "publish_completed_at": t.publish_completed_at.isoformat() if t.publish_completed_at else None,
+            "rendered_video_path": t.rendered_video_path,
+            "artifact_storage_key": t.artifact_storage_key,
+            "outro_applied_id": t.outro_applied_id,
+            "outro_applied_version": int(applied_outro.version) if applied_outro else None,
+            "has_outro": active_outro is not None,
+            "active_outro": active_outro_summary,
+            "preview_url": f"/api/publish/clips/{t.clip_id}/destinations/{t.destination_id}/preview",
+            "preview_info_url": f"/api/publish/clips/{t.clip_id}/destinations/{t.destination_id}/preview-info",
+        })
+    return out
+
+
+async def _recompute_clip_aggregate_async(clip: Clip, db: AsyncSession) -> list[PublishTarget]:
+    """Recompute aggregate Clip publish fields truthfully from its PublishTarget rows."""
+    res = await db.execute(select(PublishTarget).where(PublishTarget.clip_id == clip.id))
+    targets = list(res.scalars().all())
+    if not targets:
+        return []
+
+    done_statuses = {"completed", "published"}
+    active_statuses = {"queued", "uploading", "finalizing", "publishing"}
+    first_yt = next((t.youtube_video_id for t in targets if t.status in done_statuses and t.youtube_video_id), None)
+    if first_yt and not clip.youtube_short_id:
+        clip.youtube_short_id = first_yt
+
+    active_targets = [t for t in targets if t.status in active_statuses]
+    if active_targets:
+        if any(t.status in ("uploading", "finalizing", "publishing") for t in active_targets):
+            clip.publish_status = PublishStatus.UPLOADING.value
+            clip.publish_stage = "uploading"
+        else:
+            clip.publish_status = PublishStatus.QUEUED.value
+            clip.publish_stage = "queued"
+        avg = sum(float(t.publish_progress or 0.0) for t in targets) / max(1, len(targets))
+        clip.publish_progress = int(max(0, min(99, round(avg))))
+        return targets
+
+    non_cancelled = [t for t in targets if t.status != "cancelled"]
+    if any(t.status == "manual_review" for t in targets):
+        clip.publish_status = PublishStatus.MANUAL_REVIEW.value
+        clip.publish_stage = "manual_review"
+    elif non_cancelled and all(t.status in done_statuses for t in non_cancelled):
+        clip.publish_status = PublishStatus.PUBLISHED.value
+        clip.publish_stage = "published"
+        clip.publish_progress = 100
+        clip.publish_error = None
+    elif not non_cancelled:
+        clip.publish_status = PublishStatus.CANCELLED.value
+        clip.publish_stage = "cancelled"
+        clip.publish_error = "Cancelled by user."
+    elif any(t.status == "failed" for t in targets):
+        failed = [t for t in targets if t.status == "failed"]
+        succeeded = [t for t in targets if t.status in done_statuses]
+        clip.publish_status = PublishStatus.FAILED.value
+        clip.publish_stage = "failed"
+        sample = next((t.error_message for t in failed if t.error_message), "Upload failed")
+        if succeeded:
+            clip.publish_error = f"{len(succeeded)}/{len(non_cancelled)} destinations succeeded; {len(failed)} failed: {sample}"
+        else:
+            clip.publish_error = sample
+    return targets
+
+
 @router.post("/publish-now", status_code=status.HTTP_202_ACCEPTED)
 async def publish_now(body: PublishRequest, response: Response, db: AsyncSession = Depends(get_db)):
     """
-    Upload Studio Phase 3: Durable Asynchronous Publishing.
-    - Validates eligibility (output file exists, video not processing).
-    - Reuses/returns active publishing operation if in progress (status 202).
-    - Blocks normal publish if in manual_review (HTTP 409).
-    - Commits PostgreSQL transaction first ('queued') before Celery dispatch.
-    - Dispatches publish_clip_task with stable logical idempotency key.
-    - Returns 202 Accepted.
+    Upload Studio Phase 3 & Multi-Destination Asynchronous Publishing.
+    - Supports single destination_channel_id or multi-destination destination_ids list.
+    - Validates eligibility and OAuth credentials for every selected destination before queueing.
+    - Creates/updates per-destination PublishTarget rows while skipping already-completed targets idempotently.
+    - Commits PostgreSQL transaction first ('queued') before dispatching per-target Celery tasks.
+    - Enforces private-by-default privacy policy.
     """
     result = await db.execute(select(Clip).where(Clip.id == body.clip_id))
     clip = result.scalar_one_or_none()
     if not clip:
         raise HTTPException(status_code=404, detail="Clip not found")
 
-    # Already published check
-    if clip.publish_status == PublishStatus.PUBLISHED.value and clip.youtube_short_id:
-        response.status_code = status.HTTP_200_OK
-        return {
-            "status": "published",
-            "message": "Clip is already published",
-            "youtube_url": f"https://www.youtube.com/shorts/{clip.youtube_short_id}",
-            "video_id": clip.youtube_short_id,
-        }
+    existing_res = await db.execute(select(PublishTarget).where(PublishTarget.clip_id == clip.id))
+    existing_targets = list(existing_res.scalars().all())
+    existing_by_dest = {t.destination_id: t for t in existing_targets}
 
-    # Already actively running check -> idempotent reuse
-    if clip.publish_status in (PublishStatus.QUEUED.value, PublishStatus.UPLOADING.value, PublishStatus.FINALIZING.value):
+    if body.destination_ids is not None:
+        if len(body.destination_ids) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Publish destination channel is required. Please select an authorized destination.",
+            )
+        raw_dest_ids = list(dict.fromkeys(body.destination_ids))
+    elif body.destination_channel_id:
+        raw_dest_ids = [body.destination_channel_id]
+    elif existing_targets:
+        raw_dest_ids = [t.destination_id for t in existing_targets if t.destination_id]
+    elif clip.publish_destination_id:
+        raw_dest_ids = [clip.publish_destination_id]
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Publish destination channel is required. Please select an authorized destination.",
+        )
+
+    # Single-destination or legacy already-published check
+    done_statuses = {"completed", "published"}
+    if body.destination_ids is None and clip.publish_status == PublishStatus.PUBLISHED.value and clip.youtube_short_id:
+        if not existing_targets or all(t.status in done_statuses for t in existing_targets):
+            response.status_code = status.HTTP_200_OK
+            return {
+                "status": "published",
+                "message": "Clip is already published",
+                "youtube_url": f"https://www.youtube.com/shorts/{clip.youtube_short_id}",
+                "video_id": clip.youtube_short_id,
+            }
+
+    # Manual review gating
+    if clip.publish_status == PublishStatus.MANUAL_REVIEW.value and not body.destination_ids:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Clip publication is in manual_review state. Automatic publishing is blocked until manual resolution.",
+        )
+
+    # Already actively running check when no explicit target override supplied
+    if body.destination_ids is None and clip.publish_status in (
+        PublishStatus.QUEUED.value, PublishStatus.UPLOADING.value, PublishStatus.FINALIZING.value
+    ):
         response.status_code = status.HTTP_202_ACCEPTED
         return {
             "status": clip.publish_status,
@@ -561,105 +820,147 @@ async def publish_now(body: PublishRequest, response: Response, db: AsyncSession
             "message": "Publishing operation is already in progress.",
         }
 
-    # Manual review gating
-    if clip.publish_status == PublishStatus.MANUAL_REVIEW.value:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Clip publication is in manual_review state. Automatic publishing is blocked until manual resolution."
-        )
-
     # Output file validation
-    if not clip.output_path or not Path(clip.output_path).exists():
+    if not _resolve_clip_local_path(clip.output_path):
         raise HTTPException(status_code=400, detail="Clip video file not found on disk")
 
-    # Save metadata attributes to DB record
-    clip.privacy = body.privacy
+    # Validate every destination strictly
+    resolved_channels = await _validate_active_destinations(raw_dest_ids, db)
+
+    # If user passed destination_ids and ALL of those targets are already published, return 200 cleanly
+    if all(
+        (d.id in existing_by_dest and existing_by_dest[d.id].status in done_statuses and existing_by_dest[d.id].youtube_video_id)
+        for d in resolved_channels
+    ):
+        first_done = existing_by_dest[resolved_channels[0].id]
+        response.status_code = status.HTTP_200_OK
+        serialized = await _serialize_targets_for_clips([clip.id], db)
+        return {
+            "status": "published",
+            "message": "Clip is already published to all selected destinations",
+            "youtube_url": f"https://www.youtube.com/shorts/{first_done.youtube_video_id}",
+            "video_id": first_done.youtube_video_id,
+            "targets": serialized.get(clip.id, []),
+        }
+
+    # Save metadata attributes to DB record (enforce private-by-default on publish)
+    clip.privacy = "private"
     clip.made_for_kids = body.made_for_kids
     clip.age_restricted = body.age_restricted
     clip.tags = body.tags
     clip.category = body.category
-    # Determine and strictly validate effective destination channel
-    effective_dest_id = body.destination_channel_id or clip.publish_destination_id
-    if not effective_dest_id:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Publish destination channel is required. Please select an authorized destination."
-        )
-
-    from backend.models.models import Channel
-    dest_res = await db.execute(
-        select(Channel).where(
-            (Channel.id == effective_dest_id) | (Channel.youtube_channel_id == effective_dest_id),
-            Channel.is_destination == True,
-            Channel.is_active == True,
-        )
-    )
-    dest_ch = dest_res.scalar_one_or_none()
-    if not dest_ch:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid destination channel: not found, inactive, or not an authorized destination."
-        )
-
-    from backend.services.publisher import check_channel_authorization
-    if not check_channel_authorization(dest_ch.youtube_channel_id):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Destination channel is not authorized or OAuth credentials are invalid."
-        )
-
-    clip.publish_destination_id = dest_ch.id
+    clip.publish_destination_id = resolved_channels[0].id
     if body.title:
         clip.title = body.title
     if body.description:
         clip.description = body.description
 
-    # Assign stable logical idempotency key
-    idempotency_key = clip.publish_idempotency_key or f"pub_{clip.id}_{dest_ch.id}"
-    clip.publish_idempotency_key = idempotency_key
-    clip.publish_status = PublishStatus.QUEUED.value
-    clip.publish_stage = "queued"
-    clip.publish_progress = 0
-    clip.publish_error = None
-    clip.publish_started_at = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc)
+    queued_targets: list[PublishTarget] = []
+    for dest_ch in resolved_channels:
+        pt = existing_by_dest.get(dest_ch.id)
+        if pt and pt.status in done_statuses and pt.youtube_video_id:
+            continue
+        if pt and pt.status in ("queued", "uploading", "finalizing", "publishing"):
+            continue
+        idemp = f"pub_{clip.id}_{dest_ch.id}"
+        if not pt:
+            pt = PublishTarget(
+                id=str(uuid.uuid4()),
+                clip_id=clip.id,
+                destination_id=dest_ch.id,
+                status="queued",
+                privacy="private",
+                made_for_kids=bool(body.made_for_kids),
+                age_restricted=bool(body.age_restricted),
+                publish_stage="queued",
+                publish_progress=0.0,
+                publish_started_at=now,
+                idempotency_key=idemp,
+                created_at=now,
+                updated_at=now,
+            )
+            db.add(pt)
+            existing_by_dest[dest_ch.id] = pt
+        else:
+            pt.status = "queued"
+            pt.publish_stage = "queued"
+            pt.publish_progress = 0.0
+            pt.privacy = "private"
+            pt.made_for_kids = bool(body.made_for_kids)
+            pt.age_restricted = bool(body.age_restricted)
+            pt.error_message = None
+            pt.publish_started_at = now
+            pt.idempotency_key = pt.idempotency_key or idemp
+        queued_targets.append(pt)
 
-    # Commit PostgreSQL transaction FIRST (Requirement 3: Durable PostgreSQL-to-Celery Dispatch)
+    # Remove stale pending/draft targets not in the explicit multi-destination selection
+    if body.destination_ids is not None:
+        selected_ids = {d.id for d in resolved_channels}
+        for existing_dest_id, existing_pt in list(existing_by_dest.items()):
+            if existing_dest_id not in selected_ids and existing_pt.status in ("pending", "cancelled"):
+                await db.delete(existing_pt)
+
+    primary_idemp = clip.publish_idempotency_key or f"pub_{clip.id}_{resolved_channels[0].id}"
+    clip.publish_idempotency_key = primary_idemp
+    if queued_targets:
+        clip.publish_status = PublishStatus.QUEUED.value
+        clip.publish_stage = "queued"
+        clip.publish_progress = 0
+        clip.publish_error = None
+        clip.publish_started_at = now
+
+    # Commit PostgreSQL transaction FIRST (Durable PostgreSQL-to-Celery Dispatch)
     await db.commit()
     await db.refresh(clip)
+    for pt in queued_targets:
+        await db.refresh(pt)
 
-    # Dispatch Celery task
+    # Dispatch independent Celery task per queued target
     from backend.tasks.clip_tasks import publish_clip_task
-    try:
-        task = publish_clip_task.apply_async(
-            args=[clip.id],
-            kwargs={
-                "channel_id": dest_ch.id,
-                "privacy": body.privacy,
-            }
-        )
-        clip.publish_task_id = task.id
-        await db.commit()
-    except Exception as exc:
-        print(f"[PublishAPI] Celery dispatch warning: {exc}. Job remains queued in DB and will be recovered.")
+    dispatched_task_ids: list[str] = []
+    for pt in queued_targets:
+        try:
+            task = publish_clip_task.apply_async(
+                args=[clip.id],
+                kwargs={
+                    "channel_id": pt.destination_id,
+                    "target_id": pt.id,
+                    "privacy": "private",
+                },
+            )
+            t_id = getattr(task, "id", None)
+            if isinstance(t_id, str):
+                pt.publish_task_id = t_id
+                dispatched_task_ids.append(t_id)
+                clip.publish_task_id = t_id
+        except Exception as exc:
+            print(f"[PublishAPI] Celery dispatch warning for target {pt.id}: {exc}. Target remains queued and will be recovered.")
 
+    if dispatched_task_ids:
+        await db.commit()
+
+    serialized = await _serialize_targets_for_clips([clip.id], db)
     response.status_code = status.HTTP_202_ACCEPTED
     return {
         "status": "queued",
         "clip_id": clip.id,
         "task_id": clip.publish_task_id,
-        "idempotency_key": idempotency_key,
-        "message": "Publishing job queued successfully",
+        "idempotency_key": primary_idemp,
+        "targets": serialized.get(clip.id, []),
+        "message": f"Publishing queued for {len(queued_targets)} destination(s)",
     }
 
 
 @router.get("/status/{clip_id}")
 async def get_publish_status_route(clip_id: str, db: AsyncSession = Depends(get_db)):
-    """Get live publishing status, progress, stage, attempt count, and remote video ID."""
+    """Get live publishing status, progress, stage, attempt count, and per-destination targets."""
     result = await db.execute(select(Clip).where(Clip.id == clip_id))
     clip = result.scalar_one_or_none()
     if not clip:
         raise HTTPException(status_code=404, detail="Clip not found")
 
+    serialized = await _serialize_targets_for_clips([clip.id], db)
     return {
         "clip_id": clip.id,
         "publish_status": clip.publish_status,
@@ -673,17 +974,14 @@ async def get_publish_status_route(clip_id: str, db: AsyncSession = Depends(get_
         "publish_started_at": clip.publish_started_at.isoformat() if clip.publish_started_at else None,
         "publish_task_id": clip.publish_task_id,
         "idempotency_key": clip.publish_idempotency_key,
+        "targets": serialized.get(clip.id, []),
     }
 
 
 @router.post("/clips/{clip_id}/retry", status_code=status.HTTP_202_ACCEPTED)
 async def retry_publish_clip(clip_id: str, body: RetryPublishRequest = None, db: AsyncSession = Depends(get_db)):
     """
-    Retries publishing for a failed or stuck clip.
-    - Rejects if already published.
-    - Rejects if active publishing is in-flight.
-    - If in manual_review, requires force=True to acknowledge resolution.
-    - Commits DB first, dispatches task, returns 202 Accepted.
+    Retries publishing for a failed or stuck clip (or any non-completed PublishTargets without duplicating succeeded siblings).
     """
     result = await db.execute(select(Clip).where(Clip.id == clip_id))
     clip = result.scalar_one_or_none()
@@ -703,24 +1001,56 @@ async def retry_publish_clip(clip_id: str, body: RetryPublishRequest = None, db:
             detail="Clip is in manual_review state. Confirm that remote video does not exist or provide force=True to proceed."
         )
 
+    pt_res = await db.execute(select(PublishTarget).where(PublishTarget.clip_id == clip.id))
+    all_targets = list(pt_res.scalars().all())
+    retryable_targets = [
+        t for t in all_targets
+        if t.status in ("failed", "cancelled", "pending", "manual_review")
+        and (t.status != "manual_review" or force)
+    ]
+
+    now = datetime.now(timezone.utc)
+    for t in retryable_targets:
+        t.status = "queued"
+        t.publish_stage = "queued"
+        t.error_message = None
+        t.publish_progress = 0.0
+        t.publish_started_at = now
+        t.idempotency_key = t.idempotency_key or f"pub_{clip.id}_{t.destination_id}"
+
     clip.publish_status = PublishStatus.QUEUED.value
     clip.publish_stage = "queued"
     clip.publish_error = None
     clip.publish_progress = 0
-    clip.publish_started_at = datetime.now(timezone.utc)
+    clip.publish_started_at = now
     await db.commit()
     await db.refresh(clip)
 
     from backend.tasks.clip_tasks import publish_clip_task
     try:
-        task = publish_clip_task.apply_async(
-            args=[clip.id],
-            kwargs={
-                "channel_id": clip.publish_destination_id,
-                "privacy": "private"
-            }
-        )
-        clip.publish_task_id = task.id
+        if retryable_targets:
+            for t in retryable_targets:
+                task = publish_clip_task.apply_async(
+                    args=[clip.id],
+                    kwargs={
+                        "channel_id": t.destination_id,
+                        "target_id": t.id,
+                        "privacy": "private",
+                    },
+                )
+                if isinstance(getattr(task, "id", None), str):
+                    t.publish_task_id = task.id
+                    clip.publish_task_id = task.id
+        else:
+            task = publish_clip_task.apply_async(
+                args=[clip.id],
+                kwargs={
+                    "channel_id": clip.publish_destination_id,
+                    "privacy": "private",
+                },
+            )
+            if isinstance(getattr(task, "id", None), str):
+                clip.publish_task_id = task.id
         await db.commit()
     except Exception as exc:
         print(f"[PublishAPI] Retry dispatch warning: {exc}")
@@ -736,10 +1066,7 @@ async def retry_publish_clip(clip_id: str, body: RetryPublishRequest = None, db:
 @router.post("/clips/{clip_id}/cancel")
 async def cancel_publish_clip(clip_id: str, db: AsyncSession = Depends(get_db)):
     """
-    Cooperative cancellation of a publishing job.
-    - Rejects if already published.
-    - If queued, scheduled, draft, failed, or manual_review, immediately cancels and revokes Celery task.
-    - If uploading or finalizing, sets 'cancelling' so the worker halts safely.
+    Cooperative cancellation of a publishing job across the clip and any non-completed PublishTargets.
     """
     result = await db.execute(select(Clip).where(Clip.id == clip_id))
     clip = result.scalar_one_or_none()
@@ -751,6 +1078,25 @@ async def cancel_publish_clip(clip_id: str, db: AsyncSession = Depends(get_db)):
 
     if clip.publish_status == PublishStatus.CANCELLED.value:
         return {"status": "cancelled", "clip_id": clip.id, "message": "Publication already cancelled."}
+
+    pt_res = await db.execute(select(PublishTarget).where(PublishTarget.clip_id == clip.id))
+    all_targets = list(pt_res.scalars().all())
+    for t in all_targets:
+        if t.status in ("completed", "published", "cancelled"):
+            continue
+        if t.status in ("queued", "pending", "scheduled", "failed", "manual_review"):
+            t.status = "cancelled"
+            t.publish_stage = "cancelled"
+            t.error_message = "Cancelled by user."
+            if t.publish_task_id:
+                try:
+                    from backend.tasks.celery_app import celery_app
+                    celery_app.control.revoke(t.publish_task_id, terminate=True)
+                except Exception:
+                    pass
+        else:
+            t.status = "cancelling"
+            t.publish_stage = "cancelling"
 
     if clip.publish_status in (
         PublishStatus.QUEUED.value,
@@ -781,43 +1127,395 @@ async def cancel_publish_clip(clip_id: str, db: AsyncSession = Depends(get_db)):
     }
 
 
+@router.get("/clips/{clip_id}/targets")
+async def get_clip_publish_targets(clip_id: str, db: AsyncSession = Depends(get_db)):
+    """Return all destination PublishTarget rows (with outro and preview metadata) for a clip."""
+    res = await db.execute(select(Clip).where(Clip.id == clip_id))
+    clip = res.scalar_one_or_none()
+    if not clip:
+        raise HTTPException(status_code=404, detail="Clip not found")
+
+    serialized = await _serialize_targets_for_clips([clip.id], db)
+    targets = serialized.get(clip.id, [])
+    return {
+        "clip_id": clip.id,
+        "publish_status": clip.publish_status,
+        "publish_destination_id": clip.publish_destination_id,
+        "destination_ids": [t["destination_id"] for t in targets],
+        "targets": targets,
+    }
+
+
+@router.put("/clips/{clip_id}/destinations")
+async def update_clip_destinations(
+    clip_id: str,
+    body: ClipDestinationsUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Update selected publishing destinations for a clip before publishing.
+    - Protects already-published and actively uploading targets from silent deletion.
+    - Validates added destinations (active + authorized) before persisting.
+    - Supports removing destinations cleanly (including clearing pending destinations with []).
+    """
+    res = await db.execute(select(Clip).where(Clip.id == clip_id))
+    clip = res.scalar_one_or_none()
+    if not clip:
+        raise HTTPException(status_code=404, detail="Clip not found")
+
+    raw_dest_ids = list(dict.fromkeys(body.destination_ids or []))
+    resolved_channels = await _validate_active_destinations(raw_dest_ids, db) if raw_dest_ids else []
+    selected_ids = {c.id for c in resolved_channels}
+
+    existing_res = await db.execute(select(PublishTarget).where(PublishTarget.clip_id == clip.id))
+    existing_targets = list(existing_res.scalars().all())
+    existing_by_dest = {t.destination_id: t for t in existing_targets}
+
+    protected_statuses = {"completed", "published", "uploading", "finalizing", "publishing", "cancelling"}
+    for t in existing_targets:
+        if t.destination_id not in selected_ids and t.status in protected_statuses:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Cannot remove destination '{t.destination_id}' because its publish status is '{t.status}'.",
+            )
+
+    for t in existing_targets:
+        if t.destination_id not in selected_ids:
+            await db.delete(t)
+
+    now = datetime.now(timezone.utc)
+    for ch in resolved_channels:
+        if ch.id not in existing_by_dest:
+            db.add(PublishTarget(
+                id=str(uuid.uuid4()),
+                clip_id=clip.id,
+                destination_id=ch.id,
+                status="pending",
+                privacy="private",
+                publish_stage="pending",
+                publish_progress=0.0,
+                idempotency_key=f"pub_{clip.id}_{ch.id}",
+                created_at=now,
+                updated_at=now,
+            ))
+
+    await db.flush()
+    remaining_res = await db.execute(select(PublishTarget).where(PublishTarget.clip_id == clip.id))
+    remaining = list(remaining_res.scalars().all())
+    if resolved_channels:
+        clip.publish_destination_id = resolved_channels[0].id
+    elif not remaining:
+        clip.publish_destination_id = None
+
+    await _recompute_clip_aggregate_async(clip, db)
+    await db.commit()
+
+    serialized = await _serialize_targets_for_clips([clip.id], db)
+    targets = serialized.get(clip.id, [])
+    return {
+        "status": "updated",
+        "clip_id": clip.id,
+        "destination_ids": [t["destination_id"] for t in targets],
+        "targets": targets,
+    }
+
+
+@router.post("/targets/{target_id}/retry", status_code=status.HTTP_202_ACCEPTED)
+async def retry_publish_target(
+    target_id: str,
+    body: RetryPublishRequest | None = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Retry a single failed/cancelled/manual_review PublishTarget without re-publishing sibling destinations.
+    """
+    t_res = await db.execute(select(PublishTarget).where(PublishTarget.id == target_id))
+    target = t_res.scalar_one_or_none()
+    if not target:
+        raise HTTPException(status_code=404, detail="Publish target not found")
+
+    if target.status in ("completed", "published"):
+        raise HTTPException(status_code=400, detail="Cannot retry an already published destination target.")
+
+    if target.status in ("queued", "uploading", "finalizing", "publishing"):
+        raise HTTPException(status_code=409, detail="Publishing for this destination is already actively running.")
+
+    force = body.force if body else False
+    if target.status == "manual_review" and not force:
+        raise HTTPException(
+            status_code=400,
+            detail="Target is in manual_review state. Confirm remote state or pass force=True to retry.",
+        )
+
+    c_res = await db.execute(select(Clip).where(Clip.id == target.clip_id))
+    clip = c_res.scalar_one_or_none()
+    if not clip:
+        raise HTTPException(status_code=404, detail="Parent clip not found")
+
+    if not _resolve_clip_local_path(clip.output_path):
+        raise HTTPException(status_code=400, detail="Clip video file not found on disk")
+
+    await _validate_active_destinations([target.destination_id], db)
+
+    now = datetime.now(timezone.utc)
+    target.status = "queued"
+    target.publish_stage = "queued"
+    target.publish_progress = 0.0
+    target.error_message = None
+    target.publish_started_at = now
+    target.privacy = "private"
+    target.idempotency_key = target.idempotency_key or f"pub_{target.clip_id}_{target.destination_id}"
+
+    await _recompute_clip_aggregate_async(clip, db)
+    await db.commit()
+    await db.refresh(target)
+
+    from backend.tasks.clip_tasks import publish_clip_task
+    try:
+        task = publish_clip_task.apply_async(
+            args=[target.clip_id],
+            kwargs={
+                "channel_id": target.destination_id,
+                "target_id": target.id,
+                "privacy": "private",
+            },
+        )
+        t_id = getattr(task, "id", None)
+        if isinstance(t_id, str):
+            target.publish_task_id = t_id
+            await db.commit()
+    except Exception as exc:
+        print(f"[PublishAPI] Target retry dispatch warning: {exc}")
+
+    serialized = await _serialize_targets_for_clips([target.clip_id], db)
+    target_payload = next((t for t in serialized.get(target.clip_id, []) if t["id"] == target.id), None)
+    return {
+        "status": "queued",
+        "target_id": target.id,
+        "clip_id": target.clip_id,
+        "destination_id": target.destination_id,
+        "task_id": target.publish_task_id,
+        "target": target_payload,
+        "message": "Destination target retry queued successfully.",
+    }
+
+
+@router.post("/targets/{target_id}/cancel")
+async def cancel_publish_target(target_id: str, db: AsyncSession = Depends(get_db)):
+    """Cancel a single destination PublishTarget independently without cancelling sibling destinations."""
+    t_res = await db.execute(select(PublishTarget).where(PublishTarget.id == target_id))
+    target = t_res.scalar_one_or_none()
+    if not target:
+        raise HTTPException(status_code=404, detail="Publish target not found")
+
+    if target.status in ("completed", "published"):
+        raise HTTPException(status_code=400, detail="Cannot cancel a destination upload that has already succeeded.")
+
+    c_res = await db.execute(select(Clip).where(Clip.id == target.clip_id))
+    clip = c_res.scalar_one_or_none()
+
+    if target.status == "cancelled":
+        return {"status": "cancelled", "target_id": target.id, "clip_id": target.clip_id, "message": "Target already cancelled."}
+
+    if target.status in ("queued", "pending", "scheduled", "failed", "manual_review"):
+        target.status = "cancelled"
+        target.publish_stage = "cancelled"
+        target.error_message = "Cancelled by user."
+        if target.publish_task_id:
+            try:
+                from backend.tasks.celery_app import celery_app
+                celery_app.control.revoke(target.publish_task_id, terminate=True)
+            except Exception:
+                pass
+        if clip:
+            await _recompute_clip_aggregate_async(clip, db)
+        await db.commit()
+        return {"status": "cancelled", "target_id": target.id, "clip_id": target.clip_id, "message": "Target publication cancelled immediately."}
+
+    target.status = "cancelling"
+    target.publish_stage = "cancelling"
+    if clip:
+        await _recompute_clip_aggregate_async(clip, db)
+    await db.commit()
+    return {
+        "status": "cancelling",
+        "target_id": target.id,
+        "clip_id": target.clip_id,
+        "message": "Cancellation requested. Worker will halt destination upload cooperatively.",
+    }
+
+
+async def _load_clip_dest_outro_snapshots(
+    clip_id: str,
+    destination_id: str,
+    db: AsyncSession,
+):
+    c_res = await db.execute(select(Clip).where(Clip.id == clip_id))
+    clip = c_res.scalar_one_or_none()
+    if not clip:
+        raise HTTPException(status_code=404, detail="Clip not found")
+
+    ch_res = await db.execute(
+        select(Channel).where(
+            ((Channel.id == destination_id) | (Channel.youtube_channel_id == destination_id)),
+            Channel.is_destination == True,
+        )
+    )
+    ch = ch_res.scalar_one_or_none()
+    if not ch:
+        raise HTTPException(status_code=404, detail=f"Destination channel '{destination_id}' not found")
+
+    active_outro = None
+    if getattr(ch, "active_outro_id", None):
+        o_res = await db.execute(
+            select(DestinationOutro).where(
+                DestinationOutro.id == ch.active_outro_id,
+                DestinationOutro.is_active == True,
+            )
+        )
+        active_outro = o_res.scalar_one_or_none()
+    if active_outro is None:
+        o_res = await db.execute(
+            select(DestinationOutro)
+            .where(DestinationOutro.channel_id == ch.id, DestinationOutro.is_active == True)
+            .order_by(DestinationOutro.version.desc())
+        )
+        active_outro = o_res.scalars().first()
+
+    clip_snap = SimpleNamespace(
+        id=str(clip.id),
+        video_id=clip.video_id,
+        title=clip.title,
+        output_path=clip.output_path,
+        duration=float(clip.duration or 0.0),
+    )
+    dest_snap = SimpleNamespace(
+        id=str(ch.id),
+        youtube_channel_id=ch.youtube_channel_id,
+        channel_name=ch.channel_name,
+        is_destination=bool(ch.is_destination),
+        is_active=bool(ch.is_active),
+        active_outro_id=ch.active_outro_id,
+    )
+    outro_snap = (
+        SimpleNamespace(
+            id=str(active_outro.id),
+            channel_id=str(active_outro.channel_id),
+            file_path=str(active_outro.file_path),
+            original_filename=active_outro.original_filename,
+            outro_type=str(active_outro.outro_type),
+            duration_seconds=float(active_outro.duration_seconds),
+            width=active_outro.width,
+            height=active_outro.height,
+            fps=active_outro.fps,
+            has_audio=bool(active_outro.has_audio),
+            version=int(active_outro.version or 1),
+            is_active=bool(active_outro.is_active),
+        )
+        if active_outro
+        else None
+    )
+    return clip_snap, dest_snap, outro_snap
+
+
+@router.get("/clips/{clip_id}/destinations/{destination_id}/preview-info")
+async def get_destination_preview_info_route(
+    clip_id: str,
+    destination_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Non-mutating preview metadata for a clip + destination (base duration, outro metadata, combined duration)."""
+    from backend.services.outro_service import get_destination_preview_info_from_records
+
+    clip_snap, dest_snap, outro_snap = await _load_clip_dest_outro_snapshots(clip_id, destination_id, db)
+    info = await asyncio.to_thread(
+        get_destination_preview_info_from_records,
+        clip_snap,
+        dest_snap,
+        outro_snap,
+    )
+    return info
+
+
+@router.get("/clips/{clip_id}/destinations/{destination_id}/preview")
+async def stream_destination_preview_route(
+    clip_id: str,
+    destination_id: str,
+    force: bool = False,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Generate (or reuse cached) destination-specific rendered preview MP4 with active outro appended,
+    or stream the untouched base clip if the destination has no configured outro.
+    """
+    from backend.services.outro_service import (
+        render_or_reuse_destination_variant_from_records,
+        OutroNotFoundError,
+        InvalidOutroError,
+        OutroRenderError,
+    )
+
+    clip_snap, dest_snap, outro_snap = await _load_clip_dest_outro_snapshots(clip_id, destination_id, db)
+    try:
+        variant = await asyncio.to_thread(
+            render_or_reuse_destination_variant_from_records,
+            clip_snap,
+            dest_snap,
+            outro_snap,
+            force,
+        )
+    except OutroNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except InvalidOutroError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except OutroRenderError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    video_path = Path(variant["video_path"])
+    if not video_path.exists():
+        raise HTTPException(status_code=404, detail="Rendered preview video not found on disk")
+
+    safe_name = "".join(c if c.isalnum() or c in ("-", "_", " ") else "_" for c in (clip_snap.title or clip_snap.id)).strip()[:60] or clip_snap.id
+    return FileResponse(
+        str(video_path),
+        media_type="video/mp4",
+        filename=f"{safe_name}_{dest_snap.id[:8]}.mp4",
+    )
+
+
 @router.post("/schedule")
 async def schedule_publish(body: PublishRequest, db: AsyncSession = Depends(get_db)):
-    """Schedule a clip for later publishing."""
+    """Schedule a clip for later publishing (single or multi-destination)."""
     result = await db.execute(select(Clip).where(Clip.id == body.clip_id))
     clip = result.scalar_one_or_none()
     if not clip:
         raise HTTPException(status_code=404, detail="Clip not found")
 
-    # Determine and strictly validate effective destination channel
-    effective_dest_id = body.destination_channel_id or clip.publish_destination_id
-    if not effective_dest_id:
+    existing_res = await db.execute(select(PublishTarget).where(PublishTarget.clip_id == clip.id))
+    existing_targets = list(existing_res.scalars().all())
+    existing_by_dest = {t.destination_id: t for t in existing_targets}
+
+    if body.destination_ids is not None:
+        if len(body.destination_ids) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Publish destination channel is required. Please select an authorized destination.",
+            )
+        raw_dest_ids = list(dict.fromkeys(body.destination_ids))
+    elif body.destination_channel_id:
+        raw_dest_ids = [body.destination_channel_id]
+    elif existing_targets:
+        raw_dest_ids = [t.destination_id for t in existing_targets if t.destination_id]
+    elif clip.publish_destination_id:
+        raw_dest_ids = [clip.publish_destination_id]
+    else:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Publish destination channel is required. Please select an authorized destination."
+            detail="Publish destination channel is required. Please select an authorized destination.",
         )
 
-    from backend.models.models import Channel
-    dest_res = await db.execute(
-        select(Channel).where(
-            (Channel.id == effective_dest_id) | (Channel.youtube_channel_id == effective_dest_id),
-            Channel.is_destination == True,
-            Channel.is_active == True,
-        )
-    )
-    dest_ch = dest_res.scalar_one_or_none()
-    if not dest_ch:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid destination channel: not found, inactive, or not an authorized destination."
-        )
-
-    from backend.services.publisher import check_channel_authorization
-    if not check_channel_authorization(dest_ch.youtube_channel_id):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Destination channel is not authorized or OAuth credentials are invalid."
-        )
+    resolved_channels = await _validate_active_destinations(raw_dest_ids, db)
+    dest_ch = resolved_channels[0]
 
     # Validate non-null, valid, future scheduled_at (PREREQ-005)
     if not body.scheduled_at or not str(body.scheduled_at).strip():
@@ -854,20 +1552,45 @@ async def schedule_publish(body: PublishRequest, db: AsyncSession = Depends(get_
             detail=f"Clip {clip.id} rendering is not complete (status: '{clip.status}'). Only completed clips with rendered output can be scheduled."
         )
 
-    out_p = Path(clip.output_path)
-    if not out_p.is_absolute():
-        from backend.core.config import settings
-        out_p = settings.OUTPUT_DIR / clip.output_path
-    if not out_p.exists() or out_p.stat().st_size == 0:
+    out_p = _resolve_clip_local_path(clip.output_path)
+    if not out_p or out_p.stat().st_size == 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Rendered video artifact does not exist or is empty on disk: {clip.output_path}."
         )
 
+    for ch in resolved_channels:
+        pt = existing_by_dest.get(ch.id)
+        idemp = f"pub_{clip.id}_{ch.id}"
+        if not pt:
+            db.add(PublishTarget(
+                id=str(uuid.uuid4()),
+                clip_id=clip.id,
+                destination_id=ch.id,
+                status="queued",
+                privacy="private",
+                made_for_kids=bool(body.made_for_kids),
+                age_restricted=bool(body.age_restricted),
+                scheduled_at=scheduled_time,
+                publish_stage="scheduled",
+                publish_progress=0.0,
+                idempotency_key=idemp,
+                created_at=now_utc,
+                updated_at=now_utc,
+            ))
+        elif pt.status not in ("completed", "published"):
+            pt.status = "queued"
+            pt.publish_stage = "scheduled"
+            pt.scheduled_at = scheduled_time
+            pt.privacy = "private"
+            pt.made_for_kids = bool(body.made_for_kids)
+            pt.age_restricted = bool(body.age_restricted)
+            pt.idempotency_key = pt.idempotency_key or idemp
+
     clip.publish_status = "queued"
     clip.scheduled_at = scheduled_time
     clip.publish_destination_id = dest_ch.id
-    clip.privacy = body.privacy
+    clip.privacy = "private"
     clip.made_for_kids = body.made_for_kids
     clip.age_restricted = body.age_restricted
     clip.tags = body.tags
@@ -878,7 +1601,12 @@ async def schedule_publish(body: PublishRequest, db: AsyncSession = Depends(get_
     if body.description:
         clip.description = body.description
     await db.commit()
-    return {"message": "Clip scheduled", "scheduled_at": scheduled_time.isoformat() if scheduled_time else None}
+    serialized = await _serialize_targets_for_clips([clip.id], db)
+    return {
+        "message": "Clip scheduled",
+        "scheduled_at": scheduled_time.isoformat() if scheduled_time else None,
+        "targets": serialized.get(clip.id, []),
+    }
 
 
 @router.get("/queue")
@@ -887,7 +1615,7 @@ async def get_publish_queue(
     limit: int = 50,
     db: AsyncSession = Depends(get_db)
 ):
-    """Get all clips in the publish queue or recent publish history."""
+    """Get all clips in the publish queue or recent publish history, enriched with per-destination targets."""
     query = select(Clip).where(
         Clip.publish_status.isnot(None),
         Clip.publish_status != PublishStatus.DRAFT.value
@@ -901,6 +1629,9 @@ async def get_publish_queue(
 
     result = await db.execute(query)
     clips = result.scalars().all()
+    clip_ids = [c.id for c in clips]
+    targets_map = await _serialize_targets_for_clips(clip_ids, db)
+
     return [
         {
             "id": c.id,
@@ -916,7 +1647,9 @@ async def get_publish_queue(
             "youtube_short_id": c.youtube_short_id,
             "youtube_url": f"https://youtube.com/shorts/{c.youtube_short_id}" if c.youtube_short_id else None,
             "publish_destination_id": c.publish_destination_id,
-            "privacy": c.privacy or "public",
+            "destination_ids": [t["destination_id"] for t in targets_map.get(c.id, [])],
+            "targets": targets_map.get(c.id, []),
+            "privacy": c.privacy or "private",
             "thumbnail_path": c.thumbnail_path,
         }
         for c in clips

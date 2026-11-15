@@ -62,6 +62,8 @@ TMP_CHUNKS_DIRNAME = ".tmp_chunks"
 class CreateBatchRequest(BaseModel):
     idempotency_key: str = Field(..., min_length=1, max_length=64)
     name: Optional[str] = Field(None, max_length=255)
+    destination_ids: Optional[List[str]] = None
+    config: Optional[dict] = None
 
 
 class InitVideoItemRequest(BaseModel):
@@ -75,6 +77,13 @@ class InitVideoItemRequest(BaseModel):
 class ReorderQueueRequest(BaseModel):
     version: int = Field(..., ge=1)
     item_ids: List[str] = Field(..., min_items=1)
+
+
+class ProcessBatchRequest(BaseModel):
+    destination_ids: Optional[List[str]] = None
+    clip_mode: Optional[str] = None
+    clips_count: Optional[int] = None
+    config: Optional[dict] = None
 
 
 class VideoItemResponse(BaseModel):
@@ -121,6 +130,8 @@ class BatchResponse(BaseModel):
     processing_started_at: Optional[datetime] = None
     processing_completed_at: Optional[datetime] = None
     batch_error: Optional[str] = None
+    destination_ids: Optional[List[str]] = None
+    config: Optional[dict] = None
     videos: List[VideoItemResponse] = []
 
     class Config:
@@ -281,6 +292,9 @@ async def create_batch(req: CreateBatchRequest, db: AsyncSession = Depends(get_d
         ).order_by(Video.queue_position.asc().nulls_last())
         v_res = await db.execute(v_stmt)
         videos = v_res.scalars().all()
+        existing_dest_ids = None
+        if existing_batch.config and isinstance(existing_batch.config, dict):
+            existing_dest_ids = existing_batch.config.get("destination_ids")
         return BatchResponse(
             id=existing_batch.id,
             idempotency_key=existing_batch.idempotency_key,
@@ -291,6 +305,8 @@ async def create_batch(req: CreateBatchRequest, db: AsyncSession = Depends(get_d
             reserved_bytes=existing_batch.reserved_bytes,
             created_at=existing_batch.created_at,
             updated_at=existing_batch.updated_at,
+            destination_ids=existing_dest_ids,
+            config=existing_batch.config,
             videos=[VideoItemResponse.model_validate(v) for v in videos]
         )
 
@@ -303,6 +319,10 @@ async def create_batch(req: CreateBatchRequest, db: AsyncSession = Depends(get_d
     batch_dir.mkdir(parents=True, exist_ok=True)
     tmp_chunks_dir.mkdir(parents=True, exist_ok=True)
 
+    batch_config = req.config or {}
+    if req.destination_ids is not None:
+        batch_config["destination_ids"] = req.destination_ids
+
     batch = UploadBatch(
         id=batch_id,
         idempotency_key=req.idempotency_key,
@@ -311,6 +331,7 @@ async def create_batch(req: CreateBatchRequest, db: AsyncSession = Depends(get_d
         version=1,
         total_files=0,
         reserved_bytes=0,
+        config=batch_config or None,
     )
     db.add(batch)
     await db.commit()
@@ -326,6 +347,8 @@ async def create_batch(req: CreateBatchRequest, db: AsyncSession = Depends(get_d
         reserved_bytes=batch.reserved_bytes,
         created_at=batch.created_at,
         updated_at=batch.updated_at,
+        destination_ids=batch_config.get("destination_ids") if batch_config else None,
+        config=batch.config,
         videos=[]
     )
 
@@ -361,6 +384,10 @@ async def get_batch(batch_id: str, db: AsyncSession = Depends(get_db)):
                 v_resp.processing_step = job.current_step
         video_responses.append(v_resp)
 
+    batch_dest_ids = None
+    if batch.config and isinstance(batch.config, dict):
+        batch_dest_ids = batch.config.get("destination_ids")
+
     return BatchResponse(
         id=batch.id,
         idempotency_key=batch.idempotency_key,
@@ -377,6 +404,8 @@ async def get_batch(batch_id: str, db: AsyncSession = Depends(get_db)):
         processing_started_at=batch.processing_started_at,
         processing_completed_at=batch.processing_completed_at,
         batch_error=batch.batch_error,
+        destination_ids=batch_dest_ids,
+        config=batch.config,
         videos=video_responses
     )
 
@@ -967,7 +996,14 @@ async def delete_batch(batch_id: str, db: AsyncSession = Depends(get_db)):
     coord = await get_or_create_coordinator(db, for_update=True)
     batch = await get_batch_for_update(db, batch_id)
     if not batch:
-        raise HTTPException(status_code=404, detail="Upload batch not found")
+        # Idempotent deletion: if batch is already gone from DB, ensure any disk remnants are cleaned
+        try:
+            batch_dir = get_batch_dir(batch_id)
+            if batch_dir.exists():
+                shutil.rmtree(batch_dir, ignore_errors=True)
+        except Exception:
+            pass
+        return {"deleted": True, "batch_id": batch_id, "directory_cleaned": True, "already_deleted": True}
 
     if batch.status == UploadBatchStatus.PROCESSING.value:
         raise HTTPException(
@@ -1122,7 +1158,11 @@ async def delete_batch(batch_id: str, db: AsyncSession = Depends(get_db)):
 # ── Phase 2: Sequential Processing, Retry, Cancellation & Recovery ─────────────
 
 @router.post("/batches/{batch_id}/process", response_model=BatchResponse)
-async def process_batch(batch_id: str, db: AsyncSession = Depends(get_db)):
+async def process_batch(
+    batch_id: str,
+    req: Optional[ProcessBatchRequest] = None,
+    db: AsyncSession = Depends(get_db)
+):
     """
     Idempotently triggers sequential processing of all uploaded videos in the batch.
     - Preserves exact 0-indexed queue_position ordering.
@@ -1139,9 +1179,21 @@ async def process_batch(batch_id: str, db: AsyncSession = Depends(get_db)):
     if batch.status in (UploadBatchStatus.DELETING.value, UploadBatchStatus.CANCELLED.value):
         raise HTTPException(status_code=400, detail=f"Cannot process batch in '{batch.status}' state")
 
-    # Idempotency check: if already queued or processing, return current state
+    # Lock channels & configuration while batch is active: cannot mutate mid-process
     if batch.status in (UploadBatchStatus.QUEUED.value, UploadBatchStatus.PROCESSING.value):
         return await get_batch(batch_id=batch_id, db=db)
+
+    if req:
+        current_config = dict(batch.config or {})
+        if req.destination_ids is not None:
+            current_config["destination_ids"] = req.destination_ids
+        if req.clip_mode is not None:
+            current_config["clip_mode"] = req.clip_mode
+        if req.clips_count is not None:
+            current_config["clips_count"] = req.clips_count
+        if req.config:
+            current_config.update(req.config)
+        batch.config = current_config
 
     # Fetch all non-cancelled videos in queue order
     v_stmt = select(Video).where(

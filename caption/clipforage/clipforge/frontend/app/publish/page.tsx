@@ -14,10 +14,17 @@ import {
   thumbnailUrl,
   cancelPublish,
   retryPublish,
+  cancelPublishTarget,
+  retryPublishTarget,
+  updateClipDestinations,
+  getClipDestinationPreviewInfo,
+  getClipDestinationPreviewUrl,
   getClipPublishMetadata,
   updateClipPublishMetadata,
   type PublishQueueItem,
-  type ClipPublishMetadata
+  type PublishTarget,
+  type ClipPublishMetadata,
+  type ClipDestinationPreviewInfo
 } from '@/lib/api';
 import VisualClipPicker, { SquareClipThumbnail } from '@/components/publish/VisualClipPicker';
 
@@ -119,9 +126,14 @@ function PublishPageContent() {
   const [selectedClip, setSelectedClip] = useState<any>(null);
   const [destinations, setDestinations] = useState<any[]>([]);
   const [selectedDestinationId, setSelectedDestinationId] = useState<string>('');
+  const [selectedDestinationIds, setSelectedDestinationIds] = useState<string[]>([]);
+  const [previewTab, setPreviewTab] = useState<string>('base');
+  const [previewInfo, setPreviewInfo] = useState<ClipDestinationPreviewInfo | null>(null);
+  const [previewInfoLoading, setPreviewInfoLoading] = useState<boolean>(false);
   const [queue, setQueue] = useState<PublishQueueItem[]>([]);
   const [queueLoading, setQueueLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState<{ [clipId: string]: 'cancel' | 'retry' | null }>({});
+  const [targetActionLoading, setTargetActionLoading] = useState<Record<string, 'cancel' | 'retry' | null>>({});
   const [authInfo, setAuthInfo] = useState<{ authenticated: boolean; oauth_url?: string } | null>(null);
   const [channelInfo, setChannelInfo] = useState<{ id: string; title: string; thumbnail: string; subscribers: number } | null>(null);
 
@@ -131,7 +143,7 @@ function PublishPageContent() {
   const [form, setForm] = useState({
     title: '',
     description: '',
-    privacy: 'public',
+    privacy: 'private',
     scheduleDate: '',
     madeForKids: false,
     ageRestricted: false,
@@ -181,10 +193,24 @@ function PublishPageContent() {
     });
   }, [channelParam]);
 
+  const fetchQueue = async () => {
+    try {
+      setQueueLoading(true);
+      const data = await getPublishQueue();
+      setQueue(data || []);
+    } catch (err: any) {
+      console.error('Error fetching publish queue:', err);
+    } finally {
+      setQueueLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Handle OAuth callback redirect
     if (oauthSuccess === 'success') {
-      setMsg('✅ YouTube account connected successfully! You can now publish videos.');
+      setTimeout(() => {
+        setMsg('✅ YouTube account connected successfully! You can now publish videos.');
+      }, 0);
       // Refresh auth status and destinations
       getAuthStatus().then(setAuthInfo).catch(() => {});
       getDestinations().then(setDestinations).catch(() => {});
@@ -214,35 +240,33 @@ function PublishPageContent() {
             license: found.license || 'youtube',
             madeForKids: found.made_for_kids || false,
             ageRestricted: found.age_restricted || false,
-            privacy: found.privacy || 'public'
+            privacy: found.privacy || 'private'
           }));
 
-          // Synchronize destination with clip's assigned destination
-          if (found.publish_destination_id) {
-            setSelectedDestinationId(found.publish_destination_id);
-            if (typeof window !== 'undefined') {
-              localStorage.setItem('last_publish_channel_id', found.publish_destination_id);
-            }
+          // Synchronize destinations with clip's assigned targets / destination_ids
+          const rawDests: string[] = (found.targets && found.targets.length > 0)
+            ? found.targets.map((t: any) => t.destination_channel_id || t.destination_id).filter(Boolean)
+            : (found.destination_ids && found.destination_ids.length > 0
+              ? found.destination_ids
+              : (found.publish_destination_id ? [found.publish_destination_id] : []));
+          const clipDests: string[] = Array.from(new Set(rawDests.filter(Boolean)));
+          setSelectedDestinationIds(clipDests);
+          setSelectedDestinationId(clipDests[0] || '');
+          if (clipDests[0]) {
+            setPreviewTab(clipDests[0]);
           } else {
-            setSelectedDestinationId('');
+            setPreviewTab('base');
+          }
+          if (typeof window !== 'undefined' && clipDests[0]) {
+            localStorage.setItem('last_publish_channel_id', clipDests[0]);
           }
         }
       }
     }).catch(() => {});
-    fetchQueue();
+    setTimeout(() => {
+      fetchQueue();
+    }, 0);
   }, [clipParam, oauthSuccess]);
-
-  const fetchQueue = async () => {
-    try {
-      setQueueLoading(true);
-      const data = await getPublishQueue();
-      setQueue(data || []);
-    } catch (err: any) {
-      console.error('Error fetching publish queue:', err);
-    } finally {
-      setQueueLoading(false);
-    }
-  };
 
   const handleCancelPublish = async (clipId: string) => {
     try {
@@ -343,10 +367,14 @@ function PublishPageContent() {
     if (!clipId) {
       setSelectedClip(null);
       setThumbSrc('');
+      setSelectedDestinationIds([]);
+      setSelectedDestinationId('');
+      setPreviewTab('base');
+      setPreviewInfo(null);
       setForm({
         title: '',
         description: '',
-        privacy: 'public',
+        privacy: 'private',
         scheduleDate: '',
         madeForKids: false,
         ageRestricted: false,
@@ -366,6 +394,17 @@ function PublishPageContent() {
     setMsg('');
     setError('');
 
+    // Authoritative destinations resolution for clip
+    const rawInitialDests: string[] = (found?.targets && found.targets.length > 0)
+      ? found.targets.map((t: any) => t.destination_channel_id || t.destination_id).filter(Boolean)
+      : (found?.destination_ids && found.destination_ids.length > 0
+        ? found.destination_ids
+        : (found?.publish_destination_id ? [found.publish_destination_id] : []));
+    const initialDests: string[] = Array.from(new Set(rawInitialDests.filter(Boolean)));
+    setSelectedDestinationIds(initialDests);
+    setSelectedDestinationId(initialDests[0] || '');
+    setPreviewTab(initialDests[0] || 'base');
+
     // Try fetching authoritative persisted metadata from backend
     try {
       const meta = await getClipPublishMetadata(clipId);
@@ -373,7 +412,7 @@ function PublishPageContent() {
         setForm({
           title: meta.title || '',
           description: meta.description || '',
-          privacy: meta.privacy || 'public',
+          privacy: meta.privacy || 'private',
           scheduleDate: meta.scheduled_at ? new Date(meta.scheduled_at).toISOString().slice(0, 16) : '',
           madeForKids: meta.made_for_kids || false,
           ageRestricted: meta.age_restricted || false,
@@ -382,11 +421,11 @@ function PublishPageContent() {
           license: meta.license || 'youtube'
         });
 
-        if (meta.publish_destination_id) {
-          setSelectedDestinationId(meta.publish_destination_id);
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('last_publish_channel_id', meta.publish_destination_id);
-          }
+        if (meta.publish_destination_id && !initialDests.includes(meta.publish_destination_id)) {
+          const destId = meta.publish_destination_id;
+          setSelectedDestinationIds(prev => Array.from(new Set([...prev, destId].filter(Boolean))));
+          setSelectedDestinationId(destId);
+          setPreviewTab(destId);
         }
       }
     } catch {
@@ -395,7 +434,7 @@ function PublishPageContent() {
         setForm({
           title: found.title || '',
           description: found.description || '',
-          privacy: found.privacy || 'public',
+          privacy: found.privacy || 'private',
           scheduleDate: found.scheduled_at ? new Date(found.scheduled_at).toISOString().slice(0, 16) : '',
           madeForKids: found.made_for_kids || false,
           ageRestricted: found.age_restricted || false,
@@ -403,14 +442,11 @@ function PublishPageContent() {
           category: found.category || '22',
           license: found.license || 'youtube'
         });
-        if (found.publish_destination_id) {
-          setSelectedDestinationId(found.publish_destination_id);
-        }
       }
     }
 
     setMetadataDirty(false);
-    const destId = found?.publish_destination_id || '';
+    const destId = initialDests[0] || found?.publish_destination_id || '';
     const query = [`clip=${clipId}`, destId ? `channel=${destId}` : ''].filter(Boolean).join('&');
     router.push(`/publish?${query}`);
   };
@@ -486,15 +522,90 @@ function PublishPageContent() {
     }
   };
 
-  const handleActionSubmit = async () => {
-    if (!selectedClip) return;
-    if (!selectedDestinationId) {
-      setError('Please select an authorized publishing destination channel before publishing.');
+  // Fetch destination preview info for Phase 7
+  useEffect(() => {
+    const clipId = selectedClip?.id;
+    if (!clipId || !previewTab || previewTab === 'base') {
+      setTimeout(() => setPreviewInfo(null), 0);
       return;
     }
-    const matchedDest = destinations.find(d => d.id === selectedDestinationId);
-    if (!matchedDest || matchedDest.is_authorized === false) {
-      setError('The selected destination channel is inactive, unauthorized, or not configured.');
+    let isCancelled = false;
+    setTimeout(() => {
+      if (!isCancelled) setPreviewInfoLoading(true);
+    }, 0);
+    getClipDestinationPreviewInfo(clipId, previewTab)
+      .then(info => {
+        if (!isCancelled) {
+          setPreviewInfo(info);
+          setPreviewInfoLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setPreviewInfo(null);
+          setPreviewInfoLoading(false);
+        }
+      });
+    return () => { isCancelled = true; };
+  }, [selectedClip?.id, previewTab]);
+
+  const handleToggleDestination = async (destId: string, checked: boolean) => {
+    const next = checked
+      ? Array.from(new Set([...selectedDestinationIds, destId].filter(Boolean)))
+      : selectedDestinationIds.filter(id => id !== destId);
+    setSelectedDestinationIds(next);
+    setSelectedDestinationId(next[0] || '');
+    if (next[0] && previewTab === 'base') {
+      setPreviewTab(next[0]);
+    } else if (previewTab === destId && !checked) {
+      setPreviewTab(next[0] || 'base');
+    }
+    if (selectedClip) {
+      try {
+        await updateClipDestinations(selectedClip.id, next);
+      } catch (err: any) {
+        console.error('Failed to update clip destinations:', err);
+      }
+    }
+  };
+
+  const handleCancelTarget = async (targetId: string) => {
+    setTargetActionLoading(prev => ({ ...prev, [targetId]: 'cancel' }));
+    try {
+      const res = await cancelPublishTarget(targetId);
+      setMsg(`Target cancelled: ${res.message}`);
+      fetchQueue();
+    } catch (err: any) {
+      setError(err.message || 'Failed to cancel target');
+    } finally {
+      setTargetActionLoading(prev => ({ ...prev, [targetId]: null }));
+    }
+  };
+
+  const handleRetryTarget = async (targetId: string, force: boolean = false) => {
+    setTargetActionLoading(prev => ({ ...prev, [targetId]: 'retry' }));
+    try {
+      const res = await retryPublishTarget(targetId, force);
+      setMsg(`Target queued for retry: ${res.message}`);
+      fetchQueue();
+    } catch (err: any) {
+      setError(err.message || 'Failed to retry target');
+    } finally {
+      setTargetActionLoading(prev => ({ ...prev, [targetId]: null }));
+    }
+  };
+
+  const handleActionSubmit = async () => {
+    if (!selectedClip) return;
+    if (selectedDestinationIds.length === 0) {
+      setError('Please select at least one publishing destination channel before publishing.');
+      return;
+    }
+    const unauthorized = selectedDestinationIds
+      .map(id => destinations.find(d => d.id === id))
+      .filter(d => !d || d.is_authorized === false);
+    if (unauthorized.length > 0) {
+      setError(`Destination "${unauthorized[0]?.channel_name || 'selected'}" requires re-authorization.`);
       return;
     }
     setPublishing(true);
@@ -504,7 +615,8 @@ function PublishPageContent() {
       if (form.scheduleDate) {
         await schedulePublish({
           clip_id: selectedClip.id,
-          destination_channel_id: selectedDestinationId,
+          destination_ids: selectedDestinationIds,
+          destination_channel_id: selectedDestinationIds[0],
           scheduled_at: new Date(form.scheduleDate).toISOString(),
           title: form.title,
           description: form.description,
@@ -515,11 +627,12 @@ function PublishPageContent() {
           category: form.category,
           license: form.license
         });
-        setMsg(`📅 Scheduled for ${new Date(form.scheduleDate).toLocaleString()}`);
+        setMsg(`📅 Scheduled for ${new Date(form.scheduleDate).toLocaleString()} across ${selectedDestinationIds.length} destination(s)`);
       } else {
         const res = await publishNow({
           clip_id: selectedClip.id,
-          destination_channel_id: selectedDestinationId,
+          destination_ids: selectedDestinationIds,
+          destination_channel_id: selectedDestinationIds[0],
           title: form.title,
           description: form.description,
           privacy: form.privacy,
@@ -529,7 +642,7 @@ function PublishPageContent() {
           category: form.category,
           license: form.license
         });
-        setMsg(`🚀 Upload Successful! Video ID: ${res.video_id}`);
+        setMsg(`🚀 Upload Successful across ${selectedDestinationIds.length} destination(s)! Video ID: ${res.video_id || res.id}`);
       }
       fetchQueue();
     } catch (e: any) {
@@ -686,53 +799,170 @@ function PublishPageContent() {
               />
             </div>
 
-            {/* Destination Channel Selector */}
+            {/* Multi-Destination Selection */}
             <div style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6 }}>
-                🎯 Publishing Destination Channel
-              </label>
-              <select
-                className="input-field"
-                value={selectedDestinationId}
-                onChange={e => handleDestinationChange(e.target.value)}
-                style={{ fontSize: 13, padding: '10px 12px' }}
-              >
-                <option value="">None (Select at publish time)</option>
-                {destinations.map(d => (
-                  <option key={d.id} value={d.id} disabled={d.is_authorized === false}>
-                    {d.channel_name} ({d.youtube_channel_id})
-                    {d.is_default_destination ? ' (Default)' : ''}
-                    {d.is_authorized === false ? ' (Needs Reauthorization)' : ''}
-                  </option>
-                ))}
-              </select>
-              {selectedDestinationId ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
-                  {destinations.find(d => d.id === selectedDestinationId)?.thumbnail_url && (
-                    <img 
-                      src={destinations.find(d => d.id === selectedDestinationId)?.thumbnail_url} 
-                      alt="avatar" 
-                      style={{ width: 16, height: 16, borderRadius: '50%', objectFit: 'cover' }} 
-                    />
-                  )}
-                  <span>Target: <strong style={{ color: 'var(--accent)' }}>
-                    {destinations.find(d => d.id === selectedDestinationId)?.channel_name || selectedDestinationId}
-                  </strong></span>
-                  <span style={{ color: 'var(--success)' }}>● Authorized</span>
-                </div>
-              ) : (
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                  ℹ️ Clips published without an assigned destination will remain in draft/unassigned state.{' '}
-                  <a href="/youtube-channels" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>Manage channels</a>
-                </div>
-              )}
-              {destinations.length === 0 && (
-                <div style={{ fontSize: 11, color: '#f59e0b', marginTop: 6 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  🎯 Publishing Destinations ({selectedDestinationIds.length})
+                </label>
+                <a href="/youtube-channels" style={{ fontSize: 11, color: 'var(--accent)', textDecoration: 'none' }}>
+                  Manage →
+                </a>
+              </div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
+                Select one or multiple destinations. The clip will be published to each destination with its configured outro.
+              </div>
+
+              {destinations.length === 0 ? (
+                <div style={{ fontSize: 11, color: '#f59e0b', padding: '8px 10px', background: 'rgba(245,158,11,0.08)', borderRadius: 6, border: '1px solid rgba(245,158,11,0.2)' }}>
                   ⚠️ No authorized YouTube channels connected.{' '}
                   <a href="/youtube-channels" style={{ color: '#f59e0b', textDecoration: 'underline', fontWeight: 600 }}>Connect channel</a>
                 </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 180, overflowY: 'auto' }}>
+                  {destinations.map(d => {
+                    const isChecked = selectedDestinationIds.includes(d.id);
+                    const isUnauthorized = d.is_authorized === false;
+                    return (
+                      <label
+                        key={d.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          gap: 8,
+                          padding: '6px 10px',
+                          borderRadius: 6,
+                          background: isChecked ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.02)',
+                          border: isChecked ? '1px solid var(--accent)' : '1px solid var(--border)',
+                          cursor: isUnauthorized ? 'not-allowed' : 'pointer',
+                          opacity: isUnauthorized ? 0.6 : 1,
+                          fontSize: 12
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            disabled={isUnauthorized}
+                            onChange={e => handleToggleDestination(d.id, e.target.checked)}
+                          />
+                          <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {d.channel_name}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                          {d.has_outro ? (
+                            <span className="badge" style={{ fontSize: 9.5, background: 'rgba(99,102,241,0.15)', color: 'var(--accent)' }}>
+                              {d.outro_type === 'video' ? '🎬 Outro' : '🖼️ Outro'} · {d.outro_duration || 5}s
+                            </span>
+                          ) : (
+                            <span className="badge" style={{ fontSize: 9.5, background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)' }}>
+                              ⚪ No Outro
+                            </span>
+                          )}
+                          {d.ready_for_publishing ? (
+                            <span className="badge badge-success" style={{ fontSize: 9 }}>✓</span>
+                          ) : (
+                            <span className="badge badge-warning" style={{ fontSize: 9 }}>⚠️</span>
+                          )}
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
               )}
             </div>
+
+            {/* Phase 7: Final Output Preview Switcher */}
+            {selectedClip && (
+              <div style={{ marginTop: 16, background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 12, border: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)' }}>
+                    👁️ Final Output Preview
+                  </span>
+                  {previewInfoLoading && (
+                    <span style={{ fontSize: 10, color: 'var(--accent)' }}>Loading preview...</span>
+                  )}
+                </div>
+
+                {/* Tabs */}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+                  <button
+                    type="button"
+                    onClick={() => setPreviewTab('base')}
+                    className={`btn-ghost ${previewTab === 'base' ? 'active' : ''}`}
+                    style={{
+                      fontSize: 11,
+                      padding: '4px 8px',
+                      borderRadius: 6,
+                      background: previewTab === 'base' ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
+                      color: previewTab === 'base' ? '#fff' : 'var(--text-secondary)'
+                    }}
+                  >
+                    📹 Base Clip ({selectedClip.duration?.toFixed(1) || '0.0'}s)
+                  </button>
+                  {Array.from(new Set(selectedDestinationIds.filter(Boolean))).map((destId, idx) => {
+                    const dest = destinations.find(d => d.id === destId);
+                    const isActive = previewTab === destId;
+                    return (
+                      <button
+                        key={`dest-tab-${destId || idx}`}
+                        type="button"
+                        onClick={() => setPreviewTab(destId)}
+                        className={`btn-ghost ${isActive ? 'active' : ''}`}
+                        style={{
+                          fontSize: 11,
+                          padding: '4px 8px',
+                          borderRadius: 6,
+                          background: isActive ? 'var(--accent)' : 'rgba(255,255,255,0.05)',
+                          color: isActive ? '#fff' : 'var(--text-secondary)'
+                        }}
+                      >
+                        🎯 {dest?.channel_name || destId} {dest?.has_outro ? (dest.outro_type === 'video' ? '🎬' : '🖼️') : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Preview Info & Duration Breakdown */}
+                {previewTab !== 'base' && previewInfo && (
+                  <div style={{ marginBottom: 10, padding: '8px 10px', background: 'rgba(0,0,0,0.25)', borderRadius: 6, fontSize: 11 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Duration Breakdown:</span>
+                      <span style={{ fontWeight: 600 }}>
+                        Base {previewInfo.base_duration.toFixed(1)}s + Outro {previewInfo.outro_duration.toFixed(1)}s = <strong>{previewInfo.combined_duration.toFixed(1)}s</strong>
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <span style={{ color: 'var(--text-muted)' }}>Outro:</span>
+                      <span style={{ color: previewInfo.has_outro ? 'var(--accent)' : 'var(--text-muted)' }}>
+                        {previewInfo.has_outro ? `${previewInfo.outro?.outro_type === 'video' ? '🎬 Video' : '🖼️ Image'} Outro` : 'None (Base video only)'}
+                      </span>
+                    </div>
+                    {previewInfo.combined_duration > 60 && (
+                      <div style={{ marginTop: 6, padding: '6px 8px', background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.3)', borderRadius: 4, color: '#fbbf24', fontSize: 10.5, lineHeight: 1.3 }}>
+                        ⚠️ Combined duration exceeds 60s Shorts cap ({previewInfo.combined_duration.toFixed(1)}s). This output will publish as a standard video.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Video Player */}
+                <div style={{ borderRadius: 8, overflow: 'hidden', background: '#000', maxHeight: 240 }}>
+                  <video
+                    key={previewTab}
+                    src={previewTab === 'base'
+                      ? `/api/clips/${selectedClip.id}/preview`
+                      : getClipDestinationPreviewUrl(selectedClip.id, previewTab)
+                    }
+                    controls
+                    playsInline
+                    style={{ width: '100%', maxHeight: 240, display: 'block' }}
+                  />
+                </div>
+              </div>
+            )}
 
             {selectedClip && (
               <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: 12, border: '1px solid var(--border)', fontSize: 12 }}>
@@ -1764,6 +1994,105 @@ function PublishPageContent() {
                                 transition: 'width 0.3s ease' 
                               }} 
                             />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Multi-Destination Targets Section */}
+                      {q.targets && q.targets.length > 0 && (
+                        <div style={{ marginTop: 8, padding: '8px 10px', background: 'rgba(0,0,0,0.25)', borderRadius: 8, border: '1px solid rgba(255,255,255,0.06)' }}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', marginBottom: 6, display: 'flex', justifyContent: 'space-between' }}>
+                            <span>🎯 Destination Targets ({q.targets.length})</span>
+                            <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Independent routing &amp; outros</span>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {q.targets.map((target: PublishTarget, tIdx: number) => {
+                              const tDest = destinations.find(d => d.id === target.destination_id);
+                              const tName = target.destination_name || tDest?.channel_name || target.destination_id;
+                              const isTargetLoading = targetActionLoading[target.id] !== null && targetActionLoading[target.id] !== undefined;
+                              return (
+                                <div
+                                  key={target.id || `target-${target.destination_id || tIdx}`}
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 8,
+                                    padding: '6px 8px',
+                                    borderRadius: 6,
+                                    background: 'rgba(255,255,255,0.02)',
+                                    border: '1px solid var(--border)',
+                                    fontSize: 11
+                                  }}
+                                >
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                                    <span style={{ fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      📺 {tName}
+                                    </span>
+                                    {target.has_outro ? (
+                                      <span className="badge" style={{ fontSize: 9, background: 'rgba(99,102,241,0.15)', color: 'var(--accent)' }}>
+                                        {target.outro_type === 'video' ? '🎬' : '🖼️'} {target.outro_duration || 5}s
+                                      </span>
+                                    ) : (
+                                      <span className="badge" style={{ fontSize: 9, opacity: 0.6 }}>⚪ No Outro</span>
+                                    )}
+                                  </div>
+
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                                    <span
+                                      className={`badge ${
+                                        target.status === 'published' ? 'badge-success' :
+                                        target.status === 'failed' ? 'badge-danger' :
+                                        target.status === 'rendering_outro' || target.status === 'publishing' ? 'badge-primary' :
+                                        'badge-warning'
+                                      }`}
+                                      style={{ fontSize: 9.5 }}
+                                    >
+                                      {target.status === 'published' ? '✓ Published' :
+                                       target.status === 'rendering_outro' ? '🎬 Outro Render' :
+                                       target.status === 'publishing' ? '🚀 Publishing' :
+                                       target.status === 'failed' ? '✕ Failed' :
+                                       target.status === 'cancelled' ? 'Cancelled' : '⏳ Pending'}
+                                    </span>
+
+                                    {target.youtube_url && (
+                                      <a
+                                        href={target.youtube_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ color: '#38bdf8', fontSize: 10, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 2 }}
+                                      >
+                                        🔗 Shorts
+                                      </a>
+                                    )}
+
+                                    {target.status === 'failed' && (
+                                      <button
+                                        type="button"
+                                        className="btn-ghost"
+                                        style={{ fontSize: 10, padding: '2px 6px', color: '#60a5fa' }}
+                                        disabled={isTargetLoading}
+                                        onClick={() => handleRetryTarget(target.id)}
+                                      >
+                                        🔄 Retry
+                                      </button>
+                                    )}
+
+                                    {['pending', 'rendering_outro'].includes(target.status) && (
+                                      <button
+                                        type="button"
+                                        className="btn-ghost"
+                                        style={{ fontSize: 10, padding: '2px 6px', color: '#ef4444' }}
+                                        disabled={isTargetLoading}
+                                        onClick={() => handleCancelTarget(target.id)}
+                                      >
+                                        ✕ Cancel
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}

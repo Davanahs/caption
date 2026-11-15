@@ -1,7 +1,8 @@
 import uuid
+from typing import Optional
 from datetime import datetime, timezone
 from sqlalchemy import String, Integer, BigInteger, Float, DateTime, Text, Boolean, Enum, ForeignKey, func, UniqueConstraint, JSON
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.models.database import Base
 import enum
 
@@ -223,6 +224,7 @@ class UploadBatch(Base):
     processing_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     processing_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     batch_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    config: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
 
 
@@ -372,7 +374,20 @@ class Channel(Base):
     publishing_settings: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     cached_stats: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
+    # Destination Outro Link
+    active_outro_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("destination_outros.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+    # Relationships
+    active_outro: Mapped[Optional["DestinationOutro"]] = relationship(
+        "DestinationOutro", foreign_keys=[active_outro_id], post_update=True
+    )
+    outros: Mapped[list["DestinationOutro"]] = relationship(
+        "DestinationOutro", foreign_keys="[DestinationOutro.channel_id]", back_populates="channel", cascade="all, delete-orphan"
+    )
 
 
 class ChannelDestination(Base):
@@ -398,6 +413,35 @@ class ChannelDestination(Base):
         onupdate=lambda: datetime.now(timezone.utc))
 
 
+class DestinationOutro(Base):
+    __tablename__ = "destination_outros"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    channel_id: Mapped[str] = mapped_column(
+        String(100), ForeignKey("channels.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    file_path: Mapped[str] = mapped_column(String, nullable=False)
+    original_filename: Mapped[str | None] = mapped_column(String, nullable=True)
+    file_size_bytes: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    outro_type: Mapped[str] = mapped_column(String(20), nullable=False)  # 'video' or 'image'
+    duration_seconds: Mapped[float] = mapped_column(Float, nullable=False)
+    width: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    height: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    fps: Mapped[float | None] = mapped_column(Float, nullable=True)
+    has_audio: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    version: Mapped[int] = mapped_column(Integer, default=1, server_default="1", nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true", index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), server_default=func.now()
+    )
+
+    # Relationships
+    channel: Mapped["Channel"] = relationship("Channel", foreign_keys=[channel_id], back_populates="outros")
+
+
 class PublishTarget(Base):
     __tablename__ = "publish_targets"
     __table_args__ = (
@@ -414,18 +458,38 @@ class PublishTarget(Base):
     youtube_video_id: Mapped[str | None] = mapped_column(String(50), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     retry_count: Mapped[int] = mapped_column(Integer, default=0)
-    privacy: Mapped[str] = mapped_column(String(50), default="public")
+    privacy: Mapped[str] = mapped_column(String(50), default="private", server_default="private")
     made_for_kids: Mapped[bool] = mapped_column(Boolean, default=False)
     age_restricted: Mapped[bool] = mapped_column(Boolean, default=False)
     scheduled_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True)
+    
+    # Milestone 1: Multi-Destination Rendering & Lifecycle Tracking Columns
+    rendered_video_path: Mapped[str | None] = mapped_column(String, nullable=True)
+    artifact_storage_key: Mapped[str | None] = mapped_column(String, nullable=True)
+    outro_applied_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("destination_outros.id", ondelete="SET NULL"), nullable=True, index=True
+    )
+    publish_stage: Mapped[str] = mapped_column(String(50), default="pending", server_default="pending", nullable=False)
+    publish_progress: Mapped[float] = mapped_column(Float, default=0.0, server_default="0.0", nullable=False)
+    publish_task_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    publish_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    publish_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    idempotency_key: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    upload_session_uri: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc))
+
+    # Relationships
+    outro_applied: Mapped[Optional["DestinationOutro"]] = relationship(
+        "DestinationOutro", foreign_keys=[outro_applied_id]
+    )
 
 
 class VideoMetadata(Base):

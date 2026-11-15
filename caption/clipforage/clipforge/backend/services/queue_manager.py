@@ -17,7 +17,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any, Tuple
 
-from sqlalchemy import select, func, and_, or_
+from sqlalchemy import select, func, and_, or_, not_
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,6 +32,13 @@ if not logger.handlers:
     logger.propagate = False
 
 MAX_CONCURRENT_MANUAL_JOBS = 5
+
+SYNTHETIC_URL_PREFIXES = (
+    "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    "test_upload.mp4",
+    "legacy.mp4",
+    "valid.mp4",
+)
 
 ACTIVE_PROCESSING_STATUSES = [
     JobStatus.DOWNLOADING.value,
@@ -48,36 +55,54 @@ def is_manual_job_filter():
     return or_(Job.channel_id.is_(None), Job.channel_id == "")
 
 
-def is_active_manual_job_filter():
+def is_non_synthetic_job_filter():
+    """
+    Return SQL filter excluding synthetic test fixture URLs.
+    Allows NULL source_url (unassigned or initial jobs), but rejects known synthetic prefixes.
+    """
+    return or_(
+        Job.source_url.is_(None),
+        and_(*[not_(Job.source_url.startswith(prefix)) for prefix in SYNTHETIC_URL_PREFIXES]),
+    )
+
+
+def is_active_manual_job_filter(include_test: bool = False):
     """
     Return SQL filter matching manual jobs currently occupying active processing capacity.
     Includes:
-    - Jobs in active processing pipeline stages (downloading, validating, transcribing, analyzing, selecting, clipping)
-    - Jobs dispatched to Celery awaiting worker execution (status='pending' AND celery_task_id IS NOT NULL)
+    - Non-test manual jobs in active processing pipeline stages (downloading, validating, transcribing, analyzing, selecting, clipping)
+    - Non-test manual jobs dispatched to Celery awaiting worker execution (status='pending' AND celery_task_id IS NOT NULL)
+    Excludes test fixtures (Job.is_test == True) and synthetic fixture URLs when include_test is False.
     """
-    return and_(
+    conditions = [
         is_manual_job_filter(),
         or_(
             Job.status.in_(ACTIVE_PROCESSING_STATUSES),
             and_(Job.status == JobStatus.PENDING.value, Job.celery_task_id.is_not(None)),
         ),
-    )
+    ]
+    if not include_test:
+        conditions.extend([
+            Job.is_test == False,
+            is_non_synthetic_job_filter(),
+        ])
+    return and_(*conditions)
 
 
-def get_active_manual_jobs_count_sync(session: Session) -> int:
+def get_active_manual_jobs_count_sync(session: Session, include_test: bool = False) -> int:
     """Return number of manual jobs currently actively processing in the pipeline."""
     query = (
         session.query(func.count(Job.id))
-        .filter(is_active_manual_job_filter())
+        .filter(is_active_manual_job_filter(include_test=include_test))
     )
     return query.scalar() or 0
 
 
-async def get_active_manual_jobs_count_async(db: AsyncSession) -> int:
+async def get_active_manual_jobs_count_async(db: AsyncSession, include_test: bool = False) -> int:
     """Async: Return number of manual jobs currently actively processing."""
     stmt = (
         select(func.count(Job.id))
-        .where(is_active_manual_job_filter())
+        .where(is_active_manual_job_filter(include_test=include_test))
     )
     result = await db.execute(stmt)
     if hasattr(result, "scalar"):
@@ -91,7 +116,7 @@ async def get_active_manual_jobs_count_async(db: AsyncSession) -> int:
     return 0
 
 
-def get_pending_queue_position_sync(session: Session, job_id: Optional[str] = None) -> int:
+def get_pending_queue_position_sync(session: Session, job_id: Optional[str] = None, include_test: bool = False) -> int:
     """
     Return queue position (1-based index) among pending manual jobs waiting in queue.
     If job_id is provided, counts how many pending manual jobs were created before this one + 1.
@@ -99,27 +124,31 @@ def get_pending_queue_position_sync(session: Session, job_id: Optional[str] = No
     if job_id:
         target_job = session.query(Job).filter_by(id=job_id).first()
         if target_job:
-            earlier_count = (
+            q = (
                 session.query(func.count(Job.id))
                 .filter(is_manual_job_filter())
                 .filter(Job.status == JobStatus.PENDING.value)
                 .filter(Job.celery_task_id.is_(None))
                 .filter(Job.created_at < target_job.created_at)
-                .scalar()
-            ) or 0
+            )
+            if not include_test:
+                q = q.filter(Job.is_test == False).filter(is_non_synthetic_job_filter())
+            earlier_count = q.scalar() or 0
             return earlier_count + 1
 
-    total_pending = (
+    total_pending_q = (
         session.query(func.count(Job.id))
         .filter(is_manual_job_filter())
         .filter(Job.status == JobStatus.PENDING.value)
         .filter(Job.celery_task_id.is_(None))
-        .scalar()
-    ) or 0
+    )
+    if not include_test:
+        total_pending_q = total_pending_q.filter(Job.is_test == False).filter(is_non_synthetic_job_filter())
+    total_pending = total_pending_q.scalar() or 0
     return total_pending + 1
 
 
-async def get_pending_queue_position_async(db: AsyncSession, job_id: Optional[str] = None) -> int:
+async def get_pending_queue_position_async(db: AsyncSession, job_id: Optional[str] = None, include_test: bool = False) -> int:
     """Async: Return queue position (1-based index) among pending manual jobs waiting in queue."""
     if job_id:
         target_stmt = select(Job).where(Job.id == job_id)
@@ -128,13 +157,18 @@ async def get_pending_queue_position_async(db: AsyncSession, job_id: Optional[st
         if inspect.isawaitable(target_job):
             target_job = await target_job
         if target_job and hasattr(target_job, "created_at"):
-            stmt = (
-                select(func.count(Job.id))
-                .where(is_manual_job_filter())
-                .where(Job.status == JobStatus.PENDING.value)
-                .where(Job.celery_task_id.is_(None))
-                .where(Job.created_at < target_job.created_at)
-            )
+            where_clauses = [
+                is_manual_job_filter(),
+                Job.status == JobStatus.PENDING.value,
+                Job.celery_task_id.is_(None),
+                Job.created_at < target_job.created_at,
+            ]
+            if not include_test:
+                where_clauses.extend([
+                    Job.is_test == False,
+                    is_non_synthetic_job_filter(),
+                ])
+            stmt = select(func.count(Job.id)).where(and_(*where_clauses))
             count_res = await db.execute(stmt)
             val = count_res.scalar() if hasattr(count_res, "scalar") else 0
             if inspect.isawaitable(val):
@@ -144,12 +178,17 @@ async def get_pending_queue_position_async(db: AsyncSession, job_id: Optional[st
             except (TypeError, ValueError):
                 return 1
 
-    stmt = (
-        select(func.count(Job.id))
-        .where(is_manual_job_filter())
-        .where(Job.status == JobStatus.PENDING.value)
-        .where(Job.celery_task_id.is_(None))
-    )
+    where_clauses = [
+        is_manual_job_filter(),
+        Job.status == JobStatus.PENDING.value,
+        Job.celery_task_id.is_(None),
+    ]
+    if not include_test:
+        where_clauses.extend([
+            Job.is_test == False,
+            is_non_synthetic_job_filter(),
+        ])
+    stmt = select(func.count(Job.id)).where(and_(*where_clauses))
     res = await db.execute(stmt)
     val = res.scalar() if hasattr(res, "scalar") else 0
     if inspect.isawaitable(val):
@@ -213,9 +252,16 @@ def build_dispatch_kwargs_from_job(job: Job) -> Dict[str, Any]:
 
 def dispatch_celery_job(job_id: str, kwargs: Dict[str, Any]) -> str:
     """Dispatch Celery task and return task_id."""
+    if kwargs.get("studio_batch_id"):
+        from backend.tasks.studio_tasks import process_studio_direct_video_task
+        task = process_studio_direct_video_task.apply_async(kwargs=kwargs, task_id=job_id)
+        raw_id = getattr(task, "id", None)
+        return raw_id if isinstance(raw_id, str) and raw_id else job_id
+
     from backend.tasks.orchestration import start_video_processing_task
     task = start_video_processing_task.apply_async(kwargs=kwargs, task_id=job_id)
-    return task.id
+    raw_id = getattr(task, "id", None)
+    return raw_id if isinstance(raw_id, str) and raw_id else job_id
 
 
 def update_pending_queue_positions_sync(session: Session) -> None:
@@ -223,6 +269,8 @@ def update_pending_queue_positions_sync(session: Session) -> None:
     pending_jobs = (
         session.query(Job)
         .filter(is_manual_job_filter())
+        .filter(Job.is_test == False)
+        .filter(is_non_synthetic_job_filter())
         .filter(Job.status == JobStatus.PENDING.value)
         .filter(Job.celery_task_id.is_(None))
         .order_by(Job.created_at.asc())
@@ -238,6 +286,8 @@ async def update_pending_queue_positions_async(db: AsyncSession) -> None:
     stmt = (
         select(Job)
         .where(is_manual_job_filter())
+        .where(Job.is_test == False)
+        .where(is_non_synthetic_job_filter())
         .where(Job.status == JobStatus.PENDING.value)
         .where(Job.celery_task_id.is_(None))
         .order_by(Job.created_at.asc())
@@ -275,6 +325,8 @@ def dispatch_next_queued_manual_jobs_sync(session: Optional[Session] = None) -> 
         pending_jobs = (
             s.query(Job)
             .filter(is_manual_job_filter())
+            .filter(Job.is_test == False)
+            .filter(is_non_synthetic_job_filter())
             .filter(Job.status == JobStatus.PENDING.value)
             .filter(Job.celery_task_id.is_(None))
             .order_by(Job.created_at.asc())
@@ -333,6 +385,8 @@ async def dispatch_next_queued_manual_jobs_async(db: Optional[AsyncSession] = No
         stmt = (
             select(Job)
             .where(is_manual_job_filter())
+            .where(Job.is_test == False)
+            .where(is_non_synthetic_job_filter())
             .where(Job.status == JobStatus.PENDING.value)
             .where(Job.celery_task_id.is_(None))
             .order_by(Job.created_at.asc())

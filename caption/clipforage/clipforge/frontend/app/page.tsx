@@ -10,11 +10,11 @@ import {
   getJobHistory,
   getJob,
   cancelJob,
+  cancelAllFailedJobs,
   getJobStats,
   retryJob,
   type QueueStats,
 } from '@/lib/api';
-import LayoutThumbnailSelector from '@/components/LayoutThumbnailSelector';
 import ProcessVideoModal, { ProcessVideoConfig } from '@/components/ProcessVideoModal';
 import PodcastSelectionModal, { PodcastProcessingConfig } from '@/components/PodcastSelectionModal';
 
@@ -848,6 +848,20 @@ export default function DashboardPage() {
     }
   };
 
+  const [isCancellingFailed, setIsCancellingFailed] = useState(false);
+  const handleCancelAllFailed = async () => {
+    if (!confirm('Cancel all failed processes? They will be permanently marked as cancelled.')) return;
+    setIsCancellingFailed(true);
+    try {
+      await cancelAllFailedJobs();
+      setTimeout(refreshAll, 400);
+    } catch (e: any) {
+      alert(`Failed to cancel failed processes: ${e.message}`);
+    } finally {
+      setIsCancellingFailed(false);
+    }
+  };
+
   const handleDeleteJob = async (id: string) => {
     if (!confirm('Delete this job record from the list?')) return;
     try {
@@ -952,7 +966,8 @@ export default function DashboardPage() {
           config.enableHook,
           config.targetLanguage,
           targetDuration,
-          segmentationStrategy
+          segmentationStrategy,
+          config.destinationIds
         );
         setBatchUrls('');
         setIsPendingBatch(false);
@@ -973,6 +988,7 @@ export default function DashboardPage() {
           clipMode: config.clipMode,
           targetDuration: targetDuration,
           segmentationStrategy: segmentationStrategy,
+          destinationIds: config.destinationIds,
         });
         if (res.job_id) {
           setUrl('');
@@ -996,7 +1012,8 @@ export default function DashboardPage() {
           config.maxClipDuration,
           config.clipMode,
           targetDuration,
-          segmentationStrategy
+          segmentationStrategy,
+          config.destinationIds
         );
         if (res.job_id) {
           setShowModal(false);
@@ -1024,25 +1041,45 @@ export default function DashboardPage() {
     setError('');
 
     try {
-      const res = await submitYouTubeUrl(config.url, {
-        numClips: config.clipsCount,
-        clipsCount: config.clipsCount,
-        maxClipDuration: config.targetDuration,
-        targetDuration: config.targetDuration,
-        clipMode: config.clipMode,
-        reframeMode: config.composition === 'stacked' ? 'stacked_16_9' : 'center_crop',
-        regions: config.regions,
-        podcastComposition: config.composition,
-        shotSchedule: config.shotSchedule,
-      });
+      const reframeMode = config.composition === 'stacked' ? 'stacked_16_9' : 'center_crop';
+      let res: any;
 
-      if (res.job_id) {
+      if (config.sourceType === 'file' && config.file) {
+        res = await uploadVideoFile(config.file, {
+          numClips: config.clipsCount,
+          clipsCount: config.clipsCount,
+          maxClipDuration: config.targetDuration,
+          targetDuration: config.targetDuration,
+          clipMode: config.clipMode,
+          reframeMode,
+          regions: config.regions,
+          podcastComposition: config.composition,
+          shotSchedule: config.shotSchedule,
+          destinationIds: config.destinationIds,
+        });
+      } else {
+        res = await submitYouTubeUrl(config.url || '', {
+          numClips: config.clipsCount,
+          clipsCount: config.clipsCount,
+          maxClipDuration: config.targetDuration,
+          targetDuration: config.targetDuration,
+          clipMode: config.clipMode,
+          reframeMode,
+          regions: config.regions,
+          podcastComposition: config.composition,
+          shotSchedule: config.shotSchedule,
+          destinationIds: config.destinationIds,
+        });
+      }
+
+      if (res && res.job_id) {
         setShowPodcastModal(false);
         setUrl('');
+        setPendingFile(null);
         setPodcastModalError('');
         setTimeout(refreshAll, 800);
       } else {
-        const msg = res.detail || 'Failed to start podcast processing';
+        const msg = res?.detail || 'Failed to start podcast processing';
         setPodcastModalError(msg);
         setError(msg);
       }
@@ -1119,21 +1156,6 @@ export default function DashboardPage() {
               >
                 Bulk / Batch
               </button>
-              <button
-                id="podcast-interview-mode-btn"
-                onClick={() => setShowPodcastModal(true)}
-                style={{
-                  padding: '4px 12px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
-                  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.25))',
-                  color: '#93c5fd',
-                  fontWeight: 600,
-                  display: 'flex', alignItems: 'center', gap: 5,
-                  border: '1px solid rgba(59, 130, 246, 0.4)',
-                }}
-              >
-                <span>🎙️</span>
-                <span>Podcast / Interview</span>
-              </button>
             </div>
           </div>
 
@@ -1160,27 +1182,6 @@ export default function DashboardPage() {
                   style={{ whiteSpace: 'nowrap' }}
                 >
                   {loading ? '⏳' : '⚡ Generate'}
-                </button>
-              </div>
-              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <button
-                  type="button"
-                  id="podcast-quick-launch-link"
-                  onClick={() => setShowPodcastModal(true)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#60a5fa',
-                    fontSize: 12,
-                    cursor: 'pointer',
-                    padding: 0,
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 4,
-                    textDecoration: 'underline',
-                  }}
-                >
-                  <span>🎙️ Podcast or Interview? Draw & select speaker areas</span>
                 </button>
               </div>
               {url.trim().length > 0 && !extractYouTubeVideoId(url.trim()) && (
@@ -1213,82 +1214,6 @@ export default function DashboardPage() {
               </button>
             </div>
           )}
-
-          {/* ── Clips per Video count (Only shown for AI Highlights mode) ── */}
-          {clipMode === 'ai_highlights' ? (
-            <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Clips per Video</label>
-              <input
-                type="number"
-                min="1"
-                max="10"
-                className="input-field"
-                value={clipsCount}
-                onChange={e => setClipsCount(parseInt(e.target.value) || 3)}
-                style={{ width: '100px' }}
-              />
-            </div>
-          ) : (
-            <div style={{
-              marginBottom: 20, padding: '12px 14px', borderRadius: 10,
-              background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
-              color: '#a5b4fc', fontSize: 12, display: 'flex', alignItems: 'center', gap: 8
-            }}>
-              <span>⚡</span>
-              <span><strong>Equal Split Mode Active:</strong> Clip count is automatically computed to cover 100% of the video in max 49s Shorts clips.</span>
-            </div>
-          )}
-
-
-          {/* ── Clip Generation Mode toggle ── */}
-          <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 13, color: 'var(--text-secondary)', display: 'block', marginBottom: 10 }}>
-              Clip Generation Mode
-            </label>
-            <div style={{
-              display: 'inline-flex', borderRadius: 10, overflow: 'hidden',
-              border: '1px solid var(--border)', background: 'var(--bg-secondary)',
-            }}>
-              {(
-                [['ai_highlights', '🧠 AI Highlights'], ['equal_split', '✂️ Equal Split']] as const
-              ).map(([mode, label]) => (
-                <button
-                  key={mode}
-                  onClick={() => setClipMode(mode)}
-                  style={{
-                    padding: '8px 18px', fontSize: 13, fontWeight: 600,
-                    cursor: 'pointer', border: 'none', transition: 'all 0.15s',
-                    background: clipMode === mode
-                      ? 'linear-gradient(135deg,#6366f1,#8b5cf6)'
-                      : 'transparent',
-                    color: clipMode === mode ? '#fff' : 'var(--text-secondary)',
-                    borderRight: mode === 'ai_highlights' ? '1px solid var(--border)' : 'none',
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
-              {clipMode === 'ai_highlights'
-                ? 'AI detects and scores the most engaging viral moments.'
-                : 'Divides the entire video into equal-duration clips (≤ 49s max limit) with 100% timeline coverage.'}
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>OR</span>
-            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-          </div>
-
-          {/* ── Layout Mode selector (Visual Thumbnail Selector) ── */}
-          <div style={{ marginBottom: 24 }}>
-            <LayoutThumbnailSelector
-              value={reframeMode || 'blur'}
-              onChange={val => setReframeMode(val)}
-            />
-          </div>
 
           <div
             onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -1351,30 +1276,50 @@ export default function DashboardPage() {
 
           {/* ── Queue Breakdown Pills ── */}
           {queueStats && queueStats.queue && (
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(52px, 1fr))', gap: 6, marginBottom: 14, minWidth: 0,
-              padding: 8, background: 'var(--bg-secondary)', borderRadius: 10, border: '1px solid var(--border)'
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>ACTIVE</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#6366f1' }}>{queueStats.queue.active}</div>
+            <div style={{ marginBottom: 14 }}>
+              <div style={{
+                display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(52px, 1fr))', gap: 6, marginBottom: queueStats.queue.failed > 0 ? 8 : 0, minWidth: 0,
+                padding: 8, background: 'var(--bg-secondary)', borderRadius: 10, border: '1px solid var(--border)'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>ACTIVE</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#6366f1' }}>{queueStats.queue.active}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>PENDING</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b' }}>{queueStats.queue.pending}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>DONE</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#10b981' }}>{queueStats.queue.done}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>FAILED</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#ef4444' }}>{queueStats.queue.failed}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>CANCELLED</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8' }}>{queueStats.queue.cancelled ?? 0}</div>
+                </div>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>PENDING</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#f59e0b' }}>{queueStats.queue.pending}</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>DONE</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#10b981' }}>{queueStats.queue.done}</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>FAILED</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#ef4444' }}>{queueStats.queue.failed}</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>CANCELLED</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#94a3b8' }}>{queueStats.queue.cancelled ?? 0}</div>
-              </div>
+
+              {queueStats.queue.failed > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 6 }}>
+                  <button
+                    onClick={handleCancelAllFailed}
+                    disabled={isCancellingFailed}
+                    style={{
+                      background: 'rgba(239,68,68,0.1)', color: '#ef4444',
+                      border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6,
+                      padding: '3px 8px', fontSize: 10, fontWeight: 600, cursor: 'pointer',
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                    }}
+                    title="Cancel all failed processes and clear failure status"
+                  >
+                    {isCancellingFailed ? 'Cancelling...' : '✕ Cancel All Failed'}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -1383,25 +1328,42 @@ export default function DashboardPage() {
             <div style={{
               marginBottom: 14, padding: '10px 12px', borderRadius: 10,
               background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.25)',
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+              display: 'flex', flexDirection: 'column', gap: 6,
             }}>
-              <div style={{ minWidth: 0, flex: 1, paddingRight: 8 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#ef4444' }}>
-                  ⚠️ Last Fail: {queueStats.last_failure.source_title?.slice(0, 30)}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ minWidth: 0, flex: 1, paddingRight: 8 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: '#ef4444' }}>
+                    ⚠️ Failed: {queueStats.last_failure.source_title?.slice(0, 30)}
+                  </div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {queueStats.last_failure.error}
+                  </div>
                 </div>
-                <div style={{ fontSize: 10, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {queueStats.last_failure.error}
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <button
+                    onClick={() => handleCancelJob(queueStats.last_failure!.job_id)}
+                    style={{
+                      background: 'rgba(255,255,255,0.08)', color: 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 6,
+                      padding: '4px 8px', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap'
+                    }}
+                    title="Dismiss and cancel this failure"
+                  >
+                    ✕ Cancel
+                  </button>
+                  <button
+                    onClick={() => handleManualRetry(queueStats.last_failure!.job_id)}
+                    style={{
+                      background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6,
+                      padding: '4px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap'
+                    }}
+                  >
+                    🔄 Retry
+                  </button>
                 </div>
               </div>
-              <button
-                onClick={() => handleManualRetry(queueStats.last_failure!.job_id)}
-                style={{
-                  background: '#ef4444', color: '#fff', border: 'none', borderRadius: 6,
-                  padding: '4px 10px', fontSize: 11, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap'
-                }}
-              >
-                🔄 Retry
-              </button>
+              <div style={{ fontSize: 10, color: '#94a3b8', fontStyle: 'italic' }}>
+                ℹ️ Not retried automatically · User manual action required
+              </div>
             </div>
           )}
 
@@ -1495,6 +1457,7 @@ export default function DashboardPage() {
 
       {/* ── Modernized YouTube Processing Configuration Modal ── */}
       <ProcessVideoModal
+        key={showModal ? (pendingUrl || 'modal-open') : 'modal-closed'}
         isOpen={showModal}
         onClose={() => {
           if (!isSubmittingModal) {
@@ -1533,6 +1496,7 @@ export default function DashboardPage() {
         }}
         onConfirm={confirmAndProcessPodcast}
         initialUrl={url.trim()}
+        initialFile={pendingFile}
         isSubmitting={isSubmittingPodcastModal}
         errorMessage={podcastModalError}
       />

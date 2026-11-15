@@ -13,8 +13,9 @@ from backend.core.config import settings
 def get_yt_dlp_base_args() -> list[str]:
     """Helper to return base arguments for yt-dlp, including cookies if available."""
     args = []
-    # Use client extractor args to help bypass 429/bot detection blocks
-    args.extend(["--extractor-args", "youtube:player_client=ios,android"])
+    # Do NOT restrict player_client to ios,android: modern YouTube uses SABR-only streaming
+    # on mobile clients, which skips all HD/4K formats without direct URLs and forces a 360p fallback.
+    # Allowing default client selection (web, visionos) preserves authentic 1080p, 1440p, and 4K master streams.
     
     # Check for cookies file at root or backend folder
     for path_str in ["/app/backend/cookies.txt", "/app/cookies.txt"]:
@@ -110,7 +111,7 @@ async def download_video(url: str, video_id: str, progress_callback=None, is_tes
 
     cmd = [
         "yt-dlp",
-        "--format", "bestvideo[height<=2160][vcodec!=av01]+bestaudio/best[height<=2160][vcodec!=av01]/best",
+        "--format", "bestvideo[height<=1080][vcodec^=avc1]+bestaudio[ext=m4a]/bestvideo[height<=1080]+bestaudio/best[height<=1080]/bestvideo[height<=2160]+bestaudio/best",
         "--merge-output-format", "mp4",
         "--output", str(output_path),
         "--no-playlist",

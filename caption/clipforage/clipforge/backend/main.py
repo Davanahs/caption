@@ -3,13 +3,14 @@ ClipForge — FastAPI Main Application
 """
 import asyncio
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from backend.models.database import init_db, cleanup_orphaned_jobs, AsyncSessionLocal
 from backend.core.config import settings
-from backend.api.routes import videos, clips, jobs, channels, publish, analytics, dubbing, studio, youtube_channels, captions, settings as settings_route
+from backend.api.routes import videos, clips, jobs, channels, publish, analytics, dubbing, studio, youtube_channels, settings as settings_route
 from backend.core.diagnostics import run_diagnostics
 
 
@@ -157,6 +158,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ── Global Exception Handler (Guarantees CORS headers on unhandled errors) ──
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    import logging
+    logging.getLogger("clipforge").exception(f"Unhandled exception on {request.method} {request.url.path}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": str(exc) if settings.DEBUG else "Internal Server Error"},
+    )
+
 # ── Routers ─────────────────────────────────────────────────────────────────
 app.include_router(videos.router)
 app.include_router(clips.router)
@@ -166,9 +177,15 @@ app.include_router(publish.router)
 app.include_router(analytics.router)   # Phase 4 — performance tracking
 app.include_router(dubbing.router)     # Phase 15 — multi-language dubbing
 app.include_router(studio.router)      # Upload Studio Phase 1
-app.include_router(captions.router)    # Caption Studio AI Styling Engine
 app.include_router(youtube_channels.router)  # My YouTube Channels Management
 app.include_router(settings_route.router)    # Phase 5.1 — Settings Persistence (REQ-GAP-001)
+
+# Caption Studio routes
+try:
+    from backend.api.routes.captions import router as captions_router
+    app.include_router(captions_router)
+except ImportError:
+    print("[ClipForge] Caption Studio routes not available")
 
 # ── Quarantine Protection Route (Registered BEFORE static mount) ────────────
 @app.api_route(

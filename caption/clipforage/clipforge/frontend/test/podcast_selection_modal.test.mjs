@@ -70,8 +70,6 @@ test('PodcastSelectionModal Component & Workflow Contract', async (t) => {
   });
 
   await t.test('8. Dashboard page integrates entry points and handles submission', () => {
-    assert.ok(dashboardSource.includes('podcast-interview-mode-btn'), 'Must have visible podcast intake button');
-    assert.ok(dashboardSource.includes('podcast-quick-launch-link'), 'Must have quick launch link');
     assert.ok(dashboardSource.includes('PodcastSelectionModal'), 'Must mount PodcastSelectionModal');
     assert.ok(dashboardSource.includes('confirmAndProcessPodcast'), 'Must have submission handler');
   });

@@ -9,10 +9,16 @@ import {
   updateYoutubeChannelSettings,
   setPrimaryDefaultDestination,
   disconnectYoutubeChannel,
+  deleteYoutubeChannel,
   getYoutubeOAuthUrl,
   connectYoutubeChannel,
+  uploadChannelOutro,
+  updateChannelOutroDuration,
+  deleteChannelOutro,
+  getChannelOutroPreviewUrl,
   YouTubeChannelDestination,
   ChannelPublishingSettings,
+  OutroMetadata,
 } from '@/lib/api';
 
 const CATEGORY_OPTIONS: { id: string; name: string }[] = [
@@ -40,8 +46,21 @@ export default function YouTubeChannelsPage() {
 
   // Modals state
   const [connectModalOpen, setConnectModalOpen] = useState<boolean>(false);
+  const [connectStep, setConnectStep] = useState<1 | 2>(1);
+  const [connectedNewChannel, setConnectedNewChannel] = useState<YouTubeChannelDestination | null>(null);
   const [settingsModalChannel, setSettingsModalChannel] = useState<YouTubeChannelDestination | null>(null);
   const [disconnectModalChannel, setDisconnectModalChannel] = useState<YouTubeChannelDestination | null>(null);
+
+  // Outro modals & state
+  const [outroModalChannel, setOutroModalChannel] = useState<YouTubeChannelDestination | null>(null);
+  const [outroPreviewChannel, setOutroPreviewChannel] = useState<YouTubeChannelDestination | null>(null);
+  const [outroFileType, setOutroFileType] = useState<'video' | 'image'>('video');
+  const [selectedOutroFile, setSelectedOutroFile] = useState<File | null>(null);
+  const [outroDurationSeconds, setOutroDurationSeconds] = useState<number>(3.0);
+  const [savingOutro, setSavingOutro] = useState<boolean>(false);
+  const [editDurationChannel, setEditingDurationChannel] = useState<YouTubeChannelDestination | null>(null);
+  const [editDurationVal, setEditDurationVal] = useState<number>(3.0);
+  const [savingDuration, setSavingDuration] = useState<boolean>(false);
 
   // Connect form state
   const [oauthUrl, setOauthUrl] = useState<string>('');
@@ -49,9 +68,9 @@ export default function YouTubeChannelsPage() {
   const [manualCode, setManualCode] = useState<string>('');
   const [connectingManual, setConnectingManual] = useState<boolean>(false);
 
-  // Settings form state
+  // Settings form state - private by default
   const [settingsForm, setSettingsForm] = useState<ChannelPublishingSettings>({
-    default_privacy: 'public',
+    default_privacy: 'private',
     default_category: '22',
     default_tags: 'shorts, viral',
     default_license: 'youtube',
@@ -134,7 +153,10 @@ export default function YouTubeChannelsPage() {
   // Fetch OAuth URL when opening connect modal
   const handleOpenConnectModal = async () => {
     setConnectModalOpen(true);
+    setConnectStep(1);
+    setConnectedNewChannel(null);
     setManualCode('');
+    setSelectedOutroFile(null);
     setOauthLoading(true);
     try {
       const res = await getYoutubeOAuthUrl();
@@ -153,13 +175,100 @@ export default function YouTubeChannelsPage() {
     setConnectingManual(true);
     try {
       const res = await connectYoutubeChannel(manualCode.trim());
-      showToast('success', `Channel '${res.channel?.channel_name || 'YouTube Channel'}' connected successfully!`);
-      setConnectModalOpen(false);
-      await loadChannels();
+      const chData = (res.channel as YouTubeChannelDestination) || null;
+      showToast('success', `Channel '${chData?.channel_name || 'YouTube Channel'}' connected successfully!`);
+      await loadChannels(false);
+      // Advance to Step 2 for optional outro configuration
+      if (chData && chData.id) {
+        setConnectedNewChannel(chData);
+        setConnectStep(2);
+      } else {
+        setConnectModalOpen(false);
+      }
     } catch (err: any) {
       showToast('error', `Connection failed: ${err.message}`);
     } finally {
       setConnectingManual(false);
+    }
+  };
+
+  // Step 2 outro save or skip
+  const handleSaveConnectOutro = async () => {
+    if (!connectedNewChannel || !selectedOutroFile) return;
+    setSavingOutro(true);
+    try {
+      await uploadChannelOutro(
+        connectedNewChannel.id,
+        selectedOutroFile,
+        outroFileType,
+        outroFileType === 'image' ? outroDurationSeconds : undefined
+      );
+      showToast('success', `Outro configured for '${connectedNewChannel.channel_name}'!`);
+      setConnectModalOpen(false);
+      await loadChannels(false);
+    } catch (err: any) {
+      showToast('error', `Failed to save outro: ${err.message}`);
+    } finally {
+      setSavingOutro(false);
+    }
+  };
+
+  const handleSkipConnectOutro = () => {
+    setConnectModalOpen(false);
+    showToast('success', 'Channel connection complete. You can configure an outro anytime.');
+  };
+
+  // Outro upload handler from Outro modal
+  const handleUploadOutro = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!outroModalChannel || !selectedOutroFile) return;
+    setSavingOutro(true);
+    try {
+      await uploadChannelOutro(
+        outroModalChannel.id,
+        selectedOutroFile,
+        outroFileType,
+        outroFileType === 'image' ? outroDurationSeconds : undefined
+      );
+      showToast('success', `Outro uploaded successfully for '${outroModalChannel.channel_name}'!`);
+      setSelectedOutroFile(null);
+      setOutroModalChannel(null);
+      await loadChannels(false);
+    } catch (err: any) {
+      showToast('error', `Failed to upload outro: ${err.message}`);
+    } finally {
+      setSavingOutro(false);
+    }
+  };
+
+  // Delete outro handler
+  const handleDeleteOutro = async (channel: YouTubeChannelDestination) => {
+    if (!confirm(`Are you sure you want to remove the outro for '${channel.channel_name}'? Subsequent clips will publish cleanly without an outro.`)) {
+      return;
+    }
+    try {
+      await deleteChannelOutro(channel.id);
+      showToast('success', `Outro removed for '${channel.channel_name}'.`);
+      setOutroModalChannel(null);
+      await loadChannels(false);
+    } catch (err: any) {
+      showToast('error', `Failed to remove outro: ${err.message}`);
+    }
+  };
+
+  // Update image outro duration
+  const handleSaveOutroDuration = async () => {
+    if (!editDurationChannel) return;
+    setSavingDuration(true);
+    try {
+      await updateChannelOutroDuration(editDurationChannel.id, editDurationVal);
+      showToast('success', `Outro duration updated to ${editDurationVal.toFixed(1)}s.`);
+      setEditingDurationChannel(null);
+      await loadChannels(false);
+    } catch (err: any) {
+      showToast('error', `Failed to update duration: ${err.message}`);
+    } finally {
+      setSavingDuration(false);
     }
   };
 
@@ -181,7 +290,6 @@ export default function YouTubeChannelsPage() {
       }
     } catch (err: any) {
       showToast('error', `Refresh failed: ${err.message}`);
-      // Re-fetch to reflect stale status in DB if updated
       loadChannels(false);
     } finally {
       setRefreshingId(null);
@@ -204,12 +312,12 @@ export default function YouTubeChannelsPage() {
     }
   };
 
-  // Open settings modal
+  // Open settings modal - enforce private default
   const handleOpenSettings = (channel: YouTubeChannelDestination) => {
     setSettingsModalChannel(channel);
     const existing = channel.publishing_settings || {};
     setSettingsForm({
-      default_privacy: existing.default_privacy || 'public',
+      default_privacy: existing.default_privacy || 'private',
       default_category: existing.default_category || '22',
       default_tags: Array.isArray(existing.default_tags)
         ? existing.default_tags.join(', ')
@@ -259,6 +367,19 @@ export default function YouTubeChannelsPage() {
     }
   };
 
+  // Permanently remove a destination channel
+  const handleRemoveChannel = async (channel: YouTubeChannelDestination) => {
+    const label = channel.is_test ? 'test channel' : 'destination channel';
+    if (!confirm(`Permanently remove ${label} '${channel.channel_name}'? Any connected sources and publishing records for this channel will be unlinked. This cannot be undone.`)) return;
+    try {
+      await deleteYoutubeChannel(channel.id);
+      showToast('success', `Channel '${channel.channel_name}' has been removed.`);
+      await loadChannels();
+    } catch (err: any) {
+      showToast('error', `Remove failed: ${err.message}`);
+    }
+  };
+
   const handleCopyId = (ytId: string) => {
     navigator.clipboard.writeText(ytId);
     setCopiedId(ytId);
@@ -270,6 +391,16 @@ export default function YouTubeChannelsPage() {
     if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
     if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
     return num.toLocaleString();
+  };
+
+  const formatDate = (isoString?: string | null): string => {
+    if (!isoString) return 'Never';
+    try {
+      const d = new Date(isoString);
+      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return isoString;
+    }
   };
 
   return (
@@ -308,8 +439,8 @@ export default function YouTubeChannelsPage() {
               My YouTube Channels
             </h1>
           </div>
-          <p style={{ margin: 0, color: '#94a3b8', fontSize: '1rem', maxWidth: 640 }}>
-            Connect and manage the YouTube channels you can publish to from ClipForge. Configure defaults, view analytics, and isolate authorization credentials.
+          <p style={{ margin: 0, color: '#94a3b8', fontSize: '1rem', maxWidth: 700 }}>
+            Connect and manage destination YouTube channels, configure channel-specific video/image outros, review upload authorization readiness, and isolate publishing credentials.
           </p>
         </div>
 
@@ -427,7 +558,7 @@ export default function YouTubeChannelsPage() {
             No YouTube Channels Connected
           </h2>
           <p style={{ color: '#94a3b8', fontSize: '0.95rem', lineHeight: 1.6, marginBottom: 24 }}>
-            Connect your YouTube channel using Google OAuth to enable direct, one-click YouTube Shorts publishing from ClipForge. Each channel maintains isolated credentials.
+            Connect your YouTube channel using Google OAuth to enable direct, one-click YouTube Shorts publishing from ClipForge. Each destination channel can also have its own unique outro.
           </p>
           <button
             onClick={handleOpenConnectModal}
@@ -448,12 +579,15 @@ export default function YouTubeChannelsPage() {
         </div>
       ) : (
         /* Channels Cards Grid */
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 480px), 1fr))', gap: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 520px), 1fr))', gap: 24 }}>
           {channels.map((channel) => {
             const stats = channel.cached_stats;
             const settings = channel.publishing_settings || {};
             const isRefreshing = refreshingId === channel.id;
             const cooldownSec = cooldowns[channel.id] || 0;
+            const activeOutro = channel.active_outro;
+            const hasOutro = channel.has_outro || Boolean(activeOutro);
+            const isReady = channel.ready_for_publishing ?? (channel.is_active && channel.is_authorized);
 
             return (
               <div
@@ -472,7 +606,7 @@ export default function YouTubeChannelsPage() {
                   padding: 24,
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 20,
+                  gap: 18,
                   transition: 'border-color 0.2s',
                 }}
               >
@@ -536,6 +670,14 @@ export default function YouTubeChannelsPage() {
                         )}
                       </div>
 
+                      {/* Google account identity badge */}
+                      {channel.google_account_identity && (
+                        <div style={{ color: '#38bdf8', fontSize: '0.78rem', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <span>👤</span>
+                          <span>{channel.google_account_identity}</span>
+                        </div>
+                      )}
+
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
                         <button
                           onClick={() => handleCopyId(channel.youtube_channel_id)}
@@ -571,8 +713,8 @@ export default function YouTubeChannelsPage() {
                     </div>
                   </div>
 
-                  {/* Status Indicator */}
-                  <div>
+                  {/* Status Indicator & Reconnect */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
                     <span
                       data-testid={`badge-channel-status-${channel.id}`}
                       style={{
@@ -623,8 +765,94 @@ export default function YouTubeChannelsPage() {
                         ? 'Disconnected'
                         : 'Needs Re-auth'}
                     </span>
+
+                    {(channel.status === 'needs_reauth' || channel.status === 'disconnected') && (
+                      <button
+                        onClick={handleOpenConnectModal}
+                        style={{
+                          background: 'rgba(245, 158, 11, 0.2)',
+                          color: '#fbbf24',
+                          border: '1px solid rgba(245, 158, 11, 0.4)',
+                          borderRadius: 6,
+                          padding: '3px 8px',
+                          fontSize: '0.72rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ⚡ Reconnect
+                      </button>
+                    )}
                   </div>
                 </div>
+
+                {/* Authorization & Readiness Row */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  flexWrap: 'wrap',
+                  padding: '10px 14px',
+                  borderRadius: 10,
+                  background: 'rgba(15, 23, 42, 0.6)',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  fontSize: '0.8rem',
+                }}>
+                  {/* Readiness Badge */}
+                  <span
+                    data-testid={`badge-readiness-${channel.id}`}
+                    style={{
+                      padding: '3px 9px',
+                      borderRadius: 6,
+                      background: isReady ? 'rgba(16, 185, 129, 0.18)' : 'rgba(245, 158, 11, 0.18)',
+                      color: isReady ? '#34d399' : '#fbbf24',
+                      border: `1px solid ${isReady ? 'rgba(16, 185, 129, 0.35)' : 'rgba(245, 158, 11, 0.35)'}`,
+                      fontWeight: 600,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 5,
+                    }}
+                  >
+                    <span>{isReady ? '✓' : '⚠️'}</span>
+                    <span>{isReady ? 'Ready for Publishing' : 'Action Needed for Publishing'}</span>
+                  </span>
+
+                  {/* Upload Permission Status */}
+                  <span style={{ color: '#94a3b8' }}>
+                    Upload Scope:{' '}
+                    <strong style={{
+                      color: channel.upload_permission_status === 'granted' ? '#34d399' : '#f87171'
+                    }}>
+                      {channel.upload_permission_status || (channel.is_authorized ? 'granted' : 'missing')}
+                    </strong>
+                  </span>
+
+                  {/* Mapped Sources Count */}
+                  <span style={{ color: '#94a3b8', marginLeft: 'auto' }}>
+                    Mapped Sources: <strong style={{ color: '#f8fafc' }}>{channel.mapped_sources_count ?? 0}</strong>
+                  </span>
+                </div>
+
+                {/* Last Publishing Error Banner */}
+                {channel.last_publishing_error && (
+                  <div
+                    data-testid={`banner-publishing-error-${channel.id}`}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.12)',
+                      border: '1px solid rgba(239, 68, 68, 0.35)',
+                      borderRadius: 8,
+                      padding: '8px 12px',
+                      color: '#fca5a5',
+                      fontSize: '0.78rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    <span>⚠️</span>
+                    <span>Last Publishing Error: {channel.last_publishing_error} ({formatDate(channel.last_publishing_error_at)})</span>
+                  </div>
+                )}
 
                 {/* Stale Cache Warning Banner */}
                 {stats?.status === 'stale' && (
@@ -646,6 +874,124 @@ export default function YouTubeChannelsPage() {
                     <span>{stats.warning_metadata || 'Live refresh failed (YouTube API quota or network error). Displaying cached metrics.'}</span>
                   </div>
                 )}
+
+                {/* Outro Management Banner on Card */}
+                <div
+                  data-testid={`section-outro-${channel.id}`}
+                  style={{
+                    background: hasOutro ? 'rgba(99, 102, 241, 0.1)' : 'rgba(30, 41, 59, 0.5)',
+                    border: `1px solid ${hasOutro ? 'rgba(99, 102, 241, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
+                    borderRadius: 12,
+                    padding: '12px 16px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 12,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: '1.2rem' }}>{hasOutro ? (activeOutro?.outro_type === 'image' ? '🖼️' : '🎬') : '⚪'}</span>
+                    <div>
+                      <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#f8fafc' }}>
+                        {hasOutro
+                          ? activeOutro?.outro_type === 'image'
+                            ? `Image Outro (${activeOutro.duration_seconds.toFixed(1)}s · v${activeOutro.version})`
+                            : `Video Outro (${activeOutro?.duration_seconds ? activeOutro.duration_seconds.toFixed(1) + 's' : 'MP4'} · v${activeOutro?.version || 1})`
+                          : 'No Outro Configured'}
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                        {hasOutro
+                          ? 'Appended automatically to clips published to this channel.'
+                          : 'Clips publish directly without appending an outro.'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    {hasOutro && (
+                      <button
+                        data-testid={`btn-preview-outro-${channel.id}`}
+                        onClick={() => setOutroPreviewChannel(channel)}
+                        style={{
+                          padding: '5px 10px',
+                          borderRadius: 6,
+                          background: 'rgba(99, 102, 241, 0.25)',
+                          color: '#c7d2fe',
+                          border: '1px solid rgba(99, 102, 241, 0.4)',
+                          fontSize: '0.78rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        👁️ Preview
+                      </button>
+                    )}
+
+                    {hasOutro && activeOutro?.outro_type === 'image' && (
+                      <button
+                        data-testid={`btn-edit-duration-outro-${channel.id}`}
+                        onClick={() => {
+                          setEditingDurationChannel(channel);
+                          setEditDurationVal(activeOutro.duration_seconds || 3.0);
+                        }}
+                        style={{
+                          padding: '5px 10px',
+                          borderRadius: 6,
+                          background: 'rgba(30, 41, 59, 0.8)',
+                          color: '#e2e8f0',
+                          border: '1px solid rgba(255, 255, 255, 0.15)',
+                          fontSize: '0.78rem',
+                          fontWeight: 500,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        ⏱ Duration
+                      </button>
+                    )}
+
+                    <button
+                      data-testid={`btn-manage-outro-${channel.id}`}
+                      onClick={() => {
+                        setOutroModalChannel(channel);
+                        setSelectedOutroFile(null);
+                        setOutroFileType('video');
+                        setOutroDurationSeconds(3.0);
+                      }}
+                      style={{
+                        padding: '5px 12px',
+                        borderRadius: 6,
+                        background: hasOutro ? 'rgba(30, 41, 59, 0.8)' : 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        color: '#ffffff',
+                        border: hasOutro ? '1px solid rgba(255, 255, 255, 0.15)' : 'none',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {hasOutro ? 'Replace Outro' : '+ Set Outro'}
+                    </button>
+
+                    {hasOutro && (
+                      <button
+                        data-testid={`btn-remove-outro-${channel.id}`}
+                        onClick={() => handleDeleteOutro(channel)}
+                        title="Remove outro from this channel"
+                        style={{
+                          padding: '5px 8px',
+                          borderRadius: 6,
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          color: '#f87171',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          fontSize: '0.78rem',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        🗑️
+                      </button>
+                    )}
+                  </div>
+                </div>
 
                 {/* Statistics Grid */}
                 <div
@@ -743,19 +1089,17 @@ export default function YouTubeChannelsPage() {
                       )}
                     </span>
 
-                    {stats?.warning_metadata && (
-                      <span style={{ color: '#f59e0b', fontSize: '0.72rem' }} title={stats.warning_metadata}>
-                        ℹ️ Scan bounded
-                      </span>
-                    )}
+                    <span>
+                      Last Upload: <strong style={{ color: '#cbd5e1' }}>{formatDate(channel.last_successful_upload)}</strong>
+                    </span>
                   </div>
                 </div>
 
-                {/* Publishing Defaults Summary */}
+                {/* Publishing Defaults Summary (Strictly Private by Default) */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', fontSize: '0.78rem' }}>
                   <span style={{ color: '#64748b', fontWeight: 600 }}>Defaults:</span>
                   <span style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(30, 41, 59, 0.8)', color: '#cbd5e1' }}>
-                    🔒 {settings.default_privacy || 'public'}
+                    🔒 {settings.default_privacy || 'private'}
                   </span>
                   <span style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(30, 41, 59, 0.8)', color: '#cbd5e1' }}>
                     📂 Category {settings.default_category || '22'}
@@ -883,19 +1227,26 @@ export default function YouTubeChannelsPage() {
 
                     <button
                       data-testid={`btn-disconnect-${channel.id}`}
-                      onClick={() => setDisconnectModalChannel(channel)}
+                      onClick={() => {
+                        const isDisconnectedOrTest = channel.is_test || channel.status === 'disconnected' || !channel.is_active;
+                        if (isDisconnectedOrTest) {
+                          handleRemoveChannel(channel);
+                        } else {
+                          setDisconnectModalChannel(channel);
+                        }
+                      }}
                       style={{
                         padding: '6px 12px',
                         borderRadius: 6,
-                        background: 'rgba(239, 68, 68, 0.1)',
+                        background: (channel.is_test || channel.status === 'disconnected' || !channel.is_active) ? 'rgba(239, 68, 68, 0.18)' : 'rgba(239, 68, 68, 0.1)',
                         color: '#f87171',
-                        border: '1px solid rgba(239, 68, 68, 0.25)',
+                        border: `1px solid ${(channel.is_test || channel.status === 'disconnected' || !channel.is_active) ? 'rgba(239, 68, 68, 0.5)' : 'rgba(239, 68, 68, 0.25)'}`,
                         fontSize: '0.82rem',
                         fontWeight: 500,
                         cursor: 'pointer',
                       }}
                     >
-                      Disconnect
+                      {channel.is_test || channel.status === 'disconnected' || !channel.is_active ? 'Remove' : 'Disconnect'}
                     </button>
                   </div>
                 </div>
@@ -905,7 +1256,7 @@ export default function YouTubeChannelsPage() {
         </div>
       )}
 
-      {/* ── Modal 1: Connect YouTube Channel ── */}
+      {/* ── Modal 1: Connect YouTube Channel (With Step 2 Outro) ── */}
       {connectModalOpen && (
         <div style={{
           position: 'fixed',
@@ -922,134 +1273,262 @@ export default function YouTubeChannelsPage() {
             background: '#131b2e',
             border: '1px solid rgba(255, 255, 255, 0.15)',
             borderRadius: 16,
-            maxWidth: 520,
+            maxWidth: 540,
             width: '100%',
             padding: 32,
             boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+            {connectStep === 1 ? (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+                  <div>
+                    <h2 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0, color: '#f8fafc' }}>
+                      Connect YouTube Channel
+                    </h2>
+                    <p style={{ color: '#94a3b8', fontSize: '0.88rem', margin: '4px 0 0' }}>
+                      Authorize ClipForge to upload Shorts to your channel.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setConnectModalOpen(false)}
+                    style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Quick Google Sign In */}
+                <div style={{ marginBottom: 28 }}>
+                  {oauthLoading ? (
+                    <div style={{ textAlign: 'center', padding: 20, color: '#94a3b8' }}>Generating OAuth link...</div>
+                  ) : oauthUrl ? (
+                    <a
+                      href={oauthUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 12,
+                        background: '#ffffff',
+                        color: '#0f172a',
+                        padding: '14px 20px',
+                        borderRadius: 10,
+                        textDecoration: 'none',
+                        fontWeight: 600,
+                        fontSize: '1rem',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                        transition: 'transform 0.1s',
+                      }}
+                      onMouseOver={(e) => (e.currentTarget.style.transform = 'translateY(-1px)')}
+                      onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+                        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+                        <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+                        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+                      </svg>
+                      Sign in with Google
+                    </a>
+                  ) : (
+                    <div style={{ color: '#ef4444', fontSize: '0.88rem' }}>OAuth not configured. Enter details below.</div>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0', color: '#64748b', fontSize: '0.82rem' }}>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+                  <span>OR ENTER AUTHORIZATION REDIRECT</span>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+                </div>
+
+                {/* Manual Form */}
+                <form onSubmit={handleConnectManual}>
+                  <div style={{ marginBottom: 20 }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>
+                      Redirect URL or Authorization Code:
+                    </label>
+                    <textarea
+                      value={manualCode}
+                      onChange={(e) => setManualCode(e.target.value)}
+                      placeholder="Paste http://localhost:8080/?code=4/0A... or the raw authorization code here"
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: 8,
+                        background: 'rgba(15, 23, 42, 0.7)',
+                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        color: '#f8fafc',
+                        fontSize: '0.84rem',
+                        fontFamily: 'monospace',
+                        resize: 'vertical',
+                        boxSizing: 'border-box',
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+                    <button
+                      type="button"
+                      onClick={() => setConnectModalOpen(false)}
+                      style={{
+                        padding: '10px 18px',
+                        borderRadius: 8,
+                        background: 'rgba(30, 41, 59, 0.8)',
+                        color: '#cbd5e1',
+                        border: 'none',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={connectingManual || !manualCode.trim()}
+                      style={{
+                        padding: '10px 20px',
+                        borderRadius: 8,
+                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                        color: '#ffffff',
+                        border: 'none',
+                        fontWeight: 600,
+                        cursor: connectingManual || !manualCode.trim() ? 'not-allowed' : 'pointer',
+                        opacity: connectingManual || !manualCode.trim() ? 0.6 : 1,
+                      }}
+                    >
+                      {connectingManual ? 'Verifying...' : 'Verify & Connect'}
+                    </button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              /* Step 2: Optional Outro Configuration */
               <div>
-                <h2 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0, color: '#f8fafc' }}>
-                  Connect YouTube Channel
-                </h2>
-                <p style={{ color: '#94a3b8', fontSize: '0.88rem', margin: '4px 0 0' }}>
-                  Authorize ClipForge to upload Shorts to your channel.
-                </p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                  <div>
+                    <span style={{ fontSize: '0.8rem', color: '#34d399', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      Step 2 of 2 · Connected!
+                    </span>
+                    <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: '4px 0 0', color: '#f8fafc' }}>
+                      Configure Channel Outro (Optional)
+                    </h2>
+                    <p style={{ color: '#94a3b8', fontSize: '0.86rem', margin: '4px 0 0' }}>
+                      Add an outro that will automatically be appended to all clips published to <strong>{connectedNewChannel?.channel_name}</strong>.
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleSkipConnectOutro}
+                    style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div style={{ background: 'rgba(15, 23, 42, 0.7)', borderRadius: 12, padding: 20, marginBottom: 20, border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                  {/* Outro Type Selector */}
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: '#f8fafc', fontSize: '0.88rem' }}>
+                      <input
+                        type="radio"
+                        name="step2OutroType"
+                        value="video"
+                        checked={outroFileType === 'video'}
+                        onChange={() => setOutroFileType('video')}
+                      />
+                      <span>🎬 Video Outro (.mp4, .mov)</span>
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: '#f8fafc', fontSize: '0.88rem' }}>
+                      <input
+                        type="radio"
+                        name="step2OutroType"
+                        value="image"
+                        checked={outroFileType === 'image'}
+                        onChange={() => setOutroFileType('image')}
+                      />
+                      <span>🖼️ Static Image (.png, .jpg, .webp)</span>
+                    </label>
+                  </div>
+
+                  {/* File Input */}
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>
+                      Select {outroFileType === 'video' ? 'Video File' : 'Image File'}:
+                    </label>
+                    <input
+                      type="file"
+                      accept={outroFileType === 'video' ? 'video/mp4,video/quicktime,video/webm' : 'image/png,image/jpeg,image/webp'}
+                      onChange={(e) => setSelectedOutroFile(e.target.files?.[0] || null)}
+                      style={{
+                        width: '100%',
+                        fontSize: '0.85rem',
+                        color: '#cbd5e1',
+                      }}
+                    />
+                  </div>
+
+                  {/* Duration Slider if Image */}
+                  {outroFileType === 'image' && (
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#cbd5e1', marginBottom: 6 }}>
+                        <span>Display Duration:</span>
+                        <strong style={{ color: '#38bdf8' }}>{outroDurationSeconds.toFixed(1)} seconds</strong>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="15.0"
+                        step="0.5"
+                        value={outroDurationSeconds}
+                        onChange={(e) => setOutroDurationSeconds(parseFloat(e.target.value))}
+                        style={{ width: '100%' }}
+                      />
+                      <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 4 }}>
+                        Duration bounds: 0.5s to 15.0s. Image will preserve original aspect ratio on black 9:16 background.
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={handleSkipConnectOutro}
+                    style={{
+                      padding: '10px 18px',
+                      borderRadius: 8,
+                      background: 'rgba(30, 41, 59, 0.8)',
+                      color: '#94a3b8',
+                      border: 'none',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Skip for now
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSaveConnectOutro}
+                    disabled={savingOutro || !selectedOutroFile}
+                    style={{
+                      padding: '10px 22px',
+                      borderRadius: 8,
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontWeight: 600,
+                      cursor: savingOutro || !selectedOutroFile ? 'not-allowed' : 'pointer',
+                      opacity: savingOutro || !selectedOutroFile ? 0.6 : 1,
+                    }}
+                  >
+                    {savingOutro ? 'Uploading Outro...' : 'Save Outro & Finish'}
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => setConnectModalOpen(false)}
-                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Quick Google Sign In */}
-            <div style={{ marginBottom: 28 }}>
-              {oauthLoading ? (
-                <div style={{ textAlign: 'center', padding: 20, color: '#94a3b8' }}>Generating OAuth link...</div>
-              ) : oauthUrl ? (
-                <a
-                  href={oauthUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: 12,
-                    background: '#ffffff',
-                    color: '#0f172a',
-                    padding: '14px 20px',
-                    borderRadius: 10,
-                    textDecoration: 'none',
-                    fontWeight: 600,
-                    fontSize: '1rem',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-                    transition: 'transform 0.1s',
-                  }}
-                  onMouseOver={(e) => (e.currentTarget.style.transform = 'translateY(-1px)')}
-                  onMouseOut={(e) => (e.currentTarget.style.transform = 'translateY(0)')}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-                    <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
-                    <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.03 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-                    <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-                  </svg>
-                  Sign in with Google
-                </a>
-              ) : (
-                <div style={{ color: '#ef4444', fontSize: '0.88rem' }}>OAuth not configured. Enter details below.</div>
-              )}
-            </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '20px 0', color: '#64748b', fontSize: '0.82rem' }}>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-              <span>OR ENTER AUTHORIZATION REDIRECT</span>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-            </div>
-
-            {/* Manual Form */}
-            <form onSubmit={handleConnectManual}>
-              <div style={{ marginBottom: 20 }}>
-                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>
-                  Redirect URL or Authorization Code:
-                </label>
-                <textarea
-                  value={manualCode}
-                  onChange={(e) => setManualCode(e.target.value)}
-                  placeholder="Paste http://localhost:8080/?code=4/0A... or the raw authorization code here"
-                  rows={3}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    borderRadius: 8,
-                    background: 'rgba(15, 23, 42, 0.7)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: '#f8fafc',
-                    fontSize: '0.84rem',
-                    fontFamily: 'monospace',
-                    resize: 'vertical',
-                    boxSizing: 'border-box',
-                  }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
-                <button
-                  type="button"
-                  onClick={() => setConnectModalOpen(false)}
-                  style={{
-                    padding: '10px 18px',
-                    borderRadius: 8,
-                    background: 'rgba(30, 41, 59, 0.8)',
-                    color: '#cbd5e1',
-                    border: 'none',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={connectingManual || !manualCode.trim()}
-                  style={{
-                    padding: '10px 20px',
-                    borderRadius: 8,
-                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                    color: '#ffffff',
-                    border: 'none',
-                    fontWeight: 600,
-                    cursor: connectingManual || !manualCode.trim() ? 'not-allowed' : 'pointer',
-                    opacity: connectingManual || !manualCode.trim() ? 0.6 : 1,
-                  }}
-                >
-                  {connectingManual ? 'Verifying...' : 'Verify & Connect'}
-                </button>
-              </div>
-            </form>
+            )}
           </div>
         </div>
       )}
@@ -1096,7 +1575,7 @@ export default function YouTubeChannelsPage() {
             </div>
 
             <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-              {/* Privacy & Category Row */}
+              {/* Privacy & Category Row - Private by default */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>
@@ -1115,9 +1594,9 @@ export default function YouTubeChannelsPage() {
                       fontSize: '0.88rem',
                     }}
                   >
-                    <option value="public">Public</option>
+                    <option value="private">Private (Recommended default)</option>
                     <option value="unlisted">Unlisted</option>
-                    <option value="private">Private</option>
+                    <option value="public">Public</option>
                   </select>
                 </div>
 
@@ -1329,7 +1808,339 @@ export default function YouTubeChannelsPage() {
         </div>
       )}
 
-      {/* ── Modal 3: Disconnect Confirmation ── */}
+      {/* ── Modal 3: Outro Upload & Replace ── */}
+      {outroModalChannel && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 20,
+        }}>
+          <div style={{
+            background: '#131b2e',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: 16,
+            maxWidth: 540,
+            width: '100%',
+            padding: 32,
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+              <div>
+                <h2 style={{ fontSize: '1.35rem', fontWeight: 700, margin: 0, color: '#f8fafc' }}>
+                  {outroModalChannel.has_outro ? 'Replace Channel Outro' : 'Configure Channel Outro'}
+                </h2>
+                <p style={{ color: '#94a3b8', fontSize: '0.86rem', margin: '4px 0 0' }}>
+                  For destination channel <strong>{outroModalChannel.channel_name}</strong>
+                </p>
+              </div>
+              <button
+                onClick={() => setOutroModalChannel(null)}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUploadOutro}>
+              <div style={{ background: 'rgba(15, 23, 42, 0.7)', borderRadius: 12, padding: 20, marginBottom: 20, border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                {/* Outro Type */}
+                <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: '#f8fafc', fontSize: '0.88rem' }}>
+                    <input
+                      type="radio"
+                      name="outroType"
+                      value="video"
+                      checked={outroFileType === 'video'}
+                      onChange={() => setOutroFileType('video')}
+                    />
+                    <span>🎬 Video (.mp4, .mov, .webm)</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', color: '#f8fafc', fontSize: '0.88rem' }}>
+                    <input
+                      type="radio"
+                      name="outroType"
+                      value="image"
+                      checked={outroFileType === 'image'}
+                      onChange={() => setOutroFileType('image')}
+                    />
+                    <span>🖼️ Image (.png, .jpg, .webp)</span>
+                  </label>
+                </div>
+
+                {/* File picker */}
+                <div style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#cbd5e1', marginBottom: 6 }}>
+                    Select Outro File:
+                  </label>
+                  <input
+                    type="file"
+                    accept={outroFileType === 'video' ? 'video/mp4,video/quicktime,video/webm' : 'image/png,image/jpeg,image/webp'}
+                    onChange={(e) => setSelectedOutroFile(e.target.files?.[0] || null)}
+                    style={{ width: '100%', fontSize: '0.85rem', color: '#cbd5e1' }}
+                  />
+                </div>
+
+                {/* Duration Slider if Image */}
+                {outroFileType === 'image' && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: '#cbd5e1', marginBottom: 6 }}>
+                      <span>Display Duration:</span>
+                      <strong style={{ color: '#38bdf8' }}>{outroDurationSeconds.toFixed(1)} seconds</strong>
+                    </div>
+                    <input
+                      type="range"
+                      min="0.5"
+                      max="15.0"
+                      step="0.5"
+                      value={outroDurationSeconds}
+                      onChange={(e) => setOutroDurationSeconds(parseFloat(e.target.value))}
+                      style={{ width: '100%' }}
+                    />
+                    <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: 4 }}>
+                      Duration bounds: 0.5s to 15.0s. Image will preserve aspect ratio on black 9:16 background without unwanted stretching.
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                {outroModalChannel.has_outro ? (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteOutro(outroModalChannel)}
+                    style={{
+                      padding: '8px 14px',
+                      borderRadius: 6,
+                      background: 'rgba(239, 68, 68, 0.15)',
+                      color: '#f87171',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      fontSize: '0.82rem',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Delete Current Outro
+                  </button>
+                ) : <span />}
+
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    type="button"
+                    onClick={() => setOutroModalChannel(null)}
+                    style={{
+                      padding: '10px 18px',
+                      borderRadius: 8,
+                      background: 'rgba(30, 41, 59, 0.8)',
+                      color: '#cbd5e1',
+                      border: 'none',
+                      fontWeight: 500,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingOutro || !selectedOutroFile}
+                    style={{
+                      padding: '10px 22px',
+                      borderRadius: 8,
+                      background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                      color: '#ffffff',
+                      border: 'none',
+                      fontWeight: 600,
+                      cursor: savingOutro || !selectedOutroFile ? 'not-allowed' : 'pointer',
+                      opacity: savingOutro || !selectedOutroFile ? 0.6 : 1,
+                    }}
+                  >
+                    {savingOutro ? 'Uploading...' : 'Upload & Save Outro'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal 4: Outro Preview Player ── */}
+      {outroPreviewChannel && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.85)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 20,
+        }}>
+          <div style={{
+            background: '#131b2e',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: 16,
+            maxWidth: 480,
+            width: '100%',
+            padding: 24,
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8)',
+            textAlign: 'center',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div style={{ textAlign: 'left' }}>
+                <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0, color: '#f8fafc' }}>
+                  Outro Preview: {outroPreviewChannel.channel_name}
+                </h3>
+                <span style={{ fontSize: '0.78rem', color: '#94a3b8' }}>
+                  {outroPreviewChannel.active_outro?.outro_type === 'image'
+                    ? `Static Image · ${outroPreviewChannel.active_outro.duration_seconds.toFixed(1)}s`
+                    : `Video Outro · ${outroPreviewChannel.active_outro?.duration_seconds ? outroPreviewChannel.active_outro.duration_seconds.toFixed(1) + 's' : 'MP4'}`}
+                </span>
+              </div>
+              <button
+                onClick={() => setOutroPreviewChannel(null)}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Video / Image Display Container in 9:16 aspect */}
+            <div style={{
+              width: '100%',
+              maxWidth: 320,
+              aspectRatio: '9/16',
+              margin: '0 auto 16px',
+              borderRadius: 12,
+              overflow: 'hidden',
+              background: '#000000',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+            }}>
+              {outroPreviewChannel.active_outro?.outro_type === 'image' ? (
+                <img
+                  src={getChannelOutroPreviewUrl(outroPreviewChannel.id, outroPreviewChannel.active_outro?.version)}
+                  alt="Outro Preview"
+                  style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                />
+              ) : (
+                <video
+                  controls
+                  autoPlay
+                  playsInline
+                  src={getChannelOutroPreviewUrl(outroPreviewChannel.id, outroPreviewChannel.active_outro?.version)}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
+              )}
+            </div>
+
+            <button
+              onClick={() => setOutroPreviewChannel(null)}
+              style={{
+                padding: '8px 20px',
+                borderRadius: 8,
+                background: 'rgba(30, 41, 59, 0.8)',
+                color: '#f8fafc',
+                border: 'none',
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+              }}
+            >
+              Close Preview
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal 5: Edit Image Duration ── */}
+      {editDurationChannel && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: 20,
+        }}>
+          <div style={{
+            background: '#131b2e',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            borderRadius: 16,
+            maxWidth: 440,
+            width: '100%',
+            padding: 28,
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6)',
+          }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 8px', color: '#f8fafc' }}>
+              Edit Outro Duration
+            </h3>
+            <p style={{ color: '#94a3b8', fontSize: '0.85rem', margin: '0 0 20px' }}>
+              Set display duration for {editDurationChannel.channel_name}'s image outro.
+            </p>
+
+            <div style={{ background: 'rgba(15, 23, 42, 0.7)', borderRadius: 10, padding: 16, marginBottom: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#f8fafc', marginBottom: 8 }}>
+                <span>Duration:</span>
+                <strong style={{ color: '#38bdf8' }}>{editDurationVal.toFixed(1)} seconds</strong>
+              </div>
+              <input
+                type="range"
+                min="0.5"
+                max="15.0"
+                step="0.5"
+                value={editDurationVal}
+                onChange={(e) => setEditDurationVal(parseFloat(e.target.value))}
+                style={{ width: '100%' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button
+                type="button"
+                onClick={() => setEditingDurationChannel(null)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: 6,
+                  background: 'rgba(30, 41, 59, 0.8)',
+                  color: '#cbd5e1',
+                  border: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveOutroDuration}
+                disabled={savingDuration}
+                style={{
+                  padding: '8px 18px',
+                  borderRadius: 6,
+                  background: '#6366f1',
+                  color: '#ffffff',
+                  border: 'none',
+                  fontWeight: 600,
+                  cursor: savingDuration ? 'not-allowed' : 'pointer',
+                }}
+              >
+                {savingDuration ? 'Saving...' : 'Update Duration'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal 6: Disconnect Confirmation ── */}
       {disconnectModalChannel && (
         <div style={{
           position: 'fixed',
@@ -1356,10 +2167,10 @@ export default function YouTubeChannelsPage() {
               Disconnect {disconnectModalChannel.channel_name}?
             </h2>
             <p style={{ color: '#94a3b8', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: 24 }}>
-              Disconnecting will remove this channel as an eligible publishing destination. Your historical clips, rendered videos, jobs, and past publish records will remain safely preserved in ClipForge.
+              Disconnecting will remove this channel as an eligible publishing destination. Any mapped monitored source channels will preserve their configuration and display a disconnected warning. Your historical clips, rendered videos, jobs, and past publish records will remain safely preserved in ClipForge.
             </p>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12, alignItems: 'center' }}>
               <button
                 onClick={() => setDisconnectModalChannel(null)}
                 style={{
@@ -1373,6 +2184,25 @@ export default function YouTubeChannelsPage() {
                 }}
               >
                 Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const ch = disconnectModalChannel;
+                  setDisconnectModalChannel(null);
+                  handleRemoveChannel(ch);
+                }}
+                style={{
+                  padding: '10px 18px',
+                  borderRadius: 8,
+                  background: 'rgba(239, 68, 68, 0.15)',
+                  color: '#f87171',
+                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  fontWeight: 600,
+                  fontSize: '0.88rem',
+                  cursor: 'pointer',
+                }}
+              >
+                Permanently Remove
               </button>
               <button
                 onClick={handleConfirmDisconnect}

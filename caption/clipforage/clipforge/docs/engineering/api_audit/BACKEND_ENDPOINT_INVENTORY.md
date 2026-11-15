@@ -121,9 +121,9 @@
 
 #### `BE-VID-004` — Upload Raw Video File
 - **Method & Path:** `POST /api/videos/upload`
-- **Router / Handler:** `backend/api/routes/videos.py:145` (`upload_video_file`)
-- **Purpose:** Multipart form file upload for local media processing, supporting AI Highlights and Equal Split.
-- **Request Input:** `UploadFile` form data (`file`), `clip_mode`, `max_clip_duration`, `target_duration`, `segmentation_strategy`, `config` form field.
+- **Router / Handler:** `backend/api/routes/videos.py` (`upload_video_file`)
+- **Purpose:** Multipart form file upload for local media processing, supporting AI Highlights, Equal Split, Dual-Region Gaming, and Podcast & Interview Studio custom speaker bounding box regions.
+- **Request Input:** `UploadFile` form data (`file`), `clip_mode`, `max_clip_duration`, `target_duration`, `segmentation_strategy`, `gaming_layout`, `regions`, `podcast_composition`, `shot_schedule`, `destination_ids`.
 - **Response:** `200 OK` -> `{"video_id": str, "job_id": str, "filename": str}`.
 - **Current Status:** Verified working.
 
@@ -187,6 +187,17 @@
 - **Frontend Usage:** `getVideoFrameUrl()` in `frontend/lib/api.ts` -> `PodcastSelectionModal.tsx` (`#frame-preview-status-badge`, shot table preview, dual speaker visual alignment).
 - **Tests:** `backend/tests/test_podcast_frame_preview.py` (8 security, bounding, caching, and SSRF tests), `frontend/test/podcast_selection_modal.test.mjs`.
 - **Current Status:** Verified working (Delivered in PODCAST-PREVIEW-FRAME-002).
+
+#### `BE-VID-011` — Live Progressive Video Preview Stream Proxy
+- **Method & Path:** `GET /api/videos/preview-stream`
+- **Router / Handler:** `backend/api/routes/videos.py` (`stream_youtube_preview`)
+- **Purpose:** Resolves and proxies a live progressive MP4 stream for YouTube videos to the browser with full HTTP Range request support (`206 Partial Content`) and in-memory TTL caching. Enables HTML5 `<video>` elements to render YouTube videos with same-origin CORS compliance, powering real-time 60 FPS live video frame rendering into HTML5 Canvas in Gaming Studio.
+- **Request Input:** Query parameter: `url` (str, required YouTube video URL). Headers: `Range` (optional standard byte range).
+- **Response:** `200 OK` or `206 Partial Content` (streamed `video/mp4` with `Accept-Ranges: bytes`, `Content-Range`, `Content-Length`, `Access-Control-Allow-Origin: *`), or `400 Bad Request` (invalid URL), or `502 Bad Gateway` (stream extraction failure).
+- **Dependencies:** `yt-dlp` (`--extractor-args youtube:player_client=ios,android`), `httpx.AsyncClient`.
+- **Frontend Usage:** `GamingSelectionModal.tsx` (`#gaming-source-video-player`) -> `GamingCompositeCanvas.tsx` (`#gaming-composite-canvas`).
+- **Tests:** `frontend/test/verify_live_stream_canvas_sync.mjs`, `frontend/test/verify_gaming_click_play_drag.mjs`.
+- **Current Status:** Verified working.
 
 ---
 
@@ -357,6 +368,12 @@
 - **Method & Path:** `WS /api/jobs/ws/{job_id}`
 - **Router / Handler:** `backend/api/routes/jobs.py:310` (`job_status_ws`)
 - **Purpose:** Bidirectional WebSocket stream pushing granular pipeline progress events (downloading -> transcription -> scoring -> rendering -> output validation).
+- **Current Status:** Verified working.
+
+#### `BE-JOB-010` — Cancel All Failed Jobs
+- **Method & Path:** `POST /api/jobs/cancel-all-failed`
+- **Router / Handler:** `backend/api/routes/jobs.py:353` (`cancel_all_failed_jobs`)
+- **Purpose:** Bulk cancels all jobs in `failed` state, transitioning their status to `cancelled` with `error_message = 'Cancelled by user'` and releasing locks. Clears failed queue count and error banners.
 - **Current Status:** Verified working.
 
 ---
@@ -596,6 +613,15 @@
 - **Tests:** `backend/tests/test_youtube_channels_management.py::test_disconnect_channel_preserves_destination_separation`
 - **Current Status:** Verified working.
 
+
+#### `BE-YTC-010` — Permanently Delete Destination Channel
+- **Method & Path:** `DELETE /api/youtube-channels/{channel_id}`
+- **Router / Handler:** `backend/api/routes/youtube_channels.py` (`delete_destination_channel`)
+- **Purpose:** Permanently deletes eligible destination channels (test fixture channels or inactive channels with zero historical publish targets). Cascades deletions of `ChannelDestination` mappings and `DestinationOutro` records, clears source channel associations, and removes token files.
+- **Frontend Usage:** `deleteYoutubeChannel()` in `frontend/lib/api.ts` -> "Remove" button on test or disconnected cards on `frontend/app/youtube-channels/page.tsx`.
+- **Tests:** `backend/tests/test_youtube_channels_management.py::test_delete_destination_channel_flow`
+- **Current Status:** Verified working.
+
 ---
 
 ### Group 8: Upload Studio Phase 1 (`backend/api/routes/studio.py`)
@@ -715,3 +741,51 @@
 2. **Defect 1 Resolution (Verified):** Added `POST /api/channels/{channel_id}/process-videos-batch` (`BE-CHN-008`), enabling multi-video selection and queueing from the Automation interface with sequential task protection.
 3. **Legacy Prefix Inconsistency:** `backend/api/routes/dubbing.py` defines `/clips/{clip_id}/dub` without `/api` prefix, in addition to `/api/dubbing/{clip_id}`. Kept for backward compatibility.
 4. **Clean Channel Separation Enforced:** `GET /api/publish/destinations` and `GET /api/youtube-channels` strictly filter `is_destination=true` and `is_test=false`, preventing monitored sources from appearing as publishing destinations.
+
+
+---
+
+### Group 14: Multi-Destination Publishing & Outro System (`youtube_channels.py`, `channels.py`, `publish.py`)
+
+#### `BE-DEST-001` — Destination Outro Upload
+- **Method & Path:** `POST /api/youtube-channels/{id}/outro`
+- **Router / Handler:** `backend/api/routes/youtube_channels.py` (`upload_destination_outro`)
+- **Purpose:** Uploads MP4 video or static image outro (0.5s–15.0s display duration) for a destination channel.
+- **Request Input:** Multipart form (`file`, `outro_type`, `duration_seconds`).
+- **Response:** `200 OK` -> `OutroUploadResponse` with metadata and version.
+
+#### `BE-DEST-002` — Destination Outro Removal
+- **Method & Path:** `DELETE /api/youtube-channels/{id}/outro`
+- **Router / Handler:** `backend/api/routes/youtube_channels.py` (`delete_destination_outro`)
+- **Purpose:** Idempotently removes active outro, deletes disk asset, and returns channel to pristine state.
+- **Response:** `200 OK` -> `OutroDeleteResponse`.
+
+#### `BE-DEST-003` — Destination Outro Preview Streaming
+- **Method & Path:** `GET /api/youtube-channels/{id}/outro/preview`
+- **Router / Handler:** `backend/api/routes/youtube_channels.py` (`preview_destination_outro`)
+- **Purpose:** Streams normalized MP4 video outro or rendered image outro for 9:16 vertical player.
+- **Response:** `200 OK` / `206 Partial Content` (video/mp4).
+
+#### `BE-DEST-004` — Channel Publishing Destinations Mapping
+- **Method & Path:** `POST /api/channels/{id}/destinations`
+- **Router / Handler:** `backend/api/routes/channels.py` (`set_channel_destinations`)
+- **Purpose:** Sets the list of publishing destination channels mapped to a monitored source channel.
+- **Request Input:** JSON `{"destination_ids": ["dest_1", "dest_2"]}`.
+- **Response:** `200 OK` -> `{"channel_id": str, "destination_ids": list[str]}`.
+
+#### `BE-DEST-005` — Clip Destination Preview Info
+- **Method & Path:** `GET /api/publish/clips/{id}/destinations/{dest_id}/preview-info`
+- **Router / Handler:** `backend/api/routes/publish.py` (`get_clip_destination_preview_info`)
+- **Purpose:** Returns duration breakdown (`base_duration`, `outro_duration`, `total_duration`), >60s Shorts warning, and variant metadata.
+- **Response:** `200 OK` -> `ClipDestinationPreviewInfo`.
+
+#### `BE-DEST-006` — Clip Destination Variant Preview Streaming
+- **Method & Path:** `GET /api/publish/clips/{id}/destinations/{dest_id}/preview`
+- **Router / Handler:** `backend/api/routes/publish.py` (`preview_clip_destination_variant`)
+- **Purpose:** Streams the destination-specific rendered variant MP4 (clip + outro).
+- **Response:** `200 OK` / `206 Partial Content` (video/mp4).
+
+#### `BE-DEST-007` — Publish Targets Listing & Retry
+- **Method & Path:** `GET /api/publish/clips/{id}/targets`, `POST /api/publish/targets/{target_id}/retry`
+- **Router / Handler:** `backend/api/routes/publish.py`
+- **Purpose:** Tracks independent per-target publishing states and executes idempotent retries without duplicating successful uploads.

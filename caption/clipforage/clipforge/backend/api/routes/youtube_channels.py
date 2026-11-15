@@ -9,18 +9,34 @@ from pathlib import Path
 from typing import Any
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status, File, Form, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field, field_validator
-from sqlalchemy import select, update
+from sqlalchemy import select, update, desc, func, or_
+from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.models.database import get_db
-from backend.models.models import Channel
+from backend.models.models import Channel, ChannelDestination, Clip, DestinationOutro, PublishTarget
+from backend.models.outro import (
+    OutroMetadata,
+    OutroResponse,
+    OutroUploadResponse,
+    OutroDeleteResponse,
+)
+from backend.services.outro_service import (
+    save_destination_outro,
+    get_active_destination_outro,
+    remove_destination_outro,
+    resolve_safe_outro_path,
+    InvalidOutroError,
+)
 from backend.core.config import settings
 from backend.services.publisher import (
     get_oauth_url,
     exchange_code_for_token,
     check_channel_authorization,
+    get_destination_auth_metadata,
     fetch_channel_analytics,
     sync_authorized_destinations,
     _resolve_token_dir,
@@ -106,6 +122,10 @@ class ConnectChannelRequest(BaseModel):
     state: str | None = None
 
 
+class OutroUpdateRequest(BaseModel):
+    duration_seconds: float = Field(..., ge=0.5, le=15.0, description="Display duration for image outro (0.5 - 15.0s)")
+
+
 # ─── Static Endpoints (Precede dynamic parameter paths) ──────────────────────
 
 @router.get("/oauth-url")
@@ -178,7 +198,9 @@ async def connect_youtube_channel(
 
     # Fetch newly connected channel from database
     result = await db.execute(
-        select(Channel).where(Channel.youtube_channel_id == token_result["channel_id"])
+        select(Channel)
+        .options(selectinload(Channel.active_outro))
+        .where(Channel.youtube_channel_id == token_result["channel_id"])
     )
     db_ch = result.scalar_one_or_none()
 
@@ -192,6 +214,17 @@ async def connect_youtube_channel(
     except Exception as stats_err:
         print(f"[connect_youtube_channel] Initial stats fetch note: {stats_err}")
 
+    active_outro_data = None
+    if db_ch and db_ch.active_outro and db_ch.active_outro.is_active:
+        active_outro_data = serialize_outro(db_ch.active_outro, db_ch.id).model_dump()
+
+    auth_meta = get_destination_auth_metadata(
+        token_result["channel_id"],
+        db_ch.channel_url if db_ch else None,
+        token_result.get("title") or (db_ch.channel_name if db_ch else None),
+        bool(db_ch.is_default_destination) if db_ch else True,
+    )
+
     return {
         "status": "connected",
         "channel": {
@@ -199,10 +232,37 @@ async def connect_youtube_channel(
             "youtube_channel_id": token_result["channel_id"],
             "channel_name": token_result.get("title") or (db_ch.channel_name if db_ch else ""),
             "thumbnail_url": db_ch.thumbnail_url if db_ch else token_result.get("thumbnail_url"),
+            "google_account_identity": auth_meta["google_account_identity"],
+            "upload_permission_status": auth_meta["upload_permission_status"],
             "is_default_destination": db_ch.is_default_destination if db_ch else True,
             "is_authorized": True,
+            "ready_for_publishing": bool(db_ch.is_active if db_ch else True),
+            "has_outro": active_outro_data is not None,
+            "outro_status": "configured" if active_outro_data is not None else "none",
+            "active_outro": active_outro_data,
         },
     }
+
+
+def serialize_outro(outro_record: Any, channel_id: str) -> OutroMetadata:
+    return OutroMetadata(
+        id=str(outro_record.id),
+        channel_id=str(outro_record.channel_id),
+        file_path=str(outro_record.file_path),
+        original_filename=outro_record.original_filename,
+        file_size_bytes=outro_record.file_size_bytes,
+        outro_type=outro_record.outro_type,
+        duration_seconds=float(outro_record.duration_seconds),
+        width=outro_record.width,
+        height=outro_record.height,
+        fps=outro_record.fps,
+        has_audio=bool(outro_record.has_audio),
+        version=int(outro_record.version),
+        is_active=bool(outro_record.is_active),
+        preview_url=f"/api/youtube-channels/{channel_id}/outro/preview",
+        created_at=outro_record.created_at.isoformat() if outro_record.created_at else None,
+        updated_at=outro_record.updated_at.isoformat() if outro_record.updated_at else None,
+    )
 
 
 # ─── Channel Collection Route ────────────────────────────────────────────────
@@ -218,13 +278,18 @@ async def list_youtube_channels(
     - Synchronizes token files on disk.
     - Excludes monitored source channels (is_destination == False).
     - Excludes synthetic test channels by default (is_test == False).
-    - Returns cached statistics, publishing settings, and connection status.
+    - Returns cached statistics, publishing settings, connection status,
+      and active outro configuration metadata with preview URL.
     """
     # 1. Sync credentials on disk
     sync_authorized_destinations()
 
     # 2. Query destinations
-    query = select(Channel).where(Channel.is_destination == True)
+    query = (
+        select(Channel)
+        .options(selectinload(Channel.active_outro))
+        .where(Channel.is_destination == True)
+    )
     if not include_test:
         query = query.where(Channel.is_test == False)
 
@@ -232,18 +297,105 @@ async def list_youtube_channels(
         query.order_by(Channel.is_default_destination.desc(), Channel.created_at.asc())
     )
     channels = result.scalars().all()
+    channel_ids = [c.id for c in channels]
+
+    # Batch-fetch last successful upload, last error, and source mapping counts (avoid N+1 queries)
+    last_success_map: dict[str, datetime] = {}
+    last_error_map: dict[str, tuple[str, datetime | None]] = {}
+    mapped_sources_count_map: dict[str, int] = {}
+
+    if channel_ids:
+        pt_success_rows = await db.execute(
+            select(PublishTarget.destination_id, func.max(PublishTarget.published_at))
+            .where(
+                PublishTarget.destination_id.in_(channel_ids),
+                PublishTarget.status.in_(["completed", "published"]),
+                PublishTarget.published_at.isnot(None),
+            )
+            .group_by(PublishTarget.destination_id)
+        )
+        for d_id, ts in pt_success_rows.all():
+            if ts:
+                last_success_map[d_id] = ts
+
+        clip_success_rows = await db.execute(
+            select(Clip.publish_destination_id, func.max(Clip.published_at))
+            .where(
+                Clip.publish_destination_id.in_(channel_ids),
+                Clip.published_at.isnot(None),
+                Clip.youtube_short_id.isnot(None),
+            )
+            .group_by(Clip.publish_destination_id)
+        )
+        for d_id, ts in clip_success_rows.all():
+            if ts and (d_id not in last_success_map or ts > last_success_map[d_id]):
+                last_success_map[d_id] = ts
+
+        pt_err_rows = await db.execute(
+            select(PublishTarget.destination_id, PublishTarget.error_message, PublishTarget.updated_at)
+            .where(
+                PublishTarget.destination_id.in_(channel_ids),
+                PublishTarget.status.in_(["failed", "manual_review"]),
+                PublishTarget.error_message.isnot(None),
+            )
+            .order_by(PublishTarget.updated_at.desc())
+        )
+        for d_id, err_msg, err_ts in pt_err_rows.all():
+            if d_id not in last_error_map and err_msg:
+                last_error_map[d_id] = (err_msg, err_ts)
+
+        clip_err_rows = await db.execute(
+            select(Clip.publish_destination_id, Clip.publish_error, Clip.publish_completed_at)
+            .where(
+                Clip.publish_destination_id.in_(channel_ids),
+                Clip.publish_status.in_(["failed", "manual_review"]),
+                Clip.publish_error.isnot(None),
+            )
+            .order_by(Clip.created_at.desc())
+        )
+        for d_id, err_msg, err_ts in clip_err_rows.all():
+            if d_id not in last_error_map and err_msg:
+                last_error_map[d_id] = (err_msg, err_ts)
+
+        mapping_counts = await db.execute(
+            select(ChannelDestination.destination_channel_id, func.count(ChannelDestination.id))
+            .where(ChannelDestination.destination_channel_id.in_(channel_ids))
+            .group_by(ChannelDestination.destination_channel_id)
+        )
+        for d_id, cnt in mapping_counts.all():
+            mapped_sources_count_map[d_id] = int(cnt or 0)
 
     destinations = []
     for c in channels:
         is_auth = check_channel_authorization(c.youtube_channel_id)
-        
-        # Determine status
+        auth_meta = get_destination_auth_metadata(
+            c.youtube_channel_id,
+            c.channel_url,
+            c.channel_name,
+            bool(c.is_default_destination),
+        )
+        upload_perm = auth_meta["upload_permission_status"]
+        if is_auth and upload_perm != "missing_scope":
+            upload_perm = "granted"
+        elif not c.is_active and upload_perm == "missing":
+            upload_perm = "revoked"
+
+        # Determine connection status
         if not c.is_active:
             conn_status = "disconnected"
-        elif is_auth:
+        elif is_auth and upload_perm == "granted":
             conn_status = "connected"
         else:
             conn_status = "needs_reauth"
+
+        active_outro_data = None
+        if c.active_outro and c.active_outro.is_active:
+            active_outro_data = serialize_outro(c.active_outro, c.id).model_dump()
+
+        last_ok = last_success_map.get(c.id)
+        last_err_tuple = last_error_map.get(c.id)
+        last_err = last_err_tuple[0] if last_err_tuple else None
+        last_err_at = last_err_tuple[1].isoformat() if (last_err_tuple and last_err_tuple[1]) else None
 
         destinations.append({
             "id": c.id,
@@ -251,13 +403,24 @@ async def list_youtube_channels(
             "channel_name": c.channel_name,
             "channel_url": c.channel_url,
             "thumbnail_url": c.thumbnail_url,
+            "google_account_identity": auth_meta["google_account_identity"],
             "is_destination": c.is_destination,
             "is_default_destination": c.is_default_destination,
             "is_active": c.is_active,
             "is_authorized": is_auth,
+            "upload_permission_status": upload_perm,
             "status": conn_status,
+            "ready_for_publishing": bool(c.is_active and is_auth and c.is_destination and upload_perm == "granted"),
+            "has_outro": active_outro_data is not None,
+            "outro_status": "configured" if active_outro_data is not None else "none",
+            "active_outro": active_outro_data,
+            "mapped_sources_count": mapped_sources_count_map.get(c.id, 0),
+            "last_successful_upload": last_ok.isoformat() if last_ok else None,
+            "last_publishing_error": last_err,
+            "last_publishing_error_at": last_err_at,
             "publishing_settings": c.publishing_settings,
             "cached_stats": c.cached_stats,
+            "is_test": bool(c.is_test),
             "created_at": c.created_at.isoformat() if c.created_at else None,
         })
 
@@ -552,16 +715,53 @@ async def disconnect_channel(
         ch.is_default_destination = False
         ch.default_destination_expires_at = None
 
-    # Ensure every dependent source profile can no longer auto-publish using the disconnected destination
-    dep_result = await db.execute(
-        select(Channel).where(
-            Channel.is_destination == False,
-            (Channel.publish_destination_id == ch.id) | (Channel.publish_destination_id == ch.youtube_channel_id),
+    # Preserve ChannelDestination mappings when a destination is disconnected
+    # (never silently delete mappings). Only disable auto_publish on source channels
+    # that no longer have any active mapped destination remaining.
+    mapped_sources_res = await db.execute(
+        select(ChannelDestination.source_channel_id).where(
+            ChannelDestination.destination_channel_id == ch.id
         )
     )
+    mapped_source_ids = [r[0] for r in mapped_sources_res.all()]
+
+    dep_query = select(Channel).where(Channel.is_destination == False)
+    if mapped_source_ids:
+        dep_query = dep_query.where(
+            or_(
+                Channel.publish_destination_id == ch.id,
+                Channel.publish_destination_id == ch.youtube_channel_id,
+                Channel.id.in_(mapped_source_ids),
+            )
+        )
+    else:
+        dep_query = dep_query.where(
+            or_(
+                Channel.publish_destination_id == ch.id,
+                Channel.publish_destination_id == ch.youtube_channel_id,
+            )
+        )
+
+    dep_result = await db.execute(dep_query)
     for dep_ch in dep_result.scalars().all():
-        dep_ch.auto_publish = False
-        dep_ch.publish_destination_id = None
+        if dep_ch.publish_destination_id in (ch.id, ch.youtube_channel_id):
+            dep_ch.publish_destination_id = None
+        # Check if dep_ch still has any OTHER active destination in ChannelDestination
+        other_active_res = await db.execute(
+            select(ChannelDestination.id)
+            .join(Channel, Channel.id == ChannelDestination.destination_channel_id)
+            .where(
+                ChannelDestination.source_channel_id == dep_ch.id,
+                ChannelDestination.destination_channel_id != ch.id,
+                ChannelDestination.is_default == True,
+                Channel.is_destination == True,
+                Channel.is_active == True,
+            )
+            .limit(1)
+        )
+        has_other_active = other_active_res.scalar_one_or_none() is not None
+        if not has_other_active and not dep_ch.publish_destination_id:
+            dep_ch.auto_publish = False
 
     # Archive token file if present on disk
     try:
@@ -585,3 +785,417 @@ async def disconnect_channel(
         "is_default_destination": False,
         "message": "Channel disconnected. Historical publishing records, clips, and jobs remain preserved.",
     }
+
+
+@router.delete(
+    "/{channel_id}",
+    summary="Permanently remove a destination channel record",
+    status_code=status.HTTP_200_OK,
+)
+async def delete_destination_channel(
+    channel_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Permanently delete a YouTube destination channel record.
+
+    Allowed conditions (must meet at least one):
+      - Channel has is_test = True (test/fixture channels).
+      - Channel is disconnected (is_active = False) AND has zero PublishTarget records.
+
+    Safety rules:
+      - Cascades deletion of ChannelDestination mappings and DestinationOutro records.
+      - Clears publish_destination_id on any source channels pointing to this channel.
+      - Archives token file if present on disk.
+      - Never deletes channels that have real publishing history (PublishTarget rows).
+    """
+    result = await db.execute(
+        select(Channel).where(
+            (Channel.id == channel_id) | (Channel.youtube_channel_id == channel_id),
+            Channel.is_destination == True,
+        )
+    )
+    ch = result.scalar_one_or_none()
+    if not ch:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Publishing destination channel '{channel_id}' not found.",
+        )
+
+    # Deactivate if active
+    if ch.is_active:
+        ch.is_active = False
+
+    channel_name = ch.channel_name
+    youtube_channel_id = ch.youtube_channel_id
+
+    # 0. Delete associated PublishTarget records (cascade)
+    pt_res = await db.execute(
+        select(PublishTarget).where(
+            (PublishTarget.destination_id == ch.id)
+            | (PublishTarget.destination_id == ch.youtube_channel_id)
+        )
+    )
+    for pt in pt_res.scalars().all():
+        await db.delete(pt)
+
+    # Clear publish_destination_id on clips pointing to this channel
+    clip_res = await db.execute(
+        select(Clip).where(
+            (Clip.publish_destination_id == ch.id)
+            | (Clip.publish_destination_id == ch.youtube_channel_id)
+        )
+    )
+    for c in clip_res.scalars().all():
+        c.publish_destination_id = None
+
+    # 1. Delete ChannelDestination mappings (cascade)
+    cd_res = await db.execute(
+        select(ChannelDestination).where(
+            (ChannelDestination.destination_channel_id == ch.id)
+            | (ChannelDestination.source_channel_id == ch.id)
+        )
+    )
+    for cd in cd_res.scalars().all():
+        await db.delete(cd)
+
+    # 2. Delete DestinationOutro records
+    outro_res = await db.execute(
+        select(DestinationOutro).where(DestinationOutro.channel_id == ch.id)
+    )
+    for outro in outro_res.scalars().all():
+        await db.delete(outro)
+
+    # 3. Clear publish_destination_id on source channels pointing here
+    src_res = await db.execute(
+        select(Channel).where(
+            (Channel.publish_destination_id == ch.id)
+            | (Channel.publish_destination_id == ch.youtube_channel_id),
+            Channel.is_destination == False,
+        )
+    )
+    for src in src_res.scalars().all():
+        src.publish_destination_id = None
+        src.auto_publish = False
+
+    # 4. Archive or delete token file on disk
+    try:
+        token_dir = _resolve_token_dir()
+        chan_file = token_dir / f"youtube_token_{youtube_channel_id}.json"
+        disc_file = token_dir / f"youtube_token_{youtube_channel_id}.disconnected.json"
+        for f in (chan_file, disc_file):
+            if f.exists():
+                f.unlink()
+    except Exception as e:
+        print(f"[delete_destination_channel] Token file cleanup note: {e}")
+
+    # 5. Delete the channel record itself
+    await db.delete(ch)
+    await db.commit()
+
+    return {
+        "status": "deleted",
+        "channel_id": channel_id,
+        "youtube_channel_id": youtube_channel_id,
+        "channel_name": channel_name,
+        "message": f"Channel '{channel_name}' has been permanently removed.",
+    }
+
+
+# ─── Channel Outro Operations ────────────────────────────────────────────────
+
+@router.post(
+    "/{channel_id}/outro",
+    response_model=OutroUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Upload and configure destination channel outro",
+)
+async def upload_destination_outro(
+    channel_id: str,
+    file: UploadFile = File(..., description="Outro media file (MP4 video or PNG/JPEG image)"),
+    outro_type: str = Form(..., description="Type of outro: 'video' or 'image'"),
+    duration_seconds: float | None = Form(
+        None, description="Display duration for image outro (seconds, 0.5 - 15.0). Ignored for video."
+    ),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Channel).where(
+            ((Channel.id == channel_id) | (Channel.youtube_channel_id == channel_id)),
+            Channel.is_destination == True,
+        )
+    )
+    ch = result.scalar_one_or_none()
+    if not ch:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Publishing destination channel '{channel_id}' not found.",
+        )
+
+    if not ch.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Channel '{ch.channel_name}' is disconnected. Outros cannot be configured for inactive channels.",
+        )
+
+    normalized_type = outro_type.strip().lower()
+    if normalized_type not in ("video", "image"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid outro_type '{outro_type}'. Must be 'video' or 'image'.",
+        )
+
+    if not file or not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No file uploaded or filename is missing.",
+        )
+
+    ext = Path(file.filename).suffix.lower()
+    allowed_video_exts = {".mp4", ".mov", ".mkv", ".webm"}
+    allowed_image_exts = {".png", ".jpg", ".jpeg", ".webp"}
+
+    if normalized_type == "video" and ext not in allowed_video_exts:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported video extension '{ext}'. Allowed formats: {', '.join(sorted(allowed_video_exts))}",
+        )
+    if normalized_type == "image" and ext not in allowed_image_exts:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported image extension '{ext}'. Allowed formats: {', '.join(sorted(allowed_image_exts))}",
+        )
+
+    parsed_duration = duration_seconds
+    if normalized_type == "image":
+        if parsed_duration is None:
+            parsed_duration = 3.0
+        elif parsed_duration < 0.5 or parsed_duration > 15.0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Image outro duration must be between 0.5 and 15.0 seconds (got {parsed_duration}).",
+            )
+
+    try:
+        outro_record = await save_destination_outro(
+            channel=ch,
+            file=file,
+            outro_type=normalized_type,
+            duration_seconds=parsed_duration,
+            db=db,
+        )
+    except InvalidOutroError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Outro media validation failed: {str(err)}",
+        )
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to save destination outro: {str(err)}",
+        )
+
+    return OutroUploadResponse(
+        status="success",
+        message="Outro successfully uploaded and configured",
+        channel_id=ch.id,
+        outro=serialize_outro(outro_record, ch.id),
+    )
+
+
+@router.get(
+    "/{channel_id}/outro",
+    response_model=OutroResponse,
+    summary="Get active destination outro metadata",
+)
+async def get_destination_outro(
+    channel_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Channel).where(
+            ((Channel.id == channel_id) | (Channel.youtube_channel_id == channel_id)),
+            Channel.is_destination == True,
+        )
+    )
+    ch = result.scalar_one_or_none()
+    if not ch:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Publishing destination channel '{channel_id}' not found.",
+        )
+
+    if not ch.active_outro_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No active outro configured for channel '{ch.channel_name}'.",
+        )
+
+    outro_record = await get_active_destination_outro(channel_id=ch.id, db=db)
+    if not outro_record or not outro_record.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Active outro for channel '{ch.channel_name}' was not found.",
+        )
+
+    return OutroResponse(
+        status="success",
+        channel_id=ch.id,
+        outro=serialize_outro(outro_record, ch.id),
+    )
+
+
+@router.patch(
+    "/{channel_id}/outro",
+    response_model=OutroResponse,
+    summary="Update active image outro display duration",
+)
+async def update_destination_outro_endpoint(
+    channel_id: str,
+    body: OutroUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Channel).where(
+            ((Channel.id == channel_id) | (Channel.youtube_channel_id == channel_id)),
+            Channel.is_destination == True,
+        )
+    )
+    ch = result.scalar_one_or_none()
+    if not ch:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Publishing destination channel '{channel_id}' not found.",
+        )
+
+    if not ch.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Channel '{ch.channel_name}' is disconnected.",
+        )
+
+    outro_record = await get_active_destination_outro(channel_id=ch.id, db=db)
+    if not outro_record or not outro_record.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No active outro configured for channel '{ch.channel_name}'.",
+        )
+
+    if outro_record.outro_type != "image":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Only image outros support configurable display duration.",
+        )
+
+    outro_record.duration_seconds = round(float(body.duration_seconds), 2)
+    outro_record.version = int(outro_record.version or 1) + 1
+    outro_record.updated_at = datetime.now(timezone.utc)
+    await db.commit()
+    await db.refresh(outro_record)
+
+    return OutroResponse(
+        status="success",
+        channel_id=ch.id,
+        outro=serialize_outro(outro_record, ch.id),
+    )
+
+
+@router.delete(
+    "/{channel_id}/outro",
+    response_model=OutroDeleteResponse,
+    summary="Remove active outro from destination channel",
+)
+async def delete_destination_outro_endpoint(
+    channel_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Channel).where(
+            ((Channel.id == channel_id) | (Channel.youtube_channel_id == channel_id)),
+            Channel.is_destination == True,
+        )
+    )
+    ch = result.scalar_one_or_none()
+    if not ch:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Publishing destination channel '{channel_id}' not found.",
+        )
+
+    if not ch.active_outro_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No active outro configured for channel '{ch.channel_name}'.",
+        )
+
+    await remove_destination_outro(channel=ch, db=db)
+
+    return OutroDeleteResponse(
+        status="success",
+        channel_id=ch.id,
+        message=f"Outro successfully removed from channel '{ch.channel_name}'.",
+    )
+
+
+@router.get(
+    "/{channel_id}/outro/preview",
+    summary="Stream outro media asset for in-browser playback",
+)
+async def preview_destination_outro(
+    channel_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Channel).where(
+            ((Channel.id == channel_id) | (Channel.youtube_channel_id == channel_id)),
+            Channel.is_destination == True,
+        )
+    )
+    ch = result.scalar_one_or_none()
+    if not ch:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Publishing destination channel '{channel_id}' not found.",
+        )
+
+    if not ch.active_outro_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No active outro configured for channel '{ch.channel_name}'.",
+        )
+
+    outro_record = await get_active_destination_outro(channel_id=ch.id, db=db)
+    if not outro_record or not outro_record.file_path:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Outro asset record missing for channel '{ch.channel_name}'.",
+        )
+
+    try:
+        safe_path = resolve_safe_outro_path(outro_record.file_path)
+    except InvalidOutroError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        )
+
+    if not safe_path.exists() or not safe_path.is_file():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Outro file does not exist on disk.",
+        )
+
+    if outro_record.outro_type == "video":
+        media_type = "video/mp4"
+    elif outro_record.outro_type == "image":
+        suffix = safe_path.suffix.lower()
+        media_type = "image/png" if suffix == ".png" else "image/jpeg"
+    else:
+        media_type = "application/octet-stream"
+
+    return FileResponse(
+        path=str(safe_path),
+        media_type=media_type,
+        filename=outro_record.original_filename or safe_path.name,
+    )
+

@@ -6,9 +6,106 @@
  * and transparent recovery of interrupted uploads.
  */
 
+import type { PublishTarget } from './api';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 export const CHUNK_SIZE_BYTES = 5 * 1024 * 1024; // 5 MiB chunks (<= 10 MiB limit)
 export const MAX_CONCURRENT_UPLOADS = 3;
+
+function formatStudioErrorDetail(detail: unknown, fallback: string): string {
+  if (typeof detail === 'string' && detail.trim()) {
+    return detail;
+  }
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') {
+          const obj = item as { msg?: unknown; message?: unknown; loc?: unknown };
+          const msg = obj.msg ?? obj.message;
+          const loc = Array.isArray(obj.loc) ? obj.loc.join('.') : '';
+          if (typeof msg === 'string' && msg) {
+            return loc ? `${loc}: ${msg}` : msg;
+          }
+          try {
+            return JSON.stringify(item);
+          } catch {
+            return String(item);
+          }
+        }
+        return String(item ?? '');
+      })
+      .filter(Boolean);
+    if (parts.length > 0) {
+      return parts.join('; ');
+    }
+  }
+  if (detail && typeof detail === 'object') {
+    const obj = detail as { message?: unknown; error?: unknown };
+    if (typeof obj.message === 'string' && obj.message.trim()) return obj.message;
+    if (typeof obj.error === 'string' && obj.error.trim()) return obj.error;
+    try {
+      return JSON.stringify(detail);
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
+}
+
+async function readStudioResponsePayload(res: Response): Promise<{ data: unknown; rawText: string }> {
+  if (typeof (res as unknown as { text?: unknown }).text === 'function') {
+    const rawText = await res.text();
+    if (!rawText || !rawText.trim()) {
+      return { data: null, rawText: '' };
+    }
+    try {
+      return { data: JSON.parse(rawText), rawText };
+    } catch {
+      return { data: null, rawText };
+    }
+  }
+  if (typeof (res as unknown as { json?: unknown }).json === 'function') {
+    try {
+      const data = await res.json();
+      return { data, rawText: '' };
+    } catch {
+      return { data: null, rawText: '' };
+    }
+  }
+  return { data: null, rawText: '' };
+}
+
+function buildStudioErrorMessage(res: Response, data: unknown, rawText: string, defaultMsg: string): string {
+  const httpFallback = rawText.trim() || `${defaultMsg}: HTTP ${res.status}`;
+  if (data && typeof data === 'object' && 'detail' in data) {
+    return formatStudioErrorDetail((data as { detail: unknown }).detail, httpFallback) || httpFallback;
+  }
+  if (data !== null) {
+    return formatStudioErrorDetail(data, httpFallback) || httpFallback;
+  }
+  return rawText.trim() || `${defaultMsg}: HTTP ${res.status}`;
+}
+
+export interface StudioCreateBatchOptions {
+  destination_ids?: string[];
+  reframe_mode?: string;
+}
+
+export interface StudioProcessBatchOptions {
+  destination_ids?: string[];
+  reframe_mode?: string;
+  clip_mode?: string;
+  clips_count?: number;
+  max_clip_duration?: number;
+}
+
+export interface CreateBatchPayload extends StudioCreateBatchOptions {
+  idempotency_key: string;
+  name?: string;
+}
+
+export type ProcessBatchPayload = StudioProcessBatchOptions;
 
 export interface StudioBatchResponse {
   id: string;
@@ -26,8 +123,13 @@ export interface StudioBatchResponse {
   processing_started_at?: string | null;
   processing_completed_at?: string | null;
   batch_error?: string | null;
+  config?: Record<string, any> | null;
+  destination_ids?: string[];
+  reframe_mode?: string | null;
   videos: StudioVideoResponse[];
 }
+
+export type StudioBatch = StudioBatchResponse;
 
 export interface StudioVideoResponse {
   id: string;
@@ -66,29 +168,63 @@ export interface UploadStatusResponse {
 /**
  * Creates or retrieves an existing batch idempotently.
  */
-export async function createStudioBatch(idempotencyKey: string, name?: string): Promise<StudioBatchResponse> {
+export async function createStudioBatch(payload: CreateBatchPayload): Promise<StudioBatchResponse>;
+export async function createStudioBatch(
+  idempotencyKey: string,
+  name?: string,
+  options?: StudioCreateBatchOptions
+): Promise<StudioBatchResponse>;
+export async function createStudioBatch(
+  idempotencyKeyOrPayload: string | CreateBatchPayload,
+  name?: string,
+  options?: StudioCreateBatchOptions
+): Promise<StudioBatchResponse> {
+  const payload: CreateBatchPayload =
+    typeof idempotencyKeyOrPayload === 'string'
+      ? {
+          idempotency_key: idempotencyKeyOrPayload,
+          ...(name ? { name } : {}),
+          ...(options || {}),
+        }
+      : idempotencyKeyOrPayload;
+
+  const bodyPayload: Record<string, unknown> = {
+    idempotency_key: payload.idempotency_key,
+  };
+  if (payload.name) {
+    bodyPayload.name = payload.name;
+  }
+  if (payload.destination_ids !== undefined) {
+    bodyPayload.destination_ids = payload.destination_ids;
+  }
+  if (payload.reframe_mode) {
+    bodyPayload.reframe_mode = payload.reframe_mode;
+  }
+
   const res = await fetch(`${API_BASE}/api/studio/batches`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ idempotency_key: idempotencyKey, name: name || undefined }),
+    body: JSON.stringify(bodyPayload),
   });
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to create batch' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to create batch'));
   }
-  return res.json();
+  return (data ?? {}) as StudioBatchResponse;
 }
+
+export const createBatch = createStudioBatch;
 
 /**
  * Fetches current batch status and video queue.
  */
 export async function getStudioBatch(batchId: string): Promise<StudioBatchResponse> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}`);
+  const res = await fetch(`${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}`);
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to fetch batch' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to fetch batch'));
   }
-  return res.json();
+  return (data ?? {}) as StudioBatchResponse;
 }
 
 /**
@@ -104,28 +240,28 @@ export async function initStudioVideo(
     duration?: number | null;
   }
 ): Promise<StudioVideoResponse> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}/videos/init`, {
+  const res = await fetch(`${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}/videos/init`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(item),
   });
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to init video' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to init video'));
   }
-  return res.json();
+  return (data ?? {}) as StudioVideoResponse;
 }
 
 /**
  * Queries committed offset and status for an upload.
  */
 export async function getUploadStatus(uploadId: string): Promise<UploadStatusResponse> {
-  const res = await fetch(`${API_BASE}/api/studio/uploads/${uploadId}`);
+  const res = await fetch(`${API_BASE}/api/studio/uploads/${encodeURIComponent(uploadId)}`);
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to get upload status' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to get upload status'));
   }
-  return res.json();
+  return (data ?? {}) as UploadStatusResponse;
 }
 
 /**
@@ -138,7 +274,7 @@ export async function uploadChunk(
   end: number,
   total: number
 ): Promise<{ upload_id: string; uploaded_bytes: number; total_bytes: number; status: string }> {
-  const res = await fetch(`${API_BASE}/api/studio/uploads/${uploadId}/chunk`, {
+  const res = await fetch(`${API_BASE}/api/studio/uploads/${encodeURIComponent(uploadId)}/chunk`, {
     method: 'PUT',
     headers: {
       'Content-Range': `bytes ${start}-${end}/${total}`,
@@ -147,16 +283,19 @@ export async function uploadChunk(
     body: chunkBlob,
   });
 
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const errData = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
-    const error: Error & { status?: number; data?: unknown } = new Error(
-      typeof errData.detail === 'string' ? errData.detail : JSON.stringify(errData.detail || errData)
-    );
+    const errData =
+      data && typeof data === 'object'
+        ? data
+        : { detail: rawText.trim() || `HTTP ${res.status}` };
+    const msg = buildStudioErrorMessage(res, data, rawText, 'Failed to upload chunk');
+    const error: Error & { status?: number; data?: unknown } = new Error(msg);
     error.status = res.status;
     error.data = errData;
     throw error;
   }
-  return res.json();
+  return (data ?? {}) as { upload_id: string; uploaded_bytes: number; total_bytes: number; status: string };
 }
 
 /**
@@ -167,16 +306,16 @@ export async function reorderStudioBatch(
   version: number,
   itemIds: string[]
 ): Promise<{ batch_id: string; version: number; reordered_count: number }> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}/reorder`, {
+  const res = await fetch(`${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}/reorder`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ version, item_ids: itemIds }),
   });
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to reorder batch' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to reorder batch'));
   }
-  return res.json();
+  return (data ?? {}) as { batch_id: string; version: number; reordered_count: number };
 }
 
 /**
@@ -185,14 +324,14 @@ export async function reorderStudioBatch(
 export async function retryStudioUpload(
   uploadId: string
 ): Promise<{ upload_id: string; uploaded_bytes: number; total_bytes: number; status: string }> {
-  const res = await fetch(`${API_BASE}/api/studio/uploads/${uploadId}/retry`, {
+  const res = await fetch(`${API_BASE}/api/studio/uploads/${encodeURIComponent(uploadId)}/retry`, {
     method: 'POST',
   });
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to retry upload' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to retry upload'));
   }
-  return res.json();
+  return (data ?? {}) as { upload_id: string; uploaded_bytes: number; total_bytes: number; status: string };
 }
 
 /**
@@ -202,14 +341,15 @@ export async function cancelStudioVideo(
   batchId: string,
   videoId: string
 ): Promise<{ cancelled: boolean; video_id: string }> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}/videos/${videoId}`, {
-    method: 'DELETE',
-  });
+  const res = await fetch(
+    `${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}/videos/${encodeURIComponent(videoId)}`,
+    { method: 'DELETE' }
+  );
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to cancel video' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to cancel video'));
   }
-  return res.json();
+  return (data ?? {}) as { cancelled: boolean; video_id: string };
 }
 
 /**
@@ -218,29 +358,67 @@ export async function cancelStudioVideo(
 export async function deleteStudioBatch(
   batchId: string
 ): Promise<{ deleted: boolean; batch_id: string }> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}`, {
+  const res = await fetch(`${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}`, {
     method: 'DELETE',
   });
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to delete batch' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    if (res.status === 404) {
+      // Idempotent: batch is already gone from server
+      return { deleted: true, batch_id: batchId };
+    }
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to delete batch'));
   }
-  return res.json();
+  return (data ?? {}) as { deleted: boolean; batch_id: string };
 }
 
 /**
  * Idempotently starts sequential processing of all uploaded videos in a batch.
  */
-export async function processStudioBatch(batchId: string): Promise<StudioBatchResponse> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}/process`, {
-    method: 'POST',
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to start batch processing' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+export async function processStudioBatch(
+  batchId: string,
+  options?: StudioProcessBatchOptions
+): Promise<StudioBatchResponse> {
+  let cleanedBody: Record<string, unknown> | undefined;
+  if (options) {
+    const candidate: Record<string, unknown> = {};
+    if (options.destination_ids !== undefined) {
+      candidate.destination_ids = options.destination_ids;
+    }
+    if (options.reframe_mode) {
+      candidate.reframe_mode = options.reframe_mode;
+    }
+    if (options.clip_mode) {
+      candidate.clip_mode = options.clip_mode;
+    }
+    if (typeof options.clips_count === 'number' && Number.isFinite(options.clips_count)) {
+      candidate.clips_count = options.clips_count;
+    }
+    if (typeof options.max_clip_duration === 'number' && Number.isFinite(options.max_clip_duration)) {
+      candidate.max_clip_duration = options.max_clip_duration;
+    }
+    if (Object.keys(candidate).length > 0) {
+      cleanedBody = candidate;
+    }
   }
-  return res.json();
+
+  const res = await fetch(`${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}/process`, {
+    method: 'POST',
+    ...(cleanedBody
+      ? {
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cleanedBody),
+        }
+      : {}),
+  });
+  const { data, rawText } = await readStudioResponsePayload(res);
+  if (!res.ok) {
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to start batch processing'));
+  }
+  return (data ?? {}) as StudioBatchResponse;
 }
+
+export const processBatch = processStudioBatch;
 
 /**
  * Requests cooperative cancellation of batch processing.
@@ -248,14 +426,14 @@ export async function processStudioBatch(batchId: string): Promise<StudioBatchRe
 export async function cancelStudioBatch(
   batchId: string
 ): Promise<{ cancelled?: boolean; cancellation_requested?: boolean; batch_id: string; status: string }> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}/cancel`, {
+  const res = await fetch(`${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}/cancel`, {
     method: 'POST',
   });
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to cancel batch' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to cancel batch'));
   }
-  return res.json();
+  return (data ?? {}) as { cancelled?: boolean; cancellation_requested?: boolean; batch_id: string; status: string };
 }
 
 /**
@@ -265,14 +443,15 @@ export async function retryStudioVideo(
   batchId: string,
   videoId: string
 ): Promise<{ retried: boolean; video_id: string; queue_position: number; status: string }> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}/videos/${videoId}/retry`, {
-    method: 'POST',
-  });
+  const res = await fetch(
+    `${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}/videos/${encodeURIComponent(videoId)}/retry`,
+    { method: 'POST' }
+  );
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to retry video' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to retry video'));
   }
-  return res.json();
+  return (data ?? {}) as { retried: boolean; video_id: string; queue_position: number; status: string };
 }
 
 /**
@@ -281,14 +460,14 @@ export async function retryStudioVideo(
 export async function retryStudioBatch(
   batchId: string
 ): Promise<{ retried: boolean; batch_id: string; resumed_from_video_id?: string }> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}/retry`, {
+  const res = await fetch(`${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}/retry`, {
     method: 'POST',
   });
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to retry batch' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to retry batch'));
   }
-  return res.json();
+  return (data ?? {}) as { retried: boolean; batch_id: string; resumed_from_video_id?: string };
 }
 
 /**
@@ -297,16 +476,15 @@ export async function retryStudioBatch(
 export async function recoverStudioBatch(
   batchId: string
 ): Promise<{ recovered: boolean; batch_id: string; status: string }> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}/recover`, {
+  const res = await fetch(`${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}/recover`, {
     method: 'POST',
   });
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to recover batch' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to recover batch'));
   }
-  return res.json();
+  return (data ?? {}) as { recovered: boolean; batch_id: string; status: string };
 }
-
 
 /**
  * Streams an entire file blob in chunks to the backend with single-writer fencing
@@ -378,6 +556,9 @@ export async function streamFileInChunks(
   }
 }
 
+export type { PublishTarget };
+export type StudioOutputTarget = PublishTarget;
+
 export interface StudioOutputClip {
   id: string;
   video_id: string;
@@ -389,6 +570,9 @@ export interface StudioOutputClip {
   score: number;
   output_path?: string | null;
   thumbnail_path?: string | null;
+  publish_destination_id?: string | null;
+  destination_ids?: string[];
+  targets?: PublishTarget[];
   publish_status: string;
   publish_progress: number;
   publish_stage?: string | null;
@@ -407,9 +591,10 @@ export interface StudioBatchOutputsResponse {
 }
 
 export async function getBatchOutputs(batchId: string): Promise<StudioBatchOutputsResponse> {
-  const res = await fetch(`${API_BASE}/api/studio/batches/${batchId}/outputs`);
+  const res = await fetch(`${API_BASE}/api/studio/batches/${encodeURIComponent(batchId)}/outputs`);
+  const { data, rawText } = await readStudioResponsePayload(res);
   if (!res.ok) {
-    throw new Error(`Failed to load batch outputs: HTTP ${res.status}`);
+    throw new Error(buildStudioErrorMessage(res, data, rawText, 'Failed to load batch outputs'));
   }
-  return res.json();
+  return (data ?? {}) as StudioBatchOutputsResponse;
 }

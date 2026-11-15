@@ -5,7 +5,8 @@ from backend.main import app
 from backend.models.database import AsyncSessionLocal
 from backend.models.models import (
     Clip, Video, Job, TaskExecution, TaskExecutionStatus, 
-    ClipVariant, ClipRetention, ClipSFXPlan, ClipVisualPlan, ClipHookPlan
+    ClipVariant, ClipRetention, ClipSFXPlan, ClipVisualPlan, ClipHookPlan,
+    ArtifactRecord
 )
 
 @pytest.mark.asyncio
@@ -39,10 +40,21 @@ async def test_clip_deletion_cascades_and_nullifies_task_execution():
             operation="reframe",
             status=TaskExecutionStatus.FAILED.value
         )
+        art = ArtifactRecord(
+            id=str(uuid.uuid4()),
+            owner_type="clip",
+            owner_id=test_clip_id,
+            artifact_type="video_render",
+            storage_key=f"outputs/test_{uid}/variant.mp4",
+            backend="local",
+            status="ready",
+            retention_policy="permanent"
+        )
         variant = ClipVariant(
             variant_id=str(uuid.uuid4()),
             clip_id=test_clip_id,
             variant_type="hook",
+            artifact_id=art.id,
             status="completed"
         )
         retention = ClipRetention(
@@ -55,7 +67,7 @@ async def test_clip_deletion_cascades_and_nullifies_task_execution():
             plan_json="{}",
             plan_hash="hash123"
         )
-        session.add_all([te, variant, retention, sfx_plan])
+        session.add_all([te, art, variant, retention, sfx_plan])
         await session.commit()
 
     # 3. Call DELETE /api/clips/{id}
@@ -77,10 +89,13 @@ async def test_clip_deletion_cascades_and_nullifies_task_execution():
         assert te_res.clip_id is None
         assert te_res.job_id == test_job_id
 
-        # ClipVariant, ClipRetention, ClipSFXPlan should be cascade deleted
+        # ClipVariant, ArtifactRecord, ClipRetention, ClipSFXPlan should be cascade deleted
         from sqlalchemy import text
         v_count = (await session.execute(text("SELECT count(*) FROM clip_variants WHERE clip_id = :cid"), {"cid": test_clip_id})).scalar()
         assert v_count == 0
+
+        ar_count = (await session.execute(text("SELECT count(*) FROM artifact_records WHERE owner_id = :cid"), {"cid": test_clip_id})).scalar()
+        assert ar_count == 0
 
         r_count = (await session.execute(text("SELECT count(*) FROM clip_retention WHERE clip_id = :cid"), {"cid": test_clip_id})).scalar()
         assert r_count == 0

@@ -60,12 +60,12 @@ def handle_pipeline_failure_task(request, exc, traceback, job_id=None, clip_id=N
         except Exception as e:
             logger.error(f"Failed to notify studio batch or set completed_at for job failure: {e}")
 
-        # Trigger queue drain to let next queued manual job start
-        try:
-            from backend.services.queue_manager import trigger_queue_drain_background
-            trigger_queue_drain_background()
-        except Exception as q_err:
-            logger.warning(f"Failed to trigger queue drain on job failure: {q_err}")
+    # Trigger queue drain to let next queued manual job start on any pipeline failure (job or clip)
+    try:
+        from backend.services.queue_manager import trigger_queue_drain_background
+        trigger_queue_drain_background()
+    except Exception as q_err:
+        logger.warning(f"Failed to trigger queue drain on pipeline failure: {q_err}")
 
 
 
@@ -248,6 +248,64 @@ def stale_recovery_task():
         session.commit()
         
     logger.info(f"Recovered {recovered} stale tasks.")
+
+
+@celery_app.task(name="backend.tasks.orchestration.stale_job_recovery_task")
+def stale_job_recovery_task():
+    """
+    Periodic task (Celery Beat) that finds in-flight jobs without updates for > 30 minutes,
+    marks them cancelled (if is_test) or failed (if not is_test), and triggers queue drain.
+    In-flight statuses: pending, downloading, validating, transcribing, analyzing, selecting, clipping_in_progress.
+    """
+    from backend.models.database import SyncSessionLocal
+    from backend.models.models import Job, JobStatus
+    from datetime import datetime, timezone, timedelta
+
+    logger.info("Running stale job recovery task...")
+    now = datetime.now(timezone.utc)
+    threshold = now - timedelta(minutes=30)
+    in_flight_statuses = [
+        JobStatus.PENDING.value,
+        JobStatus.DOWNLOADING.value,
+        JobStatus.VALIDATING.value,
+        JobStatus.TRANSCRIBING.value,
+        JobStatus.ANALYZING.value,
+        JobStatus.SELECTING.value,
+        JobStatus.CLIPPING_IN_PROGRESS.value,
+    ]
+
+    recovered = 0
+    with SyncSessionLocal() as session:
+        stale_jobs = session.query(Job).filter(
+            Job.status.in_(in_flight_statuses),
+            Job.updated_at < threshold,
+        ).all()
+
+        for job in stale_jobs:
+            target_status = JobStatus.CANCELLED.value if job.is_test else JobStatus.FAILED.value
+            logger.warning(
+                f"Job {job.id} (status: {job.status}, is_test: {job.is_test}, updated_at: {job.updated_at}) "
+                f"is stale (>30m). Transitioning to {target_status}."
+            )
+            job.status = target_status
+            job.current_step = "Timed out" if not job.is_test else "Cancelled"
+            job.error_message = "Stale execution timeout (inactivity > 30m)" if not job.is_test else "Purged stale test execution"
+            job.completed_at = now
+            job.updated_at = now
+            recovered += 1
+
+        session.commit()
+
+    if recovered > 0:
+        logger.info(f"Stale job recovery completed: transitioned {recovered} stale jobs.")
+
+    try:
+        from backend.services.queue_manager import trigger_queue_drain_background
+        trigger_queue_drain_background()
+    except Exception as q_err:
+        logger.warning(f"Failed to trigger queue drain in stale_job_recovery_task: {q_err}")
+
+    return {"recovered": recovered}
 
 
 def resolve_video_decision_sync(
@@ -464,10 +522,48 @@ def resolve_video_decision_sync(
         job_id = decision.job_id or str(uuid.uuid4())
         decision.job_id = job_id
 
-        # Look up channel settings
+        # Look up channel settings & multi-destination mappings
+        from backend.models.models import ChannelDestination
         channel = session.query(Channel).filter_by(id=decision.channel_id).first()
         auto_publish = channel.auto_publish if channel else False
         publish_dest_id = channel.publish_destination_id if channel else None
+
+        resolved_dest_ids: list[str] | None = None
+        if action == "custom" and isinstance(custom_overrides, dict) and "destination_ids" in custom_overrides:
+            resolved_dest_ids = list(dict.fromkeys(str(d) for d in (custom_overrides.get("destination_ids") or []) if d))
+            publish_dest_id = resolved_dest_ids[0] if resolved_dest_ids else None
+        elif action == "custom" and isinstance(custom_overrides, dict) and "publish_destination_id" in custom_overrides:
+            pd_val = custom_overrides.get("publish_destination_id")
+            resolved_dest_ids = [pd_val] if pd_val else []
+            publish_dest_id = pd_val or None
+        elif decision.channel_id:
+            cd_rows = (
+                session.query(ChannelDestination)
+                .join(Channel, Channel.id == ChannelDestination.destination_channel_id)
+                .filter(
+                    ChannelDestination.source_channel_id == decision.channel_id,
+                    ChannelDestination.is_default == True,
+                    (ChannelDestination.expires_at.is_(None) | (ChannelDestination.expires_at > now)),
+                    Channel.is_destination == True,
+                    Channel.is_active == True,
+                )
+                .all()
+            )
+            if cd_rows:
+                resolved_dest_ids = list(dict.fromkeys(r.destination_channel_id for r in cd_rows))
+                publish_dest_id = resolved_dest_ids[0]
+            elif publish_dest_id:
+                dest_obj = session.query(Channel).filter_by(id=publish_dest_id).first()
+                if dest_obj and (not dest_obj.is_destination or not dest_obj.is_active):
+                    publish_dest_id = None
+                    resolved_dest_ids = []
+                elif dest_obj:
+                    resolved_dest_ids = [dest_obj.id]
+            else:
+                resolved_dest_ids = []
+
+        if resolved_dest_ids is not None and len(resolved_dest_ids) == 0:
+            auto_publish = False
 
         # Detect test channels or mock test URLs to isolate automated test runs
         is_test_job = False
@@ -488,9 +584,12 @@ def resolve_video_decision_sync(
 
         if isinstance(effective_config, dict):
             effective_config = dict(effective_config)
-            if "publish_destination_id" not in effective_config:
+            if resolved_dest_ids is not None:
+                effective_config["destination_ids"] = resolved_dest_ids
                 effective_config["publish_destination_id"] = publish_dest_id
-            if "auto_publish" not in effective_config:
+            elif "publish_destination_id" not in effective_config:
+                effective_config["publish_destination_id"] = publish_dest_id
+            if "auto_publish" not in effective_config or not publish_dest_id:
                 effective_config["auto_publish"] = auto_publish
             decision.overrides = effective_config
 
@@ -507,14 +606,17 @@ def resolve_video_decision_sync(
 
         # Dispatch pipeline task asynchronously
         try:
+            task_kwargs = {
+                "job_id": job_id,
+                "youtube_url": decision.youtube_url,
+                "channel_id": decision.channel_id,
+                "auto_publish": auto_publish,
+                "publish_destination_id": publish_dest_id,
+            }
+            if resolved_dest_ids is not None:
+                task_kwargs["destination_ids"] = resolved_dest_ids
             start_video_processing_task.apply_async(
-                kwargs={
-                    "job_id": job_id,
-                    "youtube_url": decision.youtube_url,
-                    "channel_id": decision.channel_id,
-                    "auto_publish": auto_publish,
-                    "publish_destination_id": publish_dest_id
-                },
+                kwargs=task_kwargs,
                 task_id=job_id
             )
         except Exception as dispatch_err:

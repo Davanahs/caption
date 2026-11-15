@@ -141,6 +141,10 @@ def create_video_record(video_id: str, title: str, youtube_url: str, youtube_id:
             )
             session.add(video)
             session.commit()
+        else:
+            if local_path and existing.local_path != local_path:
+                existing.local_path = local_path
+                session.commit()
 
 def update_video_transcript_sync(video_id: str, transcript: str, version: str):
     """Save transcript text to video record."""
@@ -215,13 +219,17 @@ def save_clip_record(clip_id: str, video_id: str, title: str, start: float, end:
             clip.pinned_comment = pinned_comment
         session.add(clip)
 
-        # Create PublishTarget rows
+        # Create PublishTarget rows (deduplicated, private by default)
         target_dest_ids = []
+        seen_dest_ids = set()
         if destination_ids:
             for dest_id in destination_ids:
+                if not dest_id or dest_id in seen_dest_ids:
+                    continue
                 # Exclude orphaned or non-existent channels
                 ch = session.query(Channel).filter_by(id=dest_id).first()
                 if ch:
+                    seen_dest_ids.add(dest_id)
                     target_dest_ids.append(dest_id)
         elif publish_destination_id:
             # Exclude orphaned legacy destination IDs (e.g. 'test-destination-uuid')
@@ -235,6 +243,10 @@ def save_clip_record(clip_id: str, video_id: str, title: str, start: float, end:
                 clip_id=clip_id,
                 destination_id=d_id,
                 status="pending",
+                privacy="private",
+                publish_stage="pending",
+                publish_progress=0.0,
+                idempotency_key=f"pub_{clip_id}_{d_id}",
                 created_at=now,
                 updated_at=now
             )

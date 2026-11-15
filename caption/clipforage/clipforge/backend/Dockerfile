@@ -20,6 +20,8 @@ RUN --mount=type=cache,target=/root/.cache/pip pip install --default-timeout=300
 RUN --mount=type=cache,target=/root/.cache/pip pip install --default-timeout=300 --retries=20 --prefer-binary -r ./backend/requirements.txt
 
 # Pre-download Whisper base model
+RUN mkdir -p /root/.cache/whisper
+COPY assets/base.pt /root/.cache/whisper/base.pt
 RUN python -c "import whisper; whisper.load_model('base')"
 
 COPY . ./backend/

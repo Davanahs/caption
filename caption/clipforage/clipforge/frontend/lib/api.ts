@@ -1,15 +1,102 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
+function formatApiErrorDetail(detail: unknown, fallback: string): string {
+  if (typeof detail === 'string' && detail.trim()) {
+    return detail;
+  }
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map((item) => {
+        if (typeof item === 'string') return item;
+        if (item && typeof item === 'object') {
+          const obj = item as { msg?: unknown; message?: unknown; loc?: unknown };
+          const msg = obj.msg ?? obj.message;
+          const loc = Array.isArray(obj.loc) ? obj.loc.join('.') : '';
+          if (typeof msg === 'string' && msg) {
+            return loc ? `${loc}: ${msg}` : msg;
+          }
+          try {
+            return JSON.stringify(item);
+          } catch {
+            return String(item);
+          }
+        }
+        return String(item ?? '');
+      })
+      .filter(Boolean);
+    if (parts.length > 0) {
+      return parts.join('; ');
+    }
+  }
+  if (detail && typeof detail === 'object') {
+    const obj = detail as { message?: unknown; error?: unknown };
+    if (typeof obj.message === 'string' && obj.message.trim()) return obj.message;
+    if (typeof obj.error === 'string' && obj.error.trim()) return obj.error;
+    try {
+      return JSON.stringify(detail);
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
+}
+
+async function readResponsePayload(res: Response): Promise<{ data: unknown; rawText: string }> {
+  if (typeof (res as unknown as { text?: unknown }).text === 'function') {
+    const rawText = await res.text();
+    if (!rawText || !rawText.trim()) {
+      return { data: null, rawText: '' };
+    }
+    try {
+      return { data: JSON.parse(rawText), rawText };
+    } catch {
+      return { data: null, rawText };
+    }
+  }
+  if (typeof (res as unknown as { json?: unknown }).json === 'function') {
+    try {
+      const data = await res.json();
+      return { data, rawText: '' };
+    } catch {
+      return { data: null, rawText: '' };
+    }
+  }
+  return { data: null, rawText: '' };
+}
+
+async function parseFormSubmitResponse(res: Response): Promise<any> {
+  const { data, rawText } = await readResponsePayload(res);
+  if (data && typeof data === 'object') {
+    const obj = data as Record<string, unknown>;
+    if (obj.detail !== undefined && typeof obj.detail !== 'string') {
+      return { ...obj, detail: formatApiErrorDetail(obj.detail, `HTTP ${res.status}`) };
+    }
+    return data;
+  }
+  if (!res.ok) {
+    return { detail: rawText.trim() || `HTTP ${res.status}` };
+  }
+  return {};
+}
+
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     ...options,
   });
+  const { data, rawText } = await readResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Request failed' }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    const fallback = rawText.trim() || `HTTP ${res.status}`;
+    const msg =
+      data && typeof data === 'object' && 'detail' in data
+        ? formatApiErrorDetail((data as { detail: unknown }).detail, fallback)
+        : formatApiErrorDetail(data, fallback);
+    throw new Error(msg || `HTTP ${res.status}`);
   }
-  return res.json();
+  if (data === null) {
+    return {} as T;
+  }
+  return data as T;
 }
 
 // ── Stats ────────────────────────────────────────────────────────────
@@ -36,6 +123,9 @@ export function getVideoFrameUrl(videoId: string, timestamp: number, shotId?: nu
 }
 
 // ── Videos ───────────────────────────────────────────────────────────
+import type { GamingLayoutConfig } from './gamingCoordinates';
+export type { GamingLayoutConfig };
+
 export interface PodcastRegion {
   id: string;
   label: string;
@@ -65,6 +155,27 @@ export interface SubmitYouTubeOptions {
   regions?: PodcastRegion[];
   podcastComposition?: string;
   shotSchedule?: any[];
+  gamingLayout?: GamingLayoutConfig | string;
+}
+
+export interface UploadVideoOptions {
+  numClips?: number;
+  clipsCount?: number;
+  reframeMode?: string;
+  hookTitle?: boolean;
+  enableBroll?: boolean;
+  enableHook?: boolean;
+  targetLanguage?: string;
+  maxClipDuration?: number;
+  publishDestinationId?: string;
+  destinationIds?: string[];
+  targetDuration?: number;
+  segmentationStrategy?: string;
+  clipMode?: string;
+  regions?: PodcastRegion[];
+  podcastComposition?: string;
+  shotSchedule?: any[];
+  gamingLayout?: GamingLayoutConfig | string;
 }
 
 export function submitYouTubeUrl(
@@ -88,9 +199,17 @@ export function submitYouTubeUrl(
 
   if (typeof numClipsOrOptions === 'object' && numClipsOrOptions !== null) {
     const opts = numClipsOrOptions;
-    if (opts.numClips !== undefined) form.append('num_clips', opts.numClips.toString());
-    if (opts.clipsCount !== undefined) form.append('clips_count', opts.clipsCount.toString());
-    if (opts.maxClipDuration !== undefined) form.append('max_clip_duration', opts.maxClipDuration.toString());
+    if (opts.numClips !== undefined && opts.clipsCount !== undefined) {
+      form.append('num_clips', opts.numClips.toString());
+      form.append('clips_count', opts.clipsCount.toString());
+    } else if (opts.numClips !== undefined) {
+      form.append('num_clips', opts.numClips.toString());
+      form.append('clips_count', opts.numClips.toString());
+    } else if (opts.clipsCount !== undefined) {
+      form.append('num_clips', opts.clipsCount.toString());
+      form.append('clips_count', opts.clipsCount.toString());
+    }
+    if (opts.maxClipDuration !== undefined && opts.maxClipDuration !== null) form.append('max_clip_duration', opts.maxClipDuration.toString());
     if (opts.reframeMode !== undefined) form.append('reframe_mode', opts.reframeMode);
     if (opts.hookTitle !== undefined) form.append('hook_title', opts.hookTitle ? 'true' : 'false');
     if (opts.enableBroll !== undefined) form.append('enable_broll', opts.enableBroll ? 'true' : 'false');
@@ -98,17 +217,26 @@ export function submitYouTubeUrl(
     if (opts.targetLanguage) form.append('target_language', opts.targetLanguage);
     if (opts.clipMode) form.append('clip_mode', opts.clipMode);
     if (opts.publishDestinationId) form.append('publish_destination_id', opts.publishDestinationId);
-    if (opts.destinationIds !== undefined) form.append('destination_ids', JSON.stringify(opts.destinationIds));
-    if (opts.targetDuration !== undefined) form.append('target_duration', opts.targetDuration.toString());
+    if (opts.destinationIds !== undefined && opts.destinationIds !== null) form.append('destination_ids', JSON.stringify(opts.destinationIds));
+    if (opts.targetDuration !== undefined && opts.targetDuration !== null) form.append('target_duration', opts.targetDuration.toString());
     if (opts.segmentationStrategy) form.append('segmentation_strategy', opts.segmentationStrategy);
     if (opts.channelId) form.append('channel_id', opts.channelId);
     if (opts.auto_clip !== undefined) form.append('auto_clip', opts.auto_clip ? 'true' : 'false');
     if (opts.regions !== undefined && opts.regions.length > 0) form.append('regions', JSON.stringify(opts.regions));
     if (opts.podcastComposition) form.append('podcast_composition', opts.podcastComposition);
     if (opts.shotSchedule !== undefined && opts.shotSchedule.length > 0) form.append('shot_schedule', JSON.stringify(opts.shotSchedule));
+    if (opts.gamingLayout !== undefined) {
+      const serialized = typeof opts.gamingLayout === 'string'
+        ? opts.gamingLayout
+        : JSON.stringify(opts.gamingLayout);
+      form.append('gaming_layout', serialized);
+    }
   } else {
-    if (numClipsOrOptions !== undefined) form.append('num_clips', numClipsOrOptions.toString());
-    if (maxClipDuration !== undefined) form.append('max_clip_duration', maxClipDuration.toString());
+    if (numClipsOrOptions !== undefined && numClipsOrOptions !== null) {
+      form.append('num_clips', numClipsOrOptions.toString());
+      form.append('clips_count', numClipsOrOptions.toString());
+    }
+    if (maxClipDuration !== undefined && maxClipDuration !== null) form.append('max_clip_duration', maxClipDuration.toString());
     if (reframeMode !== undefined) form.append('reframe_mode', reframeMode);
     if (hookTitle !== undefined) form.append('hook_title', hookTitle ? 'true' : 'false');
     if (enableBroll !== undefined) form.append('enable_broll', enableBroll ? 'true' : 'false');
@@ -116,39 +244,27 @@ export function submitYouTubeUrl(
     if (targetLanguage) form.append('target_language', targetLanguage);
     if (clipMode) form.append('clip_mode', clipMode);
     if (publishDestinationId) form.append('publish_destination_id', publishDestinationId);
-    if (destinationIds !== undefined) form.append('destination_ids', JSON.stringify(destinationIds));
-    if (targetDuration !== undefined) form.append('target_duration', targetDuration.toString());
+    if (destinationIds !== undefined && destinationIds !== null) form.append('destination_ids', JSON.stringify(destinationIds));
+    if (targetDuration !== undefined && targetDuration !== null) form.append('target_duration', targetDuration.toString());
     if (segmentationStrategy) form.append('segmentation_strategy', segmentationStrategy);
     if (channelId) form.append('channel_id', channelId);
   }
 
-  return fetch(`${API_BASE}/api/videos/url`, { method: 'POST', body: form }).then(r => r.json());
+  return fetch(`${API_BASE}/api/videos/url`, { method: 'POST', body: form }).then(parseFormSubmitResponse);
 }
 
-export async function getPodcastAnalysisStatus(taskId: string, signal?: AbortSignal): Promise<{
+export const processYouTubeUrl = submitYouTubeUrl;
+
+export interface PodcastAnalysisStatusResponse {
   status: 'processing' | 'success' | 'failed';
   progress?: number;
   stage?: string;
   message?: string;
   result?: any;
   error?: string;
-}> {
-  const res = await fetch(`${API_BASE}/api/videos/podcast/analysis-status/${taskId}`, { signal });
-  if (!res.ok) {
-    throw new Error('Failed to query analysis status');
-  }
-  return res.json();
 }
 
-export async function analyzePodcastShots(
-  url: string,
-  regions: PodcastRegion[],
-  refTimestamp: number = 0.0,
-  onProgress?: (stage: string, progress: number) => void,
-  composition?: string,
-  signal?: AbortSignal,
-  timeoutMs: number = 180000
-): Promise<{
+export interface PodcastShotAnalysisResponse {
   status: string;
   video_id: string;
   ref_timestamp: number;
@@ -165,7 +281,31 @@ export async function analyzePodcastShots(
     crop_rect: { x: number; y: number; w: number; h: number; norm_x: number; norm_y: number; norm_w: number; norm_h: number };
     fallback_policy: string;
   }>;
-}> {
+}
+
+export async function getPodcastAnalysisStatus(taskId: string, signal?: AbortSignal): Promise<PodcastAnalysisStatusResponse> {
+  const res = await fetch(`${API_BASE}/api/videos/podcast/analysis-status/${encodeURIComponent(taskId)}`, { signal });
+  const { data, rawText } = await readResponsePayload(res);
+  if (!res.ok) {
+    const fallback = rawText.trim() || 'Failed to query analysis status';
+    const msg =
+      data && typeof data === 'object' && 'detail' in data
+        ? formatApiErrorDetail((data as { detail: unknown }).detail, fallback)
+        : fallback;
+    throw new Error(msg || 'Failed to query analysis status');
+  }
+  return (data ?? {}) as PodcastAnalysisStatusResponse;
+}
+
+export async function analyzePodcastShots(
+  url: string,
+  regions: PodcastRegion[],
+  refTimestamp: number = 0.0,
+  onProgress?: (stage: string, progress: number) => void,
+  composition?: string,
+  signal?: AbortSignal,
+  timeoutMs: number = 180000
+): Promise<PodcastShotAnalysisResponse> {
   if (signal?.aborted) {
     throw new DOMException('Analysis polling aborted by user or component unmount', 'AbortError');
   }
@@ -183,15 +323,24 @@ export async function analyzePodcastShots(
     body: form,
     signal,
   });
+  const { data, rawText } = await readResponsePayload(res);
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: 'Failed to analyze podcast shots' }));
-    throw new Error(err.detail || 'Failed to analyze podcast shots');
+    const fallback = rawText.trim() || 'Failed to analyze podcast shots';
+    const msg =
+      data && typeof data === 'object' && 'detail' in data
+        ? formatApiErrorDetail((data as { detail: unknown }).detail, fallback)
+        : fallback;
+    throw new Error(msg || 'Failed to analyze podcast shots');
   }
-  const data = await res.json();
+
+  const payload = (data && typeof data === 'object' ? data : {}) as {
+    status?: string;
+    task_id?: string;
+  };
 
   // If backend processed asynchronously in Celery queue, poll until complete or wall-clock deadline
-  if (data.status === 'queued' && data.task_id) {
-    const taskId = data.task_id;
+  if (payload.status === 'queued' && payload.task_id) {
+    const taskId = payload.task_id;
     const startTime = Date.now();
     const pollIntervalMs = 1200;
 
@@ -205,12 +354,11 @@ export async function analyzePodcastShots(
         if (signal?.aborted) {
           return reject(new DOMException('Analysis polling aborted by user or component unmount', 'AbortError'));
         }
-        let timer: ReturnType<typeof setTimeout>;
         const onAbort = () => {
           clearTimeout(timer);
           reject(new DOMException('Analysis polling aborted by user or component unmount', 'AbortError'));
         };
-        timer = setTimeout(() => {
+        const timer = setTimeout(() => {
           if (signal) {
             signal.removeEventListener('abort', onAbort);
           }
@@ -240,12 +388,12 @@ export async function analyzePodcastShots(
     throw new Error(`Shot analysis timed out in background worker after ${Math.round(timeoutMs / 1000)} seconds`);
   }
 
-  return data;
+  return payload as PodcastShotAnalysisResponse;
 }
 
 export const uploadVideoFile = (
   file: File,
-  numClips?: number,
+  numClipsOrOptions?: number | UploadVideoOptions,
   reframeMode?: string,
   hookTitle?: boolean,
   enableBroll?: boolean,
@@ -254,43 +402,132 @@ export const uploadVideoFile = (
   maxClipDuration?: number,
   clipMode?: string,
   targetDuration?: number,
-  segmentationStrategy?: string
+  segmentationStrategy?: string,
+  destinationIds?: string[],
+  publishDestinationId?: string
 ) => {
   const form = new FormData();
   form.append('file', file);
-  if (numClips !== undefined) {
-    form.append('num_clips', numClips.toString());
-    form.append('clips_count', numClips.toString());
+
+  if (typeof numClipsOrOptions === 'object' && numClipsOrOptions !== null) {
+    const opts = numClipsOrOptions;
+    if (opts.numClips !== undefined && opts.clipsCount !== undefined) {
+      form.append('num_clips', opts.numClips.toString());
+      form.append('clips_count', opts.clipsCount.toString());
+    } else if (opts.numClips !== undefined) {
+      form.append('num_clips', opts.numClips.toString());
+      form.append('clips_count', opts.numClips.toString());
+    } else if (opts.clipsCount !== undefined) {
+      form.append('num_clips', opts.clipsCount.toString());
+      form.append('clips_count', opts.clipsCount.toString());
+    }
+    if (opts.maxClipDuration !== undefined && opts.maxClipDuration !== null) form.append('max_clip_duration', opts.maxClipDuration.toString());
+    if (opts.reframeMode !== undefined) form.append('reframe_mode', opts.reframeMode);
+    if (opts.hookTitle !== undefined) form.append('hook_title', opts.hookTitle ? 'true' : 'false');
+    form.append('enable_broll', opts.enableBroll ? 'true' : 'false');
+    form.append('enable_hook', opts.enableHook ? 'true' : 'false');
+    if (opts.targetLanguage) form.append('target_language', opts.targetLanguage);
+    if (opts.clipMode) form.append('clip_mode', opts.clipMode);
+    if (opts.publishDestinationId) form.append('publish_destination_id', opts.publishDestinationId);
+    if (opts.destinationIds !== undefined && opts.destinationIds !== null) form.append('destination_ids', JSON.stringify(opts.destinationIds));
+    if (opts.targetDuration !== undefined && opts.targetDuration !== null) form.append('target_duration', opts.targetDuration.toString());
+    if (opts.segmentationStrategy) form.append('segmentation_strategy', opts.segmentationStrategy);
+    if (opts.regions !== undefined && opts.regions.length > 0) {
+      form.append('regions', JSON.stringify(opts.regions));
+    }
+    if (opts.podcastComposition) {
+      form.append('podcast_composition', opts.podcastComposition);
+    }
+    if (opts.shotSchedule !== undefined && opts.shotSchedule.length > 0) {
+      form.append('shot_schedule', JSON.stringify(opts.shotSchedule));
+    }
+    if (opts.gamingLayout !== undefined) {
+      const serialized = typeof opts.gamingLayout === 'string'
+        ? opts.gamingLayout
+        : JSON.stringify(opts.gamingLayout);
+      form.append('gaming_layout', serialized);
+    }
+  } else {
+    if (numClipsOrOptions !== undefined && numClipsOrOptions !== null) {
+      form.append('num_clips', numClipsOrOptions.toString());
+      form.append('clips_count', numClipsOrOptions.toString());
+    }
+    if (maxClipDuration !== undefined && maxClipDuration !== null) {
+      form.append('max_clip_duration', maxClipDuration.toString());
+    }
+    if (reframeMode !== undefined) {
+      form.append('reframe_mode', reframeMode);
+    }
+    if (hookTitle !== undefined) {
+      form.append('hook_title', hookTitle ? 'true' : 'false');
+    }
+    form.append('enable_broll', enableBroll ? 'true' : 'false');
+    form.append('enable_hook', enableHook ? 'true' : 'false');
+    if (targetLanguage) {
+      form.append('target_language', targetLanguage);
+    }
+    if (clipMode) {
+      form.append('clip_mode', clipMode);
+    }
+    if (publishDestinationId) {
+      form.append('publish_destination_id', publishDestinationId);
+    }
+    if (destinationIds !== undefined && destinationIds !== null) {
+      form.append('destination_ids', JSON.stringify(destinationIds));
+    }
+    if (targetDuration !== undefined && targetDuration !== null) {
+      form.append('target_duration', targetDuration.toString());
+    }
+    if (segmentationStrategy) {
+      form.append('segmentation_strategy', segmentationStrategy);
+    }
   }
-  if (maxClipDuration !== undefined) {
-    form.append('max_clip_duration', maxClipDuration.toString());
-  }
-  if (reframeMode !== undefined) {
-    form.append('reframe_mode', reframeMode);
-  }
-  if (hookTitle !== undefined) {
-    form.append('hook_title', hookTitle ? 'true' : 'false');
-  }
-  form.append('enable_broll', enableBroll ? 'true' : 'false');
-  form.append('enable_hook', enableHook ? 'true' : 'false');
-  if (targetLanguage) {
-    form.append('target_language', targetLanguage);
-  }
-  if (clipMode) {
-    form.append('clip_mode', clipMode);
-  }
-  if (targetDuration !== undefined) {
-    form.append('target_duration', targetDuration.toString());
-  }
-  if (segmentationStrategy) {
-    form.append('segmentation_strategy', segmentationStrategy);
-  }
-  return fetch(`${API_BASE}/api/videos/upload`, { method: 'POST', body: form }).then(r => r.json());
+  return fetch(`${API_BASE}/api/videos/upload`, { method: 'POST', body: form }).then(parseFormSubmitResponse);
 };
+
+export const uploadVideo = uploadVideoFile;
+export const uploadRawVideo = uploadVideoFile;
+
+export const submitGamingUrl = (
+  url: string,
+  layout: GamingLayoutConfig,
+  options?: Omit<SubmitYouTubeOptions, 'gamingLayout' | 'reframeMode'>
+) =>
+  submitYouTubeUrl(url, {
+    ...options,
+    reframeMode: 'gaming',
+    gamingLayout: layout,
+  });
+
+export const submitGamingUpload = (
+  file: File,
+  layout: GamingLayoutConfig,
+  options?: Omit<UploadVideoOptions, 'gamingLayout' | 'reframeMode'>
+) =>
+  uploadVideoFile(file, {
+    ...options,
+    reframeMode: 'gaming',
+    gamingLayout: layout,
+  });
+
+export interface BatchYouTubeOptions {
+  numClips?: number;
+  clipsCount?: number;
+  maxClipDuration?: number;
+  clipMode?: string;
+  reframeMode?: string;
+  enableBroll?: boolean;
+  enableHook?: boolean;
+  targetLanguage?: string;
+  targetDuration?: number;
+  segmentationStrategy?: string;
+  destinationIds?: string[];
+  publishDestinationId?: string;
+}
 
 export const submitBatchYouTubeUrls = (
   urls: string[],
-  clipsCount?: number,
+  clipsCountOrOptions?: number | BatchYouTubeOptions,
   maxClipDuration?: number,
   clipMode?: string,
   reframeMode?: string,
@@ -298,34 +535,110 @@ export const submitBatchYouTubeUrls = (
   enableHook?: boolean,
   targetLanguage?: string,
   targetDuration?: number,
-  segmentationStrategy?: string
-) =>
-  request<any>('/api/videos/batch', {
+  segmentationStrategy?: string,
+  destinationIds?: string[],
+  publishDestinationId?: string
+) => {
+  if (typeof clipsCountOrOptions === 'object' && clipsCountOrOptions !== null) {
+    const opts = clipsCountOrOptions;
+    return request<any>('/api/videos/batch', {
+      method: 'POST',
+      body: JSON.stringify({
+        urls,
+        clips_count: opts.clipsCount ?? opts.numClips,
+        max_clip_duration: opts.maxClipDuration ?? 49,
+        clip_mode: opts.clipMode || 'ai_highlights',
+        reframe_mode: opts.reframeMode || undefined,
+        enable_broll: opts.enableBroll ?? false,
+        enable_hook: opts.enableHook ?? false,
+        target_language: opts.targetLanguage ?? 'none',
+        target_duration: opts.targetDuration,
+        segmentation_strategy: opts.segmentationStrategy,
+        ...(opts.publishDestinationId ? { publish_destination_id: opts.publishDestinationId } : {}),
+        ...(opts.destinationIds !== undefined && opts.destinationIds !== null ? { destination_ids: opts.destinationIds } : {}),
+      }),
+    });
+  }
+
+  return request<any>('/api/videos/batch', {
     method: 'POST',
     body: JSON.stringify({
       urls,
-      clips_count: clipsCount,
-      max_clip_duration: maxClipDuration || 49,
+      clips_count: clipsCountOrOptions,
+      max_clip_duration: maxClipDuration ?? 49,
       clip_mode: clipMode || 'ai_highlights',
       reframe_mode: reframeMode || undefined,
-      enable_broll: enableBroll || false,
-      enable_hook: enableHook || false,
-      target_language: targetLanguage || 'none',
+      enable_broll: enableBroll ?? false,
+      enable_hook: enableHook ?? false,
+      target_language: targetLanguage ?? 'none',
       target_duration: targetDuration,
       segmentation_strategy: segmentationStrategy,
+      ...(publishDestinationId ? { publish_destination_id: publishDestinationId } : {}),
+      ...(destinationIds !== undefined && destinationIds !== null ? { destination_ids: destinationIds } : {}),
     }),
   });
+};
+
+export const processBatchUrls = submitBatchYouTubeUrls;
 
 export const listVideos = () => request<any[]>('/api/videos/');
 
 // ── Clips ─────────────────────────────────────────────────────────────
+export interface Clip {
+  id: string;
+  video_id: string;
+  title: string;
+  description?: string | null;
+  duration: number;
+  score: number;
+  start_time?: number;
+  end_time?: number;
+  thumbnail_path?: string | null;
+  output_path?: string | null;
+  status?: string;
+  metadata_status?: string;
+  publish_status: string;
+  publish_stage?: string | null;
+  publish_progress?: number;
+  publish_attempt?: number;
+  publish_error?: string | null;
+  publish_task_id?: string | null;
+  publish_destination_id?: string | null;
+  destination_ids?: string[];
+  targets?: PublishTarget[];
+  youtube_short_id?: string | null;
+  youtube_url?: string | null;
+  scheduled_at?: string | null;
+  published_at?: string | null;
+  publish_started_at?: string | null;
+  publish_completed_at?: string | null;
+  privacy?: string;
+  tags?: string;
+  category?: string;
+  license?: string;
+  made_for_kids?: boolean;
+  age_restricted?: boolean;
+  pinned_comment?: string | null;
+  created_at?: string | null;
+  source_title?: string | null;
+  source_url?: string | null;
+  channel_id?: string | null;
+  source_channel_name?: string | null;
+  [key: string]: any;
+}
+
 export const listClips = (params?: { video_id?: string; channel_id?: string; destination_id?: string; from_date?: string; to_date?: string }) => {
-  const q = new URLSearchParams(params as any).toString();
-  return request<any[]>(`/api/clips${q ? '?'+q : ''}`);
+  const cleanParams = params
+    ? (Object.fromEntries(
+        Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== '')
+      ) as Record<string, string>)
+    : {};
+  const q = new URLSearchParams(cleanParams).toString();
+  return request<Clip[]>(`/api/clips${q ? '?' + q : ''}`);
 };
-export const getClip = (id: string) => request<any>(`/api/clips/${id}`);
-export const updateClip = (id: string, data: any) => request(`/api/clips/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
-export const deleteClip = (id: string) => request(`/api/clips/${id}`, { method: 'DELETE' });
+export const getClip = (id: string) => request<Clip>(`/api/clips/${encodeURIComponent(id)}`);
+export const updateClip = (id: string, data: any) => request(`/api/clips/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const deleteClip = (id: string) => request(`/api/clips/${encodeURIComponent(id)}`, { method: 'DELETE' });
 
 export interface CleanupCandidate {
   clip_id: string;
@@ -387,7 +700,7 @@ export interface CleanupExecuteResponse {
 }
 
 export const previewCleanup = (scoreThreshold: number = 5.0) =>
-  request<CleanupPreviewResponse>(`/api/clips/cleanup/preview?score_threshold=${scoreThreshold}`);
+  request<CleanupPreviewResponse>(`/api/clips/cleanup/preview?score_threshold=${encodeURIComponent(String(scoreThreshold))}`);
 
 export const executeCleanup = (data: CleanupExecuteRequest) =>
   request<CleanupExecuteResponse>('/api/clips/cleanup/execute', {
@@ -398,7 +711,7 @@ export const executeCleanup = (data: CleanupExecuteRequest) =>
 export const downloadClipUrl = (id: string) => `${API_BASE}/api/clips/${id}/download`;
 export const downloadVariantUrl = (clipId: string, variantId: string) => `${API_BASE}/api/clips/${clipId}/variants/${variantId}/download`;
 export const thumbnailUrl = (id: string) => `${API_BASE}/api/clips/${id}/thumbnail`;
-export const getClipMetadata = (id: string) => request<any>(`/api/clips/${id}/metadata`);
+export const getClipMetadata = (id: string) => request<any>(`/api/clips/${encodeURIComponent(id)}/metadata`);
 
 // ── AI Enhancements (Phase 2.1 - B-roll, SFX, Hooks) ──────────────────────
 export interface BrollPlacement {
@@ -482,45 +795,45 @@ export interface HookPlan {
 }
 
 export const getBrollPlan = (clipId: string) =>
-  request<BrollPlan>(`/api/clips/${clipId}/broll-plan`);
+  request<BrollPlan>(`/api/clips/${encodeURIComponent(clipId)}/broll-plan`);
 
 export const applyBrollPlan = (clipId: string, plan: BrollPlan) =>
-  request<{ applied?: boolean; message: string; task_id?: string; clip_id: string }>(`/api/clips/${clipId}/broll-apply`, {
+  request<{ applied?: boolean; message: string; task_id?: string; clip_id: string }>(`/api/clips/${encodeURIComponent(clipId)}/broll-apply`, {
     method: 'POST',
     body: JSON.stringify(plan),
   });
 
 export const getSfxPlan = (clipId: string) =>
-  request<SFXPlan>(`/api/clips/${clipId}/sfx-plan`);
+  request<SFXPlan>(`/api/clips/${encodeURIComponent(clipId)}/sfx-plan`);
 
 export const generateSfxPlan = (clipId: string) =>
-  request<SFXPlan>(`/api/clips/${clipId}/sfx-plan`, { method: 'POST' });
+  request<SFXPlan>(`/api/clips/${encodeURIComponent(clipId)}/sfx-plan`, { method: 'POST' });
 
 export const applySfxPlan = (clipId: string, plan: SFXPlan) =>
-  request<{ applied?: boolean; message: string; task_id?: string; clip_id: string }>(`/api/clips/${clipId}/sfx-apply`, {
+  request<{ applied?: boolean; message: string; task_id?: string; clip_id: string }>(`/api/clips/${encodeURIComponent(clipId)}/sfx-apply`, {
     method: 'POST',
     body: JSON.stringify(plan),
   });
 
 export const getHookPlan = (clipId: string) =>
-  request<HookPlan>(`/api/clips/${clipId}/hook`);
+  request<HookPlan>(`/api/clips/${encodeURIComponent(clipId)}/hook`);
 
 export const generateHookPlan = (clipId: string) =>
-  request<{ message: string; task_id: string; clip_id: string }>(`/api/clips/${clipId}/hook/plan`, {
+  request<{ message: string; task_id: string; clip_id: string }>(`/api/clips/${encodeURIComponent(clipId)}/hook/plan`, {
     method: 'POST',
   });
 
 export const applyHookPlan = (clipId: string, plan: HookPlan) =>
-  request<{ message: string; task_id: string; clip_id: string }>(`/api/clips/${clipId}/hook/apply`, {
+  request<{ message: string; task_id: string; clip_id: string }>(`/api/clips/${encodeURIComponent(clipId)}/hook/apply`, {
     method: 'POST',
     body: JSON.stringify(plan),
   });
 
 export const getClipRetention = (clipId: string) =>
-  request<{ clip_id: string; overall_score: number; risks: any[] }>(`/api/clips/${clipId}/retention`);
+  request<{ clip_id: string; overall_score: number; risks: any[] }>(`/api/clips/${encodeURIComponent(clipId)}/retention`);
 
 export const applyAutofix = (clipId: string) =>
-  request<{ message: string; clip_id: string; interventions: number; variant_id?: string }>(`/api/clips/${clipId}/autofix`, {
+  request<{ message: string; clip_id: string; interventions: number; variant_id?: string }>(`/api/clips/${encodeURIComponent(clipId)}/autofix`, {
     method: 'POST',
   });
 
@@ -535,7 +848,7 @@ export interface ClipVariantItem {
 }
 
 export const listClipVariants = (clipId: string) =>
-  request<ClipVariantItem[]>(`/api/clips/${clipId}/variants`);
+  request<ClipVariantItem[]>(`/api/clips/${encodeURIComponent(clipId)}/variants`);
 
 // ── Jobs ──────────────────────────────────────────────────────────────
 export interface QueueStats {
@@ -576,17 +889,27 @@ export interface Job {
   updated_at_ist?: string | null;
 }
 
-export const getJob = (id: string) => request<Job>(`/api/jobs/${id}`);
+export const getJob = (id: string) => request<Job>(`/api/jobs/${encodeURIComponent(id)}`);
 export const listJobs = (params?: { filter_type?: 'active' | 'history'; limit?: number; include_test?: boolean }) => {
-  const q = new URLSearchParams(params as any).toString();
+  const searchParams = new URLSearchParams();
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      if (v !== undefined && v !== null && String(v) !== '') {
+        searchParams.set(k, String(v));
+      }
+    }
+  }
+  const q = searchParams.toString();
   return request<Job[]>(`/api/jobs/${q ? '?' + q : ''}`);
 };
 export const getActiveJobs = () => request<Job[]>('/api/jobs/active');
-export const getJobHistory = (limit: number = 24) => request<Job[]>(`/api/jobs/history?limit=${limit}`);
-export const cancelJob = (id: string) => request<any>(`/api/jobs/${id}`, { method: 'DELETE' });
+export const getJobHistory = (limit: number = 24) => request<Job[]>(`/api/jobs/history?limit=${encodeURIComponent(String(limit))}`);
+export const cancelJob = (id: string) => request<any>(`/api/jobs/${encodeURIComponent(id)}`, { method: 'DELETE' });
+export const cancelAllFailedJobs = (includeTest: boolean = false) =>
+  request<{ message: string; cancelled_count: number }>(`/api/jobs/cancel-all-failed${includeTest ? '?include_test=true' : ''}`, { method: 'POST' });
 export const getJobStats = (includeTest: boolean = false) =>
   request<QueueStats>(`/api/jobs/stats${includeTest ? '?include_test=true' : ''}`);
-export const retryJob = (id: string) => request<any>(`/api/jobs/${id}/retry`, { method: 'POST' });
+export const retryJob = (id: string) => request<any>(`/api/jobs/${encodeURIComponent(id)}/retry`, { method: 'POST' });
 
 
 // ── Channels & Decisions ──────────────────────────────────────────
@@ -599,11 +922,8 @@ export interface ChannelProcessingProfile {
   video_layout?: 
     | 'fill_blur' 
     | 'fit_black' 
-    | 'split_screen' 
     | 'center_crop' 
     | 'blur_background' 
-    | 'multi_split' 
-    | 'stacked_16_9' 
     | 'creative_transform'
     | string;
   segmentation_strategy?: 'hook_peak_fall' | 'equal_splits';
@@ -690,44 +1010,161 @@ export interface PaginatedVideosResponse {
   scan_scope?: number | null;
 }
 
-export const listChannels = () => request<any[]>('/api/channels/');
+export interface ChannelMappedOutroSummary {
+  id: string;
+  channel_id: string;
+  outro_type: 'video' | 'image';
+  duration_seconds: number;
+  original_filename?: string | null;
+  width?: number | null;
+  height?: number | null;
+  fps?: number | null;
+  has_audio?: boolean;
+  version: number;
+  is_active: boolean;
+  preview_url: string;
+}
+
+export interface ChannelMappedDestination {
+  id: string;
+  youtube_channel_id: string;
+  channel_name: string;
+  thumbnail_url?: string | null;
+  is_active: boolean;
+  is_authorized: boolean;
+  status: 'connected' | 'needs_reauth' | 'disconnected';
+  ready_for_publishing: boolean;
+  has_outro: boolean;
+  outro_status: 'configured' | 'none';
+  active_outro: ChannelMappedOutroSummary | null;
+  warning: string | null;
+  expires_at?: string | null;
+}
+
+export interface ChannelDestinationsResponse {
+  channel_id: string;
+  channel_name: string;
+  auto_publish: boolean;
+  publish_destination_id: string | null;
+  destination_channel_ids: string[];
+  destinations: ChannelMappedDestination[];
+  active_destinations_count: number;
+  disconnected_destinations_count: number;
+}
+
+export interface MonitoredChannel {
+  id: string;
+  channel_name: string;
+  channel_url: string;
+  youtube_channel_id: string;
+  thumbnail_url?: string | null;
+  is_active: boolean;
+  auto_clip: boolean;
+  auto_publish: boolean;
+  publish_destination_id?: string | null;
+  destination_channel_ids?: string[];
+  destinations?: ChannelMappedDestination[];
+  active_destinations_count?: number;
+  disconnected_destinations_count?: number;
+  processing_profile?: ChannelProcessingProfile | null;
+  last_checked_at?: string | null;
+  last_checked_at_ist?: string | null;
+  clips_generated?: number;
+  created_at?: string | null;
+  [key: string]: any;
+}
+
+export type Channel = MonitoredChannel;
+
+export interface UpdateChannelRequest {
+  auto_clip?: boolean;
+  auto_publish?: boolean;
+  is_active?: boolean;
+  publish_destination_id?: string | null;
+  destination_channel_ids?: string[];
+  processing_profile?: ChannelProcessingProfile;
+  [key: string]: any;
+}
+
+export const listChannels = () => request<MonitoredChannel[]>('/api/channels/');
 
 export const addChannel = (data: {
   channel_url: string;
   auto_clip: boolean;
   auto_publish: boolean;
   publish_destination_id?: string;
+  destination_channel_ids?: string[];
   processing_profile?: ChannelProcessingProfile;
 }) =>
-  request<any>('/api/channels/', { method: 'POST', body: JSON.stringify(data) });
+  request<{
+    message: string;
+    channel_name: string;
+    id: string;
+    publish_destination_id: string | null;
+    destination_channel_ids: string[];
+    destinations: ChannelMappedDestination[];
+    processing_profile?: ChannelProcessingProfile | null;
+  }>('/api/channels/', { method: 'POST', body: JSON.stringify(data) });
 
-export const updateChannel = (id: string, data: any) =>
-  request<any>(`/api/channels/${id}`, { method: 'PATCH', body: JSON.stringify(data) });
+export const updateChannel = (id: string, data: UpdateChannelRequest) =>
+  request<{
+    message: string;
+    processing_profile?: ChannelProcessingProfile | null;
+    auto_clip: boolean;
+    auto_publish: boolean;
+    publish_destination_id: string | null;
+    destination_channel_ids: string[];
+    destinations: ChannelMappedDestination[];
+    [key: string]: any;
+  }>(`/api/channels/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(data) });
+
+export const getChannelDestinations = (channelId: string) =>
+  request<ChannelDestinationsResponse>(`/api/channels/${encodeURIComponent(channelId)}/destinations`);
+
+export const updateChannelDestinations = (channelId: string, destinationChannelIds: string[]) =>
+  request<{
+    message: string;
+    channel_id: string;
+    auto_publish: boolean;
+    publish_destination_id: string | null;
+    destination_channel_ids: string[];
+    destinations: ChannelMappedDestination[];
+  }>(`/api/channels/${encodeURIComponent(channelId)}/destinations`, {
+    method: 'PUT',
+    body: JSON.stringify({ destination_channel_ids: destinationChannelIds }),
+  });
 
 export const deleteChannel = (id: string) =>
-  request<any>(`/api/channels/${id}`, { method: 'DELETE' });
+  request<any>(`/api/channels/${encodeURIComponent(id)}`, { method: 'DELETE' });
 
 export const checkChannelNow = (id: string) =>
-  request<any>(`/api/channels/${id}/check-now`, { method: 'POST' });
+  request<any>(`/api/channels/${encodeURIComponent(id)}/check-now`, { method: 'POST' });
 
 export const getChannelRecentVideos = (id: string) =>
-  request<{ channel_name: string; videos: any[] }>(`/api/channels/${id}/videos`);
+  request<{ channel_name: string; videos: any[] }>(`/api/channels/${encodeURIComponent(id)}/videos`);
 
 export const getChannelVideos = (
-  channelId: string, 
-  page: number = 1, 
+  channelId: string,
+  page: number = 1,
   pageSize: number = 8,
   sort: string = 'latest',
   scanDepth: number = 50
-) =>
-  request<PaginatedVideosResponse>(`/api/channels/${channelId}/videos?page=${page}&page_size=${pageSize}&sort=${sort}&scan_depth=${scanDepth}`);
+) => {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+    sort,
+    scan_depth: String(scanDepth),
+  });
+  return request<PaginatedVideosResponse>(`/api/channels/${encodeURIComponent(channelId)}/videos?${params.toString()}`);
+};
 
 export const processChannelVideo = (
   channelId: string,
   video: { video_id: string; video_title?: string; video_url: string },
   overrides?: ChannelProcessingProfile
 ) =>
-  request<any>(`/api/channels/${channelId}/process-video`, {
+  request<any>(`/api/channels/${encodeURIComponent(channelId)}/process-video`, {
     method: 'POST',
     body: JSON.stringify({
       video_id: video.video_id,
@@ -759,7 +1196,7 @@ export const processChannelVideosBatch = (
   videos: Array<{ video_id: string; video_title?: string; video_url: string; overrides?: ChannelProcessingProfile }>,
   overrides?: ChannelProcessingProfile
 ) =>
-  request<BatchProcessVideosResponse>(`/api/channels/${channelId}/process-videos-batch`, {
+  request<BatchProcessVideosResponse>(`/api/channels/${encodeURIComponent(channelId)}/process-videos-batch`, {
     method: 'POST',
     body: JSON.stringify({
       videos,
@@ -799,6 +1236,8 @@ export interface HistoricalPreviewResponse {
   already_processed: number;
   will_queue: number;
   destination_channel_name: string;
+  destination_channel_names?: string[];
+  destination_channel_ids?: string[];
   effective_privacy: string;
   has_view_counts: boolean;
   candidate_scope?: {
@@ -839,7 +1278,7 @@ export const getHistoricalPreview = (
     max_search_depth?: number;
   }
 ) =>
-  request<HistoricalPreviewResponse>(`/api/channels/${channelId}/historical-preview`, {
+  request<HistoricalPreviewResponse>(`/api/channels/${encodeURIComponent(channelId)}/historical-preview`, {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -852,7 +1291,7 @@ export const processHistoricalBatch = (
     overrides?: ChannelProcessingProfile | null;
   }
 ) =>
-  request<HistoricalProcessResponse>(`/api/channels/${channelId}/historical-process`, {
+  request<HistoricalProcessResponse>(`/api/channels/${encodeURIComponent(channelId)}/historical-process`, {
     method: 'POST',
     body: JSON.stringify(params),
   });
@@ -861,14 +1300,14 @@ export const getPendingDecisions = () =>
   request<VideoDecision[]>('/api/channels/decisions/pending');
 
 export const applyDefaultsDecision = (decisionId: string) =>
-  request<any>(`/api/channels/decisions/${decisionId}/apply-defaults`, { method: 'POST' });
+  request<any>(`/api/channels/decisions/${encodeURIComponent(decisionId)}/apply-defaults`, { method: 'POST' });
 
 export const customizeDecision = (
   decisionId: string,
   body?: { lease_token?: string; force?: boolean },
   channelId?: string
 ) =>
-  request<any>(`/api/channels/decisions/${decisionId}/customize${channelId ? `?channel_id=${channelId}` : ''}`, {
+  request<any>(`/api/channels/decisions/${encodeURIComponent(decisionId)}/customize${channelId ? `?channel_id=${encodeURIComponent(channelId)}` : ''}`, {
     method: 'POST',
     body: body ? JSON.stringify(body) : undefined,
   });
@@ -878,7 +1317,7 @@ export const saveAndProcessDecision = (
   overrides: ChannelProcessingProfile,
   options?: { lease_token?: string; expected_status?: string; channelId?: string }
 ) =>
-  request<any>(`/api/channels/decisions/${decisionId}/save-and-process${options?.channelId ? `?channel_id=${options.channelId}` : ''}`, {
+  request<any>(`/api/channels/decisions/${encodeURIComponent(decisionId)}/save-and-process${options?.channelId ? `?channel_id=${encodeURIComponent(options.channelId)}` : ''}`, {
     method: 'POST',
     body: JSON.stringify({
       overrides,
@@ -888,10 +1327,10 @@ export const saveAndProcessDecision = (
   });
 
 export const cancelDecision = (decisionId: string) =>
-  request<any>(`/api/channels/decisions/${decisionId}/cancel`, { method: 'POST' });
+  request<any>(`/api/channels/decisions/${encodeURIComponent(decisionId)}/cancel`, { method: 'POST' });
 
 export const getDecisionHistory = (limit: number = 50) =>
-  request<DecisionHistoryItem[]>(`/api/channels/decisions/history?limit=${limit}`);
+  request<DecisionHistoryItem[]>(`/api/channels/decisions/history?limit=${encodeURIComponent(String(limit))}`);
 
 // ── Publish ───────────────────────────────────────────────────────────
 export const getAuthStatus = () => request<{ authenticated: boolean; oauth_url?: string }>('/api/publish/auth-status');
@@ -920,9 +1359,100 @@ export const submitOAuthCode = (codeOrUrl: string) => {
   });
 };
 
-export const getDestinations = () => request<any[]>('/api/publish/destinations');
+export interface PublishOutroSummary {
+  id: string;
+  outro_type: 'video' | 'image';
+  duration_seconds: number;
+  version: number;
+  original_filename: string | null;
+  preview_url: string | null;
+}
 
-export const setDefaultDestination = (channel_id: string, expires_in_hours: number | null) => 
+export interface PublishDestination {
+  id: string;
+  youtube_channel_id: string;
+  channel_name: string;
+  channel_url: string;
+  thumbnail_url: string | null;
+  is_default_destination: boolean;
+  default_destination_expires_at: string | null;
+  is_active: boolean;
+  is_authorized: boolean;
+  status: 'connected' | 'needs_reauth' | 'disconnected';
+  ready_for_publishing: boolean;
+  active_outro_id: string | null;
+  has_outro: boolean;
+  outro: PublishOutroSummary | null;
+}
+
+export interface PublishTarget {
+  id: string;
+  clip_id?: string;
+  destination_id: string;
+  destination_name?: string;
+  channel_name?: string | null;
+  destination_youtube_channel_id?: string | null;
+  youtube_channel_id?: string | null;
+  destination_thumbnail_url?: string | null;
+  thumbnail_url?: string | null;
+  is_active?: boolean;
+  status: string;
+  publish_stage: string | null;
+  publish_progress: number;
+  youtube_video_id: string | null;
+  youtube_url: string | null;
+  error_message: string | null;
+  retry_count?: number;
+  privacy?: string;
+  scheduled_at?: string | null;
+  published_at?: string | null;
+  publish_started_at?: string | null;
+  publish_completed_at?: string | null;
+  rendered_video_path: string | null;
+  artifact_storage_key?: string | null;
+  outro_applied_id?: string | null;
+  outro_applied_version?: number | null;
+  has_outro: boolean;
+  outro_type?: 'video' | 'image' | string | null;
+  outro_duration?: number | null;
+  active_outro?: PublishOutroSummary | null;
+  preview_url: string;
+  preview_info_url?: string;
+}
+
+export interface ClipDestinationPreviewInfo {
+  clip_id: string;
+  destination_id: string;
+  destination_name: string;
+  is_active: boolean;
+  has_outro: boolean;
+  outro_file_missing: boolean;
+  base_file_missing: boolean;
+  preview_error: string | null;
+  outro: (PublishOutroSummary & { width?: number | null; height?: number | null }) | null;
+  base_duration: number;
+  outro_duration: number;
+  combined_duration: number;
+  exceeds_shorts_limit: boolean;
+  variant_ready: boolean;
+  stale_variant: boolean;
+  storage_key: string;
+  preview_url: string;
+}
+
+export interface ClipTargetsResponse {
+  clip_id: string;
+  publish_status: string;
+  publish_destination_id: string | null;
+  destination_ids: string[];
+  targets: PublishTarget[];
+}
+
+export const getDestinations = (includeTest: boolean = false) =>
+  request<PublishDestination[]>(`/api/publish/destinations${includeTest ? '?include_test=true' : ''}`);
+export const listPublishDestinations = getDestinations;
+
+export const setDefaultDestination = (channel_id: string, expires_in_hours: number | null) =>
   request<{ message: string }>('/api/publish/destinations/default', {
     method: 'POST',
     body: JSON.stringify({ channel_id, expires_in_hours }),
@@ -930,34 +1460,38 @@ export const setDefaultDestination = (channel_id: string, expires_in_hours: numb
 
 export const getChannelInfo = () => request<any>('/api/publish/channel-info');
 
-export const publishNow = (data: {
+export interface PublishRequest {
   clip_id: string;
   destination_channel_id?: string | null;
+  destination_ids?: string[];
   title?: string;
   description?: string;
-  privacy?: string;
+  /** @default 'private' */
+  privacy?: 'private' | 'unlisted' | 'public' | string;
   made_for_kids?: boolean;
   age_restricted?: boolean;
   tags?: string;
   category?: string;
   license?: string;
-}) =>
-  request<any>('/api/publish/publish-now', { method: 'POST', body: JSON.stringify(data) });
+  scheduled_at?: string;
+}
 
-export const schedulePublish = (data: {
-  clip_id: string;
-  destination_channel_id?: string | null;
+export type SchedulePublishRequest = PublishRequest & {
   scheduled_at: string;
-  title?: string;
-  description?: string;
-  privacy?: string;
-  made_for_kids?: boolean;
-  age_restricted?: boolean;
-  tags?: string;
-  category?: string;
-  license?: string;
-}) =>
-  request<any>('/api/publish/schedule', { method: 'POST', body: JSON.stringify(data) });
+};
+
+export const publishNow = (data: PublishRequest) =>
+  request<any>('/api/publish/publish-now', {
+    method: 'POST',
+    body: JSON.stringify({ ...data, privacy: data.privacy || 'private' }),
+  });
+
+export const schedulePublish = (data: SchedulePublishRequest) =>
+  request<any>('/api/publish/schedule', {
+    method: 'POST',
+    body: JSON.stringify({ ...data, privacy: data.privacy || 'private' }),
+  });
+export const scheduleClip = schedulePublish;
 
 export interface PublishQueueItem {
   id: string;
@@ -973,6 +1507,8 @@ export interface PublishQueueItem {
   youtube_short_id?: string | null;
   youtube_url?: string | null;
   publish_destination_id?: string | null;
+  destination_ids?: string[];
+  targets?: PublishTarget[];
   privacy?: string;
   thumbnail_path?: string | null;
 }
@@ -980,31 +1516,94 @@ export interface PublishQueueItem {
 export const getPublishQueue = (statusFilter?: string) =>
   request<PublishQueueItem[]>(`/api/publish/queue${statusFilter ? `?status_filter=${encodeURIComponent(statusFilter)}` : ''}`);
 
-export const getPublishStatus = (clipId: string) => 
-  request<{
-    clip_id: string;
-    publish_status: string;
-    publish_progress: number;
-    publish_stage: string | null;
-    publish_attempt: number;
-    publish_error: string | null;
-    youtube_short_id: string | null;
-    youtube_url: string | null;
-    published_at: string | null;
-    publish_started_at: string | null;
-    publish_task_id?: string | null;
-  }>(`/api/publish/status/${clipId}`);
+export interface PublishStatusResponse {
+  clip_id: string;
+  publish_status: string;
+  publish_progress: number;
+  publish_stage: string | null;
+  publish_attempt: number;
+  publish_error: string | null;
+  youtube_short_id: string | null;
+  youtube_url: string | null;
+  published_at: string | null;
+  publish_started_at: string | null;
+  publish_task_id?: string | null;
+  idempotency_key?: string | null;
+  targets?: PublishTarget[];
+}
+
+export const getPublishStatus = (clipId: string) =>
+  request<PublishStatusResponse>(`/api/publish/status/${encodeURIComponent(clipId)}`);
 
 export const retryPublish = (clipId: string, force: boolean = false) =>
-  request<any>(`/api/publish/clips/${clipId}/retry`, {
+  request<any>(`/api/publish/clips/${encodeURIComponent(clipId)}/retry`, {
     method: 'POST',
     body: JSON.stringify({ force }),
   });
 
 export const cancelPublish = (clipId: string) =>
-  request<any>(`/api/publish/clips/${clipId}/cancel`, {
+  request<any>(`/api/publish/clips/${encodeURIComponent(clipId)}/cancel`, {
     method: 'POST',
   });
+
+export const getClipTargets = (clipId: string) =>
+  request<ClipTargetsResponse>(`/api/publish/clips/${encodeURIComponent(clipId)}/targets`);
+
+export const updateClipDestinations = (clipId: string, destinationIds: string[]) =>
+  request<{
+    status: string;
+    clip_id: string;
+    destination_ids: string[];
+    targets: PublishTarget[];
+  }>(`/api/publish/clips/${encodeURIComponent(clipId)}/destinations`, {
+    method: 'PUT',
+    body: JSON.stringify({ destination_ids: destinationIds }),
+  });
+
+export const retryPublishTarget = (targetId: string, force: boolean = false) =>
+  request<{
+    status: string;
+    target_id: string;
+    clip_id: string;
+    destination_id: string;
+    task_id?: string | null;
+    target?: PublishTarget | null;
+    message: string;
+  }>(`/api/publish/targets/${encodeURIComponent(targetId)}/retry`, {
+    method: 'POST',
+    body: JSON.stringify({ force }),
+  });
+
+export const cancelPublishTarget = (targetId: string) =>
+  request<{
+    status: string;
+    target_id: string;
+    clip_id: string;
+    message: string;
+  }>(`/api/publish/targets/${encodeURIComponent(targetId)}/cancel`, {
+    method: 'POST',
+  });
+
+export const getClipDestinationPreviewInfo = (clipId: string, destinationId: string) =>
+  request<ClipDestinationPreviewInfo>(
+    `/api/publish/clips/${encodeURIComponent(clipId)}/destinations/${encodeURIComponent(destinationId)}/preview-info`
+  );
+
+export const getClipDestinationPreviewUrl = (
+  clipId: string,
+  destinationId: string,
+  options?: { force?: boolean; cacheBust?: string | number }
+): string => {
+  const params = new URLSearchParams();
+  if (options?.force) {
+    params.set('force', 'true');
+  }
+  if (options?.cacheBust !== undefined && options?.cacheBust !== null && options?.cacheBust !== '') {
+    params.set('v', String(options.cacheBust));
+  }
+  const qs = params.toString();
+  return `${API_BASE}/api/publish/clips/${encodeURIComponent(clipId)}/destinations/${encodeURIComponent(destinationId)}/preview${qs ? `?${qs}` : ''}`;
+};
 
 // ── Metadata Editor (Phase 3.2 / C-06) ──────────────────────────────
 export interface ClipPublishMetadata {
@@ -1040,10 +1639,10 @@ export interface UpdateClipPublishMetadataRequest {
 }
 
 export const getClipPublishMetadata = (clipId: string) =>
-  request<ClipPublishMetadata>(`/api/publish/clips/${clipId}/metadata`);
+  request<ClipPublishMetadata>(`/api/publish/clips/${encodeURIComponent(clipId)}/metadata`);
 
 export const updateClipPublishMetadata = (clipId: string, data: UpdateClipPublishMetadataRequest) =>
-  request<{ status: string; message: string; metadata: ClipPublishMetadata }>(`/api/publish/clips/${clipId}/metadata`, {
+  request<{ status: string; message: string; metadata: ClipPublishMetadata }>(`/api/publish/clips/${encodeURIComponent(clipId)}/metadata`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   });
@@ -1120,17 +1719,17 @@ export interface ActiveTrackersResponse {
 }
 
 export const getPipelineSummary = () => request<any>('/api/analytics/summary');
-export const getSEOAnalysis = (videoId: string) => request<SEOAnalysisResponse>(`/api/analytics/seo/${videoId}`);
-export const getVideoAnalytics = (videoId: string) => request<VideoAnalyticsResponse>(`/api/analytics/${videoId}`);
-export const getOptimizationLog = (videoId: string) => request<OptimizationLogResponse>(`/api/analytics/optimize/${videoId}/log`);
+export const getSEOAnalysis = (videoId: string) => request<SEOAnalysisResponse>(`/api/analytics/seo/${encodeURIComponent(videoId)}`);
+export const getVideoAnalytics = (videoId: string) => request<VideoAnalyticsResponse>(`/api/analytics/${encodeURIComponent(videoId)}`);
+export const getOptimizationLog = (videoId: string) => request<OptimizationLogResponse>(`/api/analytics/optimize/${encodeURIComponent(videoId)}/log`);
 export const setAutoOptimizeFlag = (videoId: string, autoOptimize: boolean) =>
   request<{ target_id?: string; video_id: string; auto_optimize: boolean; message: string }>(
-    `/api/analytics/optimize/${videoId}/flag?auto_optimize=${autoOptimize}`,
+    `/api/analytics/optimize/${encodeURIComponent(videoId)}/flag?auto_optimize=${encodeURIComponent(String(autoOptimize))}`,
     { method: 'PATCH' }
   );
 export const triggerOptimizer = (videoId: string, youtubeVideoId?: string) =>
   request<{ status: string; video_id: string; youtube_video_id: string; message: string }>(
-    `/api/analytics/optimize/${videoId}`,
+    `/api/analytics/optimize/${encodeURIComponent(videoId)}`,
     {
       method: 'POST',
       body: JSON.stringify({ youtube_video_id: youtubeVideoId || '' }),
@@ -1139,21 +1738,62 @@ export const triggerOptimizer = (videoId: string, youtubeVideoId?: string) =>
 export const getActiveTrackers = () => request<ActiveTrackersResponse>('/api/analytics/active');
 export const startTracker = (videoId: string, youtubeVideoId?: string) =>
   request<{ status: string; task_id: string; video_id: string; youtube_video_id: string; message: string }>(
-    `/api/analytics/track/${videoId}`,
+    `/api/analytics/track/${encodeURIComponent(videoId)}`,
     {
       method: 'POST',
       body: JSON.stringify({ youtube_video_id: youtubeVideoId || '' }),
     }
   );
 export const cancelTracker = (taskId: string) =>
-  request<{ status: string; task_id: string }>(`/api/analytics/cancel/${taskId}`, {
+  request<{ status: string; task_id: string }>(`/api/analytics/cancel/${encodeURIComponent(taskId)}`, {
     method: 'POST',
   });
 export const getABTests = () => request<any[]>('/api/analytics/ab-tests');
 export const getChannelInsights = () => request<any>('/api/analytics/insights');
 
-// ── My YouTube Channels Management ───────────────────────────────────
+// ── My YouTube Channels Management & Outros ──────────────────────────
+export interface OutroMetadata {
+  id: string;
+  channel_id: string;
+  file_path: string;
+  original_filename: string | null;
+  file_size_bytes: number | null;
+  mime_type?: string | null;
+  file_size?: number | null;
+  outro_type: 'video' | 'image';
+  duration_seconds: number;
+  width: number | null;
+  height: number | null;
+  fps: number | null;
+  has_audio: boolean;
+  version: number;
+  is_active: boolean;
+  preview_url: string;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface OutroResponse {
+  status: string;
+  channel_id: string;
+  outro: OutroMetadata;
+}
+
+export interface OutroUploadResponse {
+  status: string;
+  message: string;
+  channel_id: string;
+  outro: OutroMetadata;
+}
+
+export interface OutroDeleteResponse {
+  status: string;
+  channel_id: string;
+  message: string;
+}
+
 export interface ChannelPublishingSettings {
+  /** @default 'private' */
   default_privacy?: 'public' | 'unlisted' | 'private';
   default_category?: string;
   default_tags?: string | string[];
@@ -1185,15 +1825,29 @@ export interface YouTubeChannelDestination {
   channel_name: string;
   channel_url: string;
   thumbnail_url: string | null;
+  google_account_identity?: string | null;
   is_destination: boolean;
   is_default_destination: boolean;
   is_active: boolean;
   is_authorized: boolean;
+  upload_permission_status?: 'granted' | 'missing_scope' | 'missing' | 'expired' | 'revoked' | string;
   status: 'connected' | 'needs_reauth' | 'disconnected';
+  ready_for_publishing?: boolean;
+  has_outro?: boolean;
+  outro_status?: 'configured' | 'none';
+  active_outro?: OutroMetadata | null;
+  mapped_sources_count?: number;
+  last_successful_upload?: string | null;
+  last_publishing_error?: string | null;
+  last_publishing_error_at?: string | null;
   publishing_settings?: ChannelPublishingSettings | null;
   cached_stats?: ChannelCachedStats | null;
+  is_test?: boolean;
   created_at?: string | null;
 }
+
+export type YouTubeChannel = YouTubeChannelDestination;
+export type DestinationChannel = YouTubeChannelDestination;
 
 export interface RefreshChannelStatsResponse {
   status: string;
@@ -1221,36 +1875,48 @@ export const getYoutubeChannels = (includeTest: boolean = false) =>
   request<YouTubeChannelDestination[]>(`/api/youtube-channels${includeTest ? '?include_test=true' : ''}`);
 
 export const getYoutubeChannelStats = (channelId: string) =>
-  request<ChannelStatsResponse>(`/api/youtube-channels/${channelId}/stats`);
+  request<ChannelStatsResponse>(`/api/youtube-channels/${encodeURIComponent(channelId)}/stats`);
 
 export const refreshYoutubeChannelStats = (channelId: string, force: boolean = false) =>
   request<RefreshChannelStatsResponse>(
-    `/api/youtube-channels/${channelId}/refresh${force ? '?force=true' : ''}`,
+    `/api/youtube-channels/${encodeURIComponent(channelId)}/refresh${force ? '?force=true' : ''}`,
     { method: 'POST' }
   );
 
-export const updateYoutubeChannelSettings = (channelId: string, settings: Partial<ChannelPublishingSettings>) =>
-  request<{ status: string; channel_id: string; youtube_channel_id: string; publishing_settings: ChannelPublishingSettings }>(
-    `/api/youtube-channels/${channelId}/settings`,
-    { method: 'PATCH', body: JSON.stringify(settings) }
+export const updateYoutubeChannelSettings = (channelId: string, settings: Partial<ChannelPublishingSettings>) => {
+  const payload: Partial<ChannelPublishingSettings> = { ...settings };
+  if ('default_privacy' in payload && !payload.default_privacy) {
+    payload.default_privacy = 'private';
+  }
+  return request<{ status: string; channel_id: string; youtube_channel_id: string; publishing_settings: ChannelPublishingSettings }>(
+    `/api/youtube-channels/${encodeURIComponent(channelId)}/settings`,
+    { method: 'PATCH', body: JSON.stringify(payload) }
   );
+};
+export const updateYouTubeChannel = updateYoutubeChannelSettings;
 
 export const setPrimaryDefaultDestination = (channelId: string) =>
   request<{ status: string; default_channel_id: string; is_default_destination: boolean }>(
-    `/api/youtube-channels/${channelId}/set-default`,
+    `/api/youtube-channels/${encodeURIComponent(channelId)}/set-default`,
     { method: 'POST' }
   );
 
 export const disconnectYoutubeChannel = (channelId: string) =>
   request<{ status: string; channel_id: string; is_active: boolean; message: string }>(
-    `/api/youtube-channels/${channelId}/disconnect`,
+    `/api/youtube-channels/${encodeURIComponent(channelId)}/disconnect`,
     { method: 'POST' }
+  );
+
+export const deleteYoutubeChannel = (channelId: string) =>
+  request<{ status: string; channel_id: string; youtube_channel_id: string; channel_name: string; message: string }>(
+    `/api/youtube-channels/${encodeURIComponent(channelId)}`,
+    { method: 'DELETE' }
   );
 
 export const getYoutubeOAuthUrl = () =>
   request<{ oauth_url: string; state: string }>('/api/youtube-channels/oauth-url');
 
-export const connectYoutubeChannel = (codeOrUrl: string) => {
+export const connectYoutubeChannel = (codeOrUrl: string, state?: string) => {
   let normalizedInput = codeOrUrl.trim();
   if (normalizedInput.includes('http') && !normalizedInput.includes('?') && normalizedInput.includes('=')) {
     const slashIndex = normalizedInput.lastIndexOf('/');
@@ -1259,13 +1925,75 @@ export const connectYoutubeChannel = (codeOrUrl: string) => {
       normalizedInput = normalizedInput.substring(0, slashIndex + 1) + '?' + normalizedInput.substring(slashIndex + 1);
     }
   }
-  const payload = normalizedInput.includes('code=')
+  const payload: { redirect_url?: string; code?: string; state?: string } = normalizedInput.includes('code=')
     ? { redirect_url: normalizedInput }
     : { code: normalizedInput };
-  return request<{ status: string; channel: any }>('/api/youtube-channels/connect', {
+  if (state) {
+    payload.state = state;
+  }
+  return request<{
+    status: string;
+    channel: Partial<YouTubeChannelDestination> & {
+      id: string;
+      youtube_channel_id: string;
+      channel_name: string;
+    };
+  }>('/api/youtube-channels/connect', {
     method: 'POST',
     body: JSON.stringify(payload),
   });
+};
+export const connectYouTubeChannel = connectYoutubeChannel;
+
+export async function uploadChannelOutro(
+  channelId: string,
+  file: File,
+  outroType: 'video' | 'image',
+  durationSeconds?: number | null
+): Promise<OutroUploadResponse> {
+  const form = new FormData();
+  form.append('file', file);
+  form.append('outro_type', outroType);
+  if (typeof durationSeconds === 'number' && Number.isFinite(durationSeconds)) {
+    form.append('duration_seconds', durationSeconds.toString());
+  }
+
+  const res = await fetch(`${API_BASE}/api/youtube-channels/${encodeURIComponent(channelId)}/outro`, {
+    method: 'POST',
+    body: form,
+  });
+  const { data, rawText } = await readResponsePayload(res);
+  if (!res.ok) {
+    const fallback = rawText.trim() || `HTTP ${res.status}`;
+    const msg =
+      data && typeof data === 'object' && 'detail' in data
+        ? formatApiErrorDetail((data as { detail: unknown }).detail, fallback)
+        : formatApiErrorDetail(data, fallback);
+    throw new Error(msg || `HTTP ${res.status}`);
+  }
+  return (data ?? {}) as OutroUploadResponse;
+}
+
+export const getChannelOutro = (channelId: string) =>
+  request<OutroResponse>(`/api/youtube-channels/${encodeURIComponent(channelId)}/outro`);
+
+export const updateChannelOutroDuration = (channelId: string, durationSeconds: number) =>
+  request<OutroResponse>(`/api/youtube-channels/${encodeURIComponent(channelId)}/outro`, {
+    method: 'PATCH',
+    body: JSON.stringify({ duration_seconds: durationSeconds }),
+  });
+
+export const deleteChannelOutro = (channelId: string) =>
+  request<OutroDeleteResponse>(`/api/youtube-channels/${encodeURIComponent(channelId)}/outro`, {
+    method: 'DELETE',
+  });
+
+export const getChannelOutroPreviewUrl = (channelId: string, cacheBust?: string | number): string => {
+  const base = `${API_BASE}/api/youtube-channels/${encodeURIComponent(channelId)}/outro/preview`;
+  if (cacheBust !== undefined && cacheBust !== null && cacheBust !== '') {
+    return `${base}?v=${encodeURIComponent(String(cacheBust))}`;
+  }
+  return base;
 };
 
 // ── System Settings API (Phase 5.1 / C-09: REQ-GAP-001) ─────────────────────
@@ -1380,15 +2108,15 @@ export const getDubbingLanguages = () =>
   request<DubbingLanguagesResponse>('/api/dubbing/languages');
 
 export const getClipDubbing = (clipId: string) =>
-  request<ClipDubbingResponse>(`/api/dubbing/${clipId}`);
+  request<ClipDubbingResponse>(`/api/dubbing/${encodeURIComponent(clipId)}`);
 
 export const triggerClipDubbing = (clipId: string, data: DubbingTriggerRequest) =>
-  request<DubbingTriggerResponse>(`/api/dubbing/${clipId}`, {
+  request<DubbingTriggerResponse>(`/api/dubbing/${encodeURIComponent(clipId)}`, {
     method: 'POST',
     body: JSON.stringify(data),
   });
 export const getDubbingTaskStatus = (taskId: string) =>
-  request<DubbingTaskStatusResponse>(`/api/dubbing/tasks/${taskId}`);
+  request<DubbingTaskStatusResponse>(`/api/dubbing/tasks/${encodeURIComponent(taskId)}`);
 
 export interface SourceSeoMetadataResponse {
   source_video_id: string;
@@ -1406,10 +2134,10 @@ export interface SourceSeoMetadataResponse {
 }
 
 export const getVideoSeoMetadata = (videoId: string) =>
-  request<SourceSeoMetadataResponse>(`/api/videos/${videoId}/seo-metadata`);
+  request<SourceSeoMetadataResponse>(`/api/videos/${encodeURIComponent(videoId)}/seo-metadata`);
 
 export const refreshVideoSeoMetadata = (videoId: string) =>
-  request<SourceSeoMetadataResponse>(`/api/videos/${videoId}/seo-metadata/refresh`, {
+  request<SourceSeoMetadataResponse>(`/api/videos/${encodeURIComponent(videoId)}/seo-metadata/refresh`, {
     method: 'POST',
   });
 

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import LayoutThumbnailSelector, { resolveLayoutOptionId, LAYOUT_OPTIONS } from './LayoutThumbnailSelector';
 import { useFocusTrap } from '@/lib/useFocusTrap';
+import { getDestinations, PublishDestination } from '@/lib/api';
 
 export interface ProcessVideoConfig {
   clipsCount?: number;
@@ -15,6 +16,7 @@ export interface ProcessVideoConfig {
   targetLanguage: string;
   targetDuration?: number;
   segmentationStrategy?: string;
+  destinationIds?: string[];
 }
 
 export interface ProcessVideoModalProps {
@@ -34,6 +36,7 @@ export interface ProcessVideoModalProps {
   initialEnableBroll?: boolean;
   initialEnableHook?: boolean;
   initialTargetLanguage?: string;
+  initialDestinationIds?: string[];
   isSubmitting?: boolean;
   errorMessage?: string;
 }
@@ -81,6 +84,7 @@ export default function ProcessVideoModal({
   initialEnableBroll = false,
   initialEnableHook = false,
   initialTargetLanguage = 'none',
+  initialDestinationIds = [],
   isSubmitting = false,
   errorMessage = '',
 }: ProcessVideoModalProps) {
@@ -96,13 +100,30 @@ export default function ProcessVideoModal({
   const [targetLanguage, setTargetLanguage] = useState<string>(initialTargetLanguage);
   const [showEnhancements, setShowEnhancements] = useState<boolean>(false);
   const [thumbnailError, setThumbnailError] = useState<boolean>(false);
+  const [destinations, setDestinations] = useState<PublishDestination[]>([]);
+  const [selectedDestinationIds, setSelectedDestinationIds] = useState<string[]>(initialDestinationIds);
+
+  useEffect(() => {
+    let cancelled = false;
+    getDestinations()
+      .then((dests) => {
+        if (!cancelled && Array.isArray(dests)) {
+          setDestinations(dests);
+        }
+      })
+      .catch((err) => console.error('Failed to load destinations in ProcessVideoModal:', err));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const modalContainerRef = useRef<HTMLDivElement>(null);
+  const wasOpenRef = useRef<boolean>(false);
   useFocusTrap(isOpen, modalContainerRef, onClose, isSubmitting);
 
-  // Sync state when modal opens or initial values change
+  // Sync state when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !wasOpenRef.current) {
       setClipsCount(initialClipsCount || 5);
       setCustomClips('');
       setClipMode(initialClipMode);
@@ -112,19 +133,12 @@ export default function ProcessVideoModal({
       setEnableBroll(initialEnableBroll);
       setEnableHook(initialEnableHook);
       setTargetLanguage(initialTargetLanguage);
+      setSelectedDestinationIds(initialDestinationIds || []);
       setThumbnailError(false);
     }
-  }, [
-    isOpen,
-    initialClipsCount,
-    initialClipMode,
-    initialDuration,
-    initialLayout,
-    initialHookTitle,
-    initialEnableBroll,
-    initialEnableHook,
-    initialTargetLanguage,
-  ]);
+    wasOpenRef.current = isOpen;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   // Handle ESC key
   useEffect(() => {
@@ -185,8 +199,11 @@ export default function ProcessVideoModal({
     } else {
       parts.push('Original Audio');
     }
+    if (selectedDestinationIds.length > 0) {
+      parts.push(`${selectedDestinationIds.length} destination${selectedDestinationIds.length > 1 ? 's' : ''}`);
+    }
     return parts.join(' · ');
-  }, [clipMode, effectiveClipsCount, maxClipDuration, layoutDisplayName, visualEnhancementsCount, targetLanguage]);
+  }, [clipMode, effectiveClipsCount, maxClipDuration, layoutDisplayName, visualEnhancementsCount, targetLanguage, selectedDestinationIds]);
 
   if (!isOpen) return null;
 
@@ -206,6 +223,7 @@ export default function ProcessVideoModal({
       targetLanguage,
       targetDuration: clipMode === 'equal_split' ? maxClipDuration : undefined,
       segmentationStrategy: clipMode === 'equal_split' ? 'equal_splits' : undefined,
+      destinationIds: selectedDestinationIds.length > 0 ? selectedDestinationIds : undefined,
     });
   };
 
@@ -575,21 +593,41 @@ export default function ProcessVideoModal({
           {/* 3. Clip Count Section */}
           <div>
             <div style={{ marginBottom: 10 }}>
-              <label
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: '#e2e8f0',
-                  display: 'block',
-                  marginBottom: 3,
-                }}
-              >
-                How many clips?
-              </label>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
+                <label
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: '#e2e8f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <span>Clips per Video</span>
+                  {clipMode === 'equal_split' && (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        background: 'rgba(239, 68, 68, 0.15)',
+                        color: '#f87171',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        padding: '2px 8px',
+                        borderRadius: 6,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                      }}
+                    >
+                      🔒 Disabled in Equal Split
+                    </span>
+                  )}
+                </label>
+              </div>
               <p style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>
                 {clipMode === 'ai_highlights'
                   ? 'Choose how many Shorts to generate from this video.'
-                  : 'In Equal Split mode, clip count is calculated automatically from total duration.'}
+                  : 'In Equal Split mode, manual clips per video is disabled because clip count is computed automatically from video duration.'}
               </p>
             </div>
 
@@ -925,7 +963,129 @@ export default function ProcessVideoModal({
             </div>
           </div>
 
-          {/* 6. Optional Enhancements (Collapsible Progressive Disclosure) */}
+          {/* 6. Publish Destinations (Multi-Destination Routing) */}
+          <div
+            id="process-video-destinations-section"
+            style={{
+              background: 'rgba(14, 21, 38, 0.6)',
+              border: selectedDestinationIds.length > 0 ? '1px solid rgba(124, 108, 240, 0.4)' : '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: 14,
+              padding: '16px 20px',
+              transition: 'border-color 0.15s ease',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+              <div>
+                <label
+                  style={{
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: '#e2e8f0',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <span>🎯</span>
+                  <span>Where should clips from this video be published?</span>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: 4,
+                      background: selectedDestinationIds.length > 0 ? 'rgba(124, 108, 240, 0.25)' : 'rgba(255, 255, 255, 0.06)',
+                      color: selectedDestinationIds.length > 0 ? '#c7d2fe' : '#94a3b8',
+                    }}
+                  >
+                    {selectedDestinationIds.length === 0
+                      ? 'No destination (manual)'
+                      : `${selectedDestinationIds.length} selected`}
+                  </span>
+                </label>
+                <p style={{ fontSize: 12, color: '#94a3b8', margin: '3px 0 0' }}>
+                  Select one or multiple destinations. Each channel's outro is applied automatically upon publishing.
+                </p>
+              </div>
+              {selectedDestinationIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedDestinationIds([])}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#94a3b8',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                  }}
+                >
+                  Clear all
+                </button>
+              )}
+            </div>
+
+            {destinations.length === 0 ? (
+              <p style={{ fontSize: 12, color: '#64748b', fontStyle: 'italic', margin: 0 }}>
+                No destination channels connected. Connect channels in YouTube Channels to publish automatically.
+              </p>
+            ) : (
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                  gap: 8,
+                  maxHeight: 180,
+                  overflowY: 'auto',
+                  marginTop: 8,
+                }}
+              >
+                {destinations.map((d) => {
+                  const isChecked = selectedDestinationIds.includes(d.id);
+                  return (
+                    <label
+                      key={d.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                        background: isChecked ? 'rgba(124, 108, 240, 0.15)' : 'rgba(255, 255, 255, 0.03)',
+                        border: isChecked ? '1px solid rgba(124, 108, 240, 0.4)' : '1px solid rgba(255, 255, 255, 0.06)',
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => {
+                          setSelectedDestinationIds((prev) =>
+                            isChecked ? prev.filter((id) => id !== d.id) : [...prev, d.id]
+                          );
+                        }}
+                        style={{ accentColor: '#7c6cf0', cursor: 'pointer' }}
+                      />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: 12, fontWeight: 600, color: '#f1f5f9', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {d.channel_name || 'Destination Channel'}
+                        </div>
+                        <div style={{ fontSize: 10, color: d.has_outro ? '#34d399' : '#64748b' }}>
+                          {d.has_outro
+                            ? `${d.outro?.outro_type === 'image' ? 'Image Outro' : 'Video Outro'} · ${d.outro?.duration_seconds ?? 3}s`
+                            : 'No Outro'}
+                        </div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* 7. Optional Enhancements (Collapsible Progressive Disclosure) */}
           <div
             style={{
               background: 'rgba(14, 21, 38, 0.6)',

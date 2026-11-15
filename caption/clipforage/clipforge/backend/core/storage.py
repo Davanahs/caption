@@ -76,14 +76,23 @@ class LocalStorageProvider(StorageProvider):
     def put(self, key: str, local_filepath: str) -> None:
         dest_path = self._resolve_path(key)
         dest_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(local_filepath, dest_path)
+        try:
+            if Path(local_filepath).resolve() != dest_path.resolve():
+                shutil.copy2(local_filepath, dest_path)
+        except shutil.SameFileError:
+            pass
 
     def get(self, key: str, dest_path: str) -> None:
         src_path = self._resolve_path(key)
         if not src_path.exists():
             raise FileNotFoundError(f"Key not found: {key}")
-        Path(dest_path).parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(src_path, dest_path)
+        dest_p = Path(dest_path).resolve()
+        dest_p.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            if src_path.resolve() != dest_p:
+                shutil.copy2(src_path, dest_p)
+        except shutil.SameFileError:
+            pass
 
     def exists(self, key: str) -> bool:
         return self._resolve_path(key).exists()

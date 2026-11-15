@@ -229,7 +229,45 @@ class ArtifactManager:
             res = await db.execute(select(ArtifactRecord).where(ArtifactRecord.storage_key == storage_key))
             
         record = res.scalar_one_or_none()
+        if not record and storage_key:
+            import re
+            vid_match = re.search(r"v_[a-f0-9]{16}", storage_key)
+            if vid_match:
+                vid_id = vid_match.group(0)
+                res = await db.execute(
+                    select(ArtifactRecord).where(
+                        ArtifactRecord.owner_id == vid_id,
+                        ArtifactRecord.artifact_type == "raw_video"
+                    )
+                )
+                record = res.scalar_one_or_none()
+            if not record:
+                res = await db.execute(select(ArtifactRecord).where(ArtifactRecord.owner_id == storage_key))
+                record = res.scalar_one_or_none()
+            if not record and "/" in storage_key:
+                suffix = storage_key.split("uploads/")[-1] if "uploads/" in storage_key else storage_key.lstrip("/")
+                res = await db.execute(select(ArtifactRecord).where(ArtifactRecord.storage_key.ilike(f"%{suffix}%")))
+                record = res.scalar_one_or_none()
+
         if not record:
+            from pathlib import Path
+            import shutil
+            p_direct = Path(storage_key) if storage_key else None
+            if p_direct and p_direct.exists() and p_direct.is_file() and p_direct.stat().st_size > 0:
+                import tempfile
+                import os
+                fd, temp_path = tempfile.mkstemp(prefix="clipforge_managed_dl_")
+                os.close(fd)
+                try:
+                    shutil.copy2(str(p_direct), temp_path)
+                    yield temp_path
+                    return
+                finally:
+                    if os.path.exists(temp_path):
+                        try:
+                            os.remove(temp_path)
+                        except Exception:
+                            pass
             raise ValueError("Artifact not found")
         if record.status not in (ArtifactStatus.READY.value, ArtifactStatus.CREATED.value):
             raise ValueError(f"Artifact is not in a ready state. Status: {record.status}")

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const nav = [
   { href: '/',                icon: '⚡', label: 'Dashboard' },
-  { href: '/captions',        icon: '💬', label: 'Caption Studio' },
+  { href: '/gaming',          icon: '🎮', label: 'Gaming Studio' },
   { href: '/podcasts',        icon: '🎙️', label: 'Podcasts / Interviews' },
   { href: '/studio',          icon: '🎞️', label: 'Upload Studio' },
   { href: '/clips',           icon: '🎬', label: 'Clips Library' },
@@ -13,6 +13,7 @@ const nav = [
   { href: '/automation',      icon: '🤖', label: 'Automation' },
   { href: '/youtube-channels', icon: '📺', label: 'My YouTube Channels' },
   { href: '/publish',         icon: '🚀', label: 'Publish' },
+  { href: '/captions',        icon: '💬', label: 'Caption Studio' },
   { href: '/settings',        icon: '⚙️', label: 'Settings' },
 ];
 
@@ -240,6 +241,7 @@ export default function Sidebar() {
           <Link
             key={item.href}
             href={item.href}
+            prefetch={false}
             className={`sidebar-link${pathname === item.href ? ' active' : ''}`}
           >
             <span style={{ fontSize: 16 }}>{item.icon}</span>

@@ -1,3 +1,4 @@
+import math
 from enum import Enum
 from typing import List, Optional, Tuple
 from pydantic import BaseModel, Field, model_validator
@@ -12,6 +13,37 @@ class LayoutMode(str, Enum):
     MULTI_SPLIT = "multi_split"
     STACKED_16_9 = "stacked_16_9"
     CREATIVE_TRANSFORM = "creative_transform"
+    GAMING = "gaming"
+
+
+class NormalizedRectModel(BaseModel):
+    x: float = Field(ge=0.0, le=1.0, description="Normalized X coordinate [0.0, 1.0]")
+    y: float = Field(ge=0.0, le=1.0, description="Normalized Y coordinate [0.0, 1.0]")
+    width: float = Field(ge=0.05, le=1.0, description="Normalized width [0.05, 1.0]")
+    height: float = Field(ge=0.05, le=1.0, description="Normalized height [0.05, 1.0]")
+
+    @model_validator(mode='after')
+    def validate_bounds(self):
+        if math.isnan(self.x) or math.isnan(self.y) or math.isnan(self.width) or math.isnan(self.height):
+            raise ValueError("Coordinates must be finite numbers")
+        if math.isinf(self.x) or math.isinf(self.y) or math.isinf(self.width) or math.isinf(self.height):
+            raise ValueError("Coordinates must be finite numbers")
+        eps = 1e-4
+        if self.x + self.width > 1.0 + eps:
+            raise ValueError(f"NormalizedRect out of bounds: x + width ({self.x} + {self.width}) exceeds 1.0")
+        if self.y + self.height > 1.0 + eps:
+            raise ValueError(f"NormalizedRect out of bounds: y + height ({self.y} + {self.height}) exceeds 1.0")
+        return self
+
+
+class GamingLayoutConfig(BaseModel):
+    mode: Optional[str] = Field(default="gaming")
+    gameplay_roi: NormalizedRectModel
+    facecam_roi: NormalizedRectModel
+    facecam_placement: Optional[str] = Field(default="top-right")
+    facecam_output_rect: Optional[NormalizedRectModel] = None
+    canvas_width: int = Field(default=1080, gt=0)
+    canvas_height: int = Field(default=1920, gt=0)
 
 class ScaleMode(str, Enum):
     CROP = "crop"
@@ -148,4 +180,14 @@ class LayoutPlan(BaseModel):
         elif self.mode == LayoutMode.BLUR_BACKGROUND:
             if self.background_policy != BackgroundPolicy.BLUR:
                 raise ValueError("BLUR_BACKGROUND mode requires BackgroundPolicy.BLUR")
+        elif self.mode == LayoutMode.GAMING:
+            if self.background_policy != BackgroundPolicy.NONE:
+                raise ValueError("GAMING mode requires BackgroundPolicy.NONE")
+            for r in self.regions:
+                if len(r.zoom_interventions) > 0:
+                    raise ValueError("Zoom interventions are forbidden in GAMING mode")
+            if len(self.regions) != 2:
+                raise ValueError(f"GAMING mode requires exactly 2 regions (gameplay and facecam), got {len(self.regions)}")
+            if self.regions[0].z_order != 1 or self.regions[1].z_order != 2:
+                raise ValueError("GAMING mode requires distinct z-orders (gameplay z=1, facecam PiP z=2)")
         return self

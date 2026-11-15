@@ -7,10 +7,21 @@ from typing import Literal
 from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc, or_
+from sqlalchemy import select, desc, or_, delete
+from sqlalchemy.orm import selectinload
 from pydantic import BaseModel, Field, model_validator
 from backend.models.database import get_db
-from backend.models.models import Channel, Video, VideoDecision, VideoDecisionStatus, Job, JobStatus, Clip
+from backend.models.models import (
+    Channel,
+    ChannelDestination,
+    DestinationOutro,
+    Video,
+    VideoDecision,
+    VideoDecisionStatus,
+    Job,
+    JobStatus,
+    Clip,
+)
 from backend.services.downloader import get_channel_videos, extract_youtube_id
 from backend.core.config import settings
 from backend.core.sanitizer import sanitize_user_facing_error
@@ -81,6 +92,7 @@ class AddChannelRequest(BaseModel):
     auto_clip: bool = False
     auto_publish: bool = False
     publish_destination_id: str | None = None
+    destination_channel_ids: list[str] | None = None
     processing_profile: ChannelProcessingProfile | dict | None = None
 
 
@@ -89,7 +101,12 @@ class UpdateChannelRequest(BaseModel):
     auto_publish: bool | None = None
     is_active: bool | None = None
     publish_destination_id: str | None = None
+    destination_channel_ids: list[str] | None = None
     processing_profile: ChannelProcessingProfile | dict | None = None
+
+
+class ChannelDestinationsUpdateRequest(BaseModel):
+    destination_channel_ids: list[str] = Field(default_factory=list)
 
 
 class CustomizeDecisionRequest(BaseModel):
@@ -188,11 +205,224 @@ def fetch_youtube_rss_dates_sync(channel_yt_id: str) -> dict[str, str]:
     return dates
 
 
+# ── Multi-Destination Mapping Helpers ────────────────────────────────────────
+
+def _serialize_mapped_outro(outro: DestinationOutro | None, channel_id: str) -> dict | None:
+    if not outro or not outro.is_active:
+        return None
+    return {
+        "id": str(outro.id),
+        "channel_id": str(outro.channel_id),
+        "outro_type": outro.outro_type,
+        "duration_seconds": float(outro.duration_seconds),
+        "original_filename": outro.original_filename,
+        "width": outro.width,
+        "height": outro.height,
+        "fps": outro.fps,
+        "has_audio": bool(outro.has_audio),
+        "version": int(outro.version or 1),
+        "is_active": bool(outro.is_active),
+        "preview_url": f"/api/youtube-channels/{channel_id}/outro/preview",
+    }
+
+
+async def _validate_destination_channels_async(
+    db: AsyncSession,
+    raw_dest_ids: list[str],
+    require_authorized: bool = False,
+    allow_existing_inactive_ids: set[str] | None = None,
+) -> list[Channel]:
+    """Validate selected destination IDs (Channel.id or youtube_channel_id), preserving order and deduping."""
+    from backend.services.publisher import check_channel_authorization
+
+    dest_channels: list[Channel] = []
+    seen_ids: set[str] = set()
+    existing_inactive_allowed = allow_existing_inactive_ids or set()
+
+    for raw_id in raw_dest_ids:
+        candidate = str(raw_id).strip() if raw_id is not None else ""
+        if not candidate:
+            continue
+        res = await db.execute(
+            select(Channel)
+            .options(selectinload(Channel.active_outro))
+            .where(
+                or_(Channel.id == candidate, Channel.youtube_channel_id == candidate),
+                Channel.is_destination == True,
+            )
+        )
+        dest_ch = res.scalar_one_or_none()
+        if not dest_ch:
+            raise HTTPException(
+                status_code=400,
+                detail="Invalid publish destination: channel does not exist or is not registered as a destination",
+            )
+        if not dest_ch.is_active and dest_ch.id not in existing_inactive_allowed:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Publish destination channel is not active ('{dest_ch.channel_name}')",
+            )
+        if require_authorized and dest_ch.is_active and not check_channel_authorization(dest_ch.youtube_channel_id):
+            raise HTTPException(
+                status_code=400,
+                detail="Publish destination channel is not authorized or OAuth credentials are invalid",
+            )
+        if dest_ch.id not in seen_ids:
+            seen_ids.add(dest_ch.id)
+            dest_channels.append(dest_ch)
+
+    return dest_channels
+
+
+async def _sync_channel_destinations_async(
+    db: AsyncSession,
+    source_channel: Channel,
+    dest_channels: list[Channel],
+) -> None:
+    """Persist multi-destination ChannelDestination mappings for a monitored channel."""
+    existing_res = await db.execute(
+        select(ChannelDestination).where(ChannelDestination.source_channel_id == source_channel.id)
+    )
+    existing_rows = existing_res.scalars().all()
+    existing_by_dest = {row.destination_channel_id: row for row in existing_rows}
+    desired_ids = [d.id for d in dest_channels]
+    desired_set = set(desired_ids)
+
+    for dest_id, row in existing_by_dest.items():
+        if dest_id not in desired_set:
+            await db.delete(row)
+
+    for dest_ch in dest_channels:
+        existing_row = existing_by_dest.get(dest_ch.id)
+        if existing_row:
+            existing_row.is_default = True
+            existing_row.expires_at = None
+        else:
+            db.add(
+                ChannelDestination(
+                    id=str(uuid.uuid4()),
+                    source_channel_id=source_channel.id,
+                    destination_channel_id=dest_ch.id,
+                    is_default=True,
+                )
+            )
+
+    active_first = next((d.id for d in dest_channels if d.is_active), None)
+    source_channel.publish_destination_id = active_first or (dest_channels[0].id if dest_channels else None)
+
+
+async def _fetch_source_destinations_map_async(
+    db: AsyncSession,
+    channels: list[Channel],
+) -> dict[str, list[dict]]:
+    """Batch-load mapped destination metadata (including disconnected warnings) for monitored channels."""
+    from backend.services.publisher import check_channel_authorization
+
+    source_ids = [c.id for c in channels]
+    if not source_ids:
+        return {}
+
+    cd_res = await db.execute(
+        select(ChannelDestination)
+        .where(
+            ChannelDestination.source_channel_id.in_(source_ids),
+            ChannelDestination.is_default == True,
+        )
+        .order_by(ChannelDestination.created_at.asc())
+    )
+    cd_rows = cd_res.scalars().all()
+
+    cd_by_source: dict[str, list[ChannelDestination]] = {}
+    referenced_dest_ids: set[str] = set()
+    for row in cd_rows:
+        cd_by_source.setdefault(row.source_channel_id, []).append(row)
+        referenced_dest_ids.add(row.destination_channel_id)
+
+    for ch in channels:
+        if ch.publish_destination_id:
+            referenced_dest_ids.add(ch.publish_destination_id)
+
+    dest_map: dict[str, Channel] = {}
+    if referenced_dest_ids:
+        dest_res = await db.execute(
+            select(Channel)
+            .options(selectinload(Channel.active_outro))
+            .where(
+                Channel.id.in_(list(referenced_dest_ids)),
+                Channel.is_destination == True,
+            )
+        )
+        for d in dest_res.scalars().all():
+            dest_map[d.id] = d
+
+    out_map: dict[str, list[dict]] = {}
+    for ch in channels:
+        rows = cd_by_source.get(ch.id, [])
+        items: list[dict] = []
+        seen_dest_ids: set[str] = set()
+
+        def _append_dest(dest_obj: Channel, expires_at=None):
+            if dest_obj.id in seen_dest_ids:
+                return
+            seen_dest_ids.add(dest_obj.id)
+            is_auth = check_channel_authorization(dest_obj.youtube_channel_id)
+            if not dest_obj.is_active:
+                status_val = "disconnected"
+                warning = f"Destination '{dest_obj.channel_name}' is disconnected. Reconnect it or update mappings."
+            elif not is_auth:
+                status_val = "needs_reauth"
+                warning = f"Destination '{dest_obj.channel_name}' needs OAuth authorization before publishing."
+            else:
+                status_val = "connected"
+                warning = None
+
+            active_outro_meta = _serialize_mapped_outro(dest_obj.active_outro, dest_obj.id)
+            items.append({
+                "id": dest_obj.id,
+                "youtube_channel_id": dest_obj.youtube_channel_id,
+                "channel_name": dest_obj.channel_name,
+                "thumbnail_url": dest_obj.thumbnail_url,
+                "is_active": bool(dest_obj.is_active),
+                "is_authorized": bool(is_auth),
+                "status": status_val,
+                "ready_for_publishing": bool(dest_obj.is_active and is_auth and dest_obj.is_destination),
+                "has_outro": active_outro_meta is not None,
+                "outro_status": "configured" if active_outro_meta is not None else "none",
+                "active_outro": active_outro_meta,
+                "warning": warning,
+                "expires_at": expires_at.isoformat() if expires_at else None,
+            })
+
+        for row in rows:
+            d_obj = dest_map.get(row.destination_channel_id)
+            if d_obj:
+                _append_dest(d_obj, expires_at=row.expires_at)
+
+        # Backwards compatibility if only legacy single column was set
+        if not rows and ch.publish_destination_id:
+            legacy_obj = dest_map.get(ch.publish_destination_id)
+            if legacy_obj:
+                _append_dest(legacy_obj)
+
+        out_map[ch.id] = items
+
+    return out_map
+
+
+async def _get_active_destination_ids_for_source_async(
+    db: AsyncSession,
+    source_channel: Channel,
+) -> list[str]:
+    """Return active mapped destination Channel IDs for a monitored channel."""
+    dest_map = await _fetch_source_destinations_map_async(db, [source_channel])
+    return [d["id"] for d in dest_map.get(source_channel.id, []) if d.get("is_active")]
+
+
 # ── Channel Management Endpoints ─────────────────────────────────────────────
 
 @router.post("/")
 async def add_channel(body: AddChannelRequest, db: AsyncSession = Depends(get_db)):
-    """Add a YouTube channel for monitoring with persistent processing profile."""
+    """Add a YouTube channel for monitoring with persistent processing profile and multi-destination routing."""
     try:
         videos = await get_channel_videos(body.channel_url, max_results=1)
         channel_name = "Unknown Channel"
@@ -211,25 +441,24 @@ async def add_channel(body: AddChannelRequest, db: AsyncSession = Depends(get_db
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=409, detail="Channel already being monitored")
 
-    if body.auto_publish and not body.publish_destination_id:
+    raw_dest_ids: list[str] = []
+    if body.destination_channel_ids is not None:
+        raw_dest_ids = [d for d in body.destination_channel_ids if d]
+    elif body.publish_destination_id:
+        raw_dest_ids = [body.publish_destination_id]
+
+    if body.auto_publish and not raw_dest_ids:
         raise HTTPException(
             status_code=422,
             detail="Cannot enable auto-publish without selecting a valid publish destination."
         )
 
-    if body.publish_destination_id:
-        dest_res = await db.execute(
-            select(Channel).where(Channel.id == body.publish_destination_id, Channel.is_destination == True)
-        )
-        dest_ch = dest_res.scalar_one_or_none()
-        if not dest_ch:
-            raise HTTPException(status_code=400, detail="Invalid publish destination: channel does not exist or is not registered as a destination")
-        if not dest_ch.is_active:
-            raise HTTPException(status_code=400, detail="Publish destination channel is not active")
-        if body.auto_publish:
-            from backend.services.publisher import check_channel_authorization
-            if not check_channel_authorization(dest_ch.youtube_channel_id):
-                raise HTTPException(status_code=400, detail="Publish destination channel is not authorized or OAuth credentials are invalid")
+    dest_channels = await _validate_destination_channels_async(
+        db,
+        raw_dest_ids,
+        require_authorized=body.auto_publish,
+    )
+    primary_dest_id = dest_channels[0].id if dest_channels else None
 
     # Validate and serialize processing profile
     profile_data = None
@@ -267,18 +496,26 @@ async def add_channel(body: AddChannelRequest, db: AsyncSession = Depends(get_db
         channel_url=body.channel_url,
         auto_clip=body.auto_clip,
         auto_publish=body.auto_publish,
-        publish_destination_id=body.publish_destination_id,
+        publish_destination_id=primary_dest_id,
         processing_profile=profile_data,
         last_video_id=top_video_id,
         last_checked_at=now,
     )
     db.add(channel)
+    await db.flush()
+    if dest_channels:
+        await _sync_channel_destinations_async(db, channel, dest_channels)
     await db.commit()
+
+    mapped_meta = await _fetch_source_destinations_map_async(db, [channel])
+    mapped_list = mapped_meta.get(channel.id, [])
     return {
         "message": "Channel added",
         "channel_name": channel_name,
         "id": channel.id,
         "publish_destination_id": channel.publish_destination_id,
+        "destination_channel_ids": [d["id"] for d in mapped_list],
+        "destinations": mapped_list,
         "processing_profile": channel.processing_profile,
     }
 
@@ -298,8 +535,14 @@ async def list_channels(
 
     result = await db.execute(query.order_by(desc(Channel.created_at)))
     channels = result.scalars().all()
-    return [
-        {
+    dest_map = await _fetch_source_destinations_map_async(db, channels)
+
+    items = []
+    for c in channels:
+        mapped = dest_map.get(c.id, [])
+        active_cnt = sum(1 for d in mapped if d.get("is_active"))
+        disconnected_cnt = sum(1 for d in mapped if not d.get("is_active"))
+        items.append({
             "id": c.id,
             "channel_name": c.channel_name,
             "channel_url": c.channel_url,
@@ -309,14 +552,91 @@ async def list_channels(
             "auto_clip": c.auto_clip,
             "auto_publish": c.auto_publish,
             "publish_destination_id": c.publish_destination_id,
+            "destination_channel_ids": [d["id"] for d in mapped],
+            "destinations": mapped,
+            "active_destinations_count": active_cnt,
+            "disconnected_destinations_count": disconnected_cnt,
             "processing_profile": c.processing_profile,
             "last_checked_at": c.last_checked_at.isoformat() if c.last_checked_at else None,
             "last_checked_at_ist": format_ist(c.last_checked_at),
             "clips_generated": c.clips_generated,
             "created_at": c.created_at.isoformat() if c.created_at else None,
-        }
-        for c in channels
-    ]
+        })
+    return items
+
+
+@router.get("/{channel_id}/destinations")
+async def get_channel_destinations(
+    channel_id: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """Get publishing destinations mapped to a monitored source channel (preserves disconnected warnings)."""
+    result = await db.execute(select(Channel).where(Channel.id == channel_id))
+    channel = result.scalar_one_or_none()
+    if not channel:
+        raise HTTPException(status_code=404, detail="Channel not found")
+
+    dest_map = await _fetch_source_destinations_map_async(db, [channel])
+    mapped = dest_map.get(channel.id, [])
+    return {
+        "channel_id": channel.id,
+        "channel_name": channel.channel_name,
+        "auto_publish": bool(channel.auto_publish),
+        "publish_destination_id": channel.publish_destination_id,
+        "destination_channel_ids": [d["id"] for d in mapped],
+        "destinations": mapped,
+        "active_destinations_count": sum(1 for d in mapped if d.get("is_active")),
+        "disconnected_destinations_count": sum(1 for d in mapped if not d.get("is_active")),
+    }
+
+
+@router.put("/{channel_id}/destinations")
+async def update_channel_destinations(
+    channel_id: str,
+    body: ChannelDestinationsUpdateRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Replace multi-destination publishing mappings for a monitored source channel."""
+    result = await db.execute(select(Channel).where(Channel.id == channel_id))
+    channel = result.scalar_one_or_none()
+    if not channel:
+        raise HTTPException(status_code=404, detail="Channel not found")
+
+    existing_res = await db.execute(
+        select(ChannelDestination.destination_channel_id).where(
+            ChannelDestination.source_channel_id == channel.id
+        )
+    )
+    already_mapped_ids = {r[0] for r in existing_res.all()}
+
+    dest_channels = await _validate_destination_channels_async(
+        db,
+        body.destination_channel_ids,
+        require_authorized=False,
+        allow_existing_inactive_ids=already_mapped_ids,
+    )
+    await _sync_channel_destinations_async(db, channel, dest_channels)
+
+    # Check whether auto_publish can remain enabled
+    from backend.services.publisher import check_channel_authorization
+    has_ready_active = any(
+        d.is_active and check_channel_authorization(d.youtube_channel_id)
+        for d in dest_channels
+    )
+    if channel.auto_publish and not has_ready_active:
+        channel.auto_publish = False
+
+    await db.commit()
+    dest_map = await _fetch_source_destinations_map_async(db, [channel])
+    mapped = dest_map.get(channel.id, [])
+    return {
+        "message": "Channel publishing destinations updated",
+        "channel_id": channel.id,
+        "auto_publish": bool(channel.auto_publish),
+        "publish_destination_id": channel.publish_destination_id,
+        "destination_channel_ids": [d["id"] for d in mapped],
+        "destinations": mapped,
+    }
 
 
 @router.patch("/{channel_id}")
@@ -330,47 +650,79 @@ async def update_channel(channel_id: str, body: UpdateChannelRequest, db: AsyncS
     if body.auto_clip is not None:
         channel.auto_clip = body.auto_clip
 
-    # Validate destination channel updates if provided
-    new_dest_id = channel.publish_destination_id
-    if body.publish_destination_id is not None:
-        if body.publish_destination_id == "":
-            channel.publish_destination_id = None
-            new_dest_id = None
-        else:
-            dest_res = await db.execute(
-                select(Channel).where(Channel.id == body.publish_destination_id, Channel.is_destination == True)
-            )
-            dest_ch = dest_res.scalar_one_or_none()
-            if not dest_ch:
-                raise HTTPException(status_code=400, detail="Invalid publish destination: channel does not exist or is not registered as a destination")
-            if not dest_ch.is_active:
-                raise HTTPException(status_code=400, detail="Publish destination channel is not active")
-            channel.publish_destination_id = body.publish_destination_id
-            new_dest_id = body.publish_destination_id
+    destinations_explicitly_modified = False
+    destinations_cleared = False
 
-    # Auto-publish validation
+    if body.destination_channel_ids is not None:
+        destinations_explicitly_modified = True
+        existing_res = await db.execute(
+            select(ChannelDestination.destination_channel_id).where(
+                ChannelDestination.source_channel_id == channel.id
+            )
+        )
+        already_mapped_ids = {r[0] for r in existing_res.all()}
+        dest_channels = await _validate_destination_channels_async(
+            db,
+            body.destination_channel_ids,
+            require_authorized=False,
+            allow_existing_inactive_ids=already_mapped_ids,
+        )
+        await _sync_channel_destinations_async(db, channel, dest_channels)
+        if not dest_channels:
+            destinations_cleared = True
+    elif body.publish_destination_id is not None:
+        destinations_explicitly_modified = True
+        if body.publish_destination_id == "":
+            await _sync_channel_destinations_async(db, channel, [])
+            channel.publish_destination_id = None
+            destinations_cleared = True
+        else:
+            dest_channels = await _validate_destination_channels_async(
+                db, [body.publish_destination_id], require_authorized=False
+            )
+            await _sync_channel_destinations_async(db, channel, dest_channels)
+
+    # Auto-publish validation across mapped destinations or legacy destination
     target_auto_publish = body.auto_publish if body.auto_publish is not None else channel.auto_publish
     if target_auto_publish:
-        if not new_dest_id:
-            raise HTTPException(
-                status_code=422,
-                detail="Cannot enable auto-publish without a valid publish destination."
+        if destinations_cleared and body.auto_publish is None:
+            channel.auto_publish = False
+        else:
+            mapped_res = await db.execute(
+                select(ChannelDestination)
+                .where(
+                    ChannelDestination.source_channel_id == channel.id,
+                    ChannelDestination.is_default == True,
+                )
             )
-        dest_res = await db.execute(
-            select(Channel).where(Channel.id == new_dest_id, Channel.is_destination == True)
-        )
-        dest_obj = dest_res.scalar_one_or_none()
-        if not dest_obj or not dest_obj.is_active:
-            raise HTTPException(status_code=400, detail="Publish destination channel is not active or invalid")
-        from backend.services.publisher import check_channel_authorization
-        if not check_channel_authorization(dest_obj.youtube_channel_id):
-            raise HTTPException(status_code=400, detail="Publish destination channel is not authorized or OAuth credentials are invalid")
-        channel.auto_publish = True
+            mapped_dest_ids = [m.destination_channel_id for m in mapped_res.scalars().all()]
+            if not mapped_dest_ids and channel.publish_destination_id:
+                mapped_dest_ids = [channel.publish_destination_id]
+
+            if not mapped_dest_ids:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Cannot enable auto-publish without a valid publish destination."
+                )
+
+            dest_res = await db.execute(
+                select(Channel).where(
+                    Channel.id.in_(mapped_dest_ids),
+                    Channel.is_destination == True,
+                )
+            )
+            dest_objs = dest_res.scalars().all()
+            active_objs = [d for d in dest_objs if d.is_active]
+            if not active_objs:
+                raise HTTPException(status_code=400, detail="Publish destination channel is not active or invalid")
+            from backend.services.publisher import check_channel_authorization
+            if not any(check_channel_authorization(d.youtube_channel_id) for d in active_objs):
+                raise HTTPException(status_code=400, detail="Publish destination channel is not authorized or OAuth credentials are invalid")
+            channel.auto_publish = True
     else:
         if body.auto_publish is not None:
             channel.auto_publish = False
-        elif body.publish_destination_id is not None and not new_dest_id:
-            # If destination was cleared and auto_publish was not explicitly supplied, disable auto_publish
+        elif destinations_cleared:
             channel.auto_publish = False
 
     if body.processing_profile is not None:
@@ -384,11 +736,16 @@ async def update_channel(channel_id: str, body: UpdateChannelRequest, db: AsyncS
             channel.processing_profile = body.processing_profile.model_dump()
 
     await db.commit()
+    dest_map = await _fetch_source_destinations_map_async(db, [channel])
+    mapped = dest_map.get(channel.id, [])
     return {
         "message": "Channel updated",
         "processing_profile": channel.processing_profile,
         "auto_clip": channel.auto_clip,
         "auto_publish": channel.auto_publish,
+        "publish_destination_id": channel.publish_destination_id,
+        "destination_channel_ids": [d["id"] for d in mapped],
+        "destinations": mapped,
     }
 
 
@@ -399,17 +756,57 @@ async def delete_channel(channel_id: str, db: AsyncSession = Depends(get_db)):
     if not channel:
         raise HTTPException(status_code=404, detail="Channel not found")
 
-    # Ensure every dependent source profile can no longer auto-publish using the deleted destination
-    dep_result = await db.execute(
-        select(Channel).where(
-            Channel.is_destination == False,
-            (Channel.publish_destination_id == channel.id) | (Channel.publish_destination_id == channel.youtube_channel_id),
+    # Ensure every dependent source profile can no longer auto-publish if this was a destination with no other active mappings
+    if channel.is_destination:
+        mapped_src_res = await db.execute(
+            select(ChannelDestination.source_channel_id).where(
+                ChannelDestination.destination_channel_id == channel.id
+            )
+        )
+        mapped_src_ids = {r[0] for r in mapped_src_res.all()}
+        dep_query = select(Channel).where(Channel.is_destination == False)
+        if mapped_src_ids:
+            dep_query = dep_query.where(
+                or_(
+                    Channel.publish_destination_id == channel.id,
+                    Channel.publish_destination_id == channel.youtube_channel_id,
+                    Channel.id.in_(list(mapped_src_ids)),
+                )
+            )
+        else:
+            dep_query = dep_query.where(
+                or_(
+                    Channel.publish_destination_id == channel.id,
+                    Channel.publish_destination_id == channel.youtube_channel_id,
+                )
+            )
+        dep_result = await db.execute(dep_query)
+        for dep_ch in dep_result.scalars().all():
+            if dep_ch.publish_destination_id in (channel.id, channel.youtube_channel_id):
+                dep_ch.publish_destination_id = None
+            other_res = await db.execute(
+                select(ChannelDestination.id)
+                .join(Channel, Channel.id == ChannelDestination.destination_channel_id)
+                .where(
+                    ChannelDestination.source_channel_id == dep_ch.id,
+                    ChannelDestination.destination_channel_id != channel.id,
+                    ChannelDestination.is_default == True,
+                    Channel.is_destination == True,
+                    Channel.is_active == True,
+                )
+                .limit(1)
+            )
+            if other_res.scalar_one_or_none() is None and not dep_ch.publish_destination_id:
+                dep_ch.auto_publish = False
+
+    await db.execute(
+        delete(ChannelDestination).where(
+            or_(
+                ChannelDestination.source_channel_id == channel.id,
+                ChannelDestination.destination_channel_id == channel.id,
+            )
         )
     )
-    for dep_ch in dep_result.scalars().all():
-        dep_ch.auto_publish = False
-        dep_ch.publish_destination_id = None
-
     await db.delete(channel)
     await db.commit()
     return {"message": "Channel removed"}
@@ -435,7 +832,11 @@ async def check_channel_now(channel_id: str, db: AsyncSession = Depends(get_db))
         now = datetime.now(timezone.utc)
         deadline = now + timedelta(seconds=20)
         decision_id = str(uuid.uuid4())
-        profile_snapshot = channel.processing_profile or {}
+        profile_snapshot = dict(channel.processing_profile or {})
+        active_dest_ids = await _get_active_destination_ids_for_source_async(db, channel)
+        if active_dest_ids:
+            profile_snapshot["destination_ids"] = active_dest_ids
+            profile_snapshot["publish_destination_id"] = active_dest_ids[0]
 
         status = (
             VideoDecisionStatus.AWAITING_SETTINGS.value
@@ -687,7 +1088,7 @@ async def process_channel_video(
         raise HTTPException(status_code=404, detail="Channel not found")
 
     # Validate overrides if supplied
-    effective_config = channel.processing_profile or {}
+    effective_config = dict(channel.processing_profile or {})
     if body.overrides:
         if isinstance(body.overrides, dict):
             try:
@@ -697,6 +1098,11 @@ async def process_channel_video(
                 raise HTTPException(status_code=422, detail=f"Invalid overrides: {val_err}")
         else:
             effective_config = body.overrides.model_dump()
+
+    active_dest_ids = await _get_active_destination_ids_for_source_async(db, channel)
+    if active_dest_ids and "destination_ids" not in effective_config:
+        effective_config["destination_ids"] = active_dest_ids
+        effective_config["publish_destination_id"] = active_dest_ids[0]
 
     # Guard: Check if video is a ClipForge-generated Short (prevent self-ingestion)
     from backend.services.provenance import check_is_clipforge_short
@@ -801,7 +1207,7 @@ async def process_channel_videos_batch(
         raise HTTPException(status_code=404, detail="Channel not found")
 
     # Global batch overrides or channel defaults
-    batch_config = channel.processing_profile or {}
+    batch_config = dict(channel.processing_profile or {})
     if body.overrides:
         if isinstance(body.overrides, dict):
             try:
@@ -811,6 +1217,11 @@ async def process_channel_videos_batch(
                 raise HTTPException(status_code=422, detail=f"Invalid batch overrides: {val_err}")
         else:
             batch_config = body.overrides.model_dump()
+
+    active_dest_ids = await _get_active_destination_ids_for_source_async(db, channel)
+    if active_dest_ids and "destination_ids" not in batch_config:
+        batch_config["destination_ids"] = active_dest_ids
+        batch_config["publish_destination_id"] = active_dest_ids[0]
 
     unique_items_count = len({itm.video_id for itm in body.videos if itm.video_id})
 
@@ -1011,21 +1422,13 @@ async def preview_historical_videos(
     if not channel:
         raise HTTPException(status_code=404, detail="Channel not found")
 
-    # Resolve destination channel name
-    dest_name = "ClipSee"
-    effective_dest_id = channel.publish_destination_id
-    if effective_dest_id:
-        dest_q = await db.execute(select(Channel).where(Channel.id == effective_dest_id))
-        d_obj = dest_q.scalar_one_or_none()
-        if d_obj:
-            dest_name = d_obj.channel_name
-    else:
-        def_dest_q = await db.execute(
-            select(Channel).where(Channel.is_destination == True, Channel.is_default_destination == True)
-        )
-        def_dest = def_dest_q.scalar_one_or_none()
-        if def_dest:
-            dest_name = def_dest.channel_name
+    # Resolve destination channel name(s) without arbitrary global or hardcoded fallback
+    mapped_dest_map = await _fetch_source_destinations_map_async(db, [channel])
+    mapped_dests = mapped_dest_map.get(channel.id, [])
+    active_dests = [d for d in mapped_dests if d.get("is_active")]
+    dest_names = [d["channel_name"] for d in active_dests if d.get("channel_name")]
+    dest_name = ", ".join(dest_names) if dest_names else "No destination configured"
+    dest_channel_ids = [d["id"] for d in active_dests]
 
     effective_privacy = "private"
 
@@ -1041,6 +1444,8 @@ async def preview_historical_videos(
             "already_processed": 0,
             "will_queue": 0,
             "destination_channel_name": dest_name,
+            "destination_channel_names": dest_names,
+            "destination_channel_ids": dest_channel_ids,
             "effective_privacy": effective_privacy,
             "has_view_counts": True,
             "limitations": [
@@ -1315,6 +1720,8 @@ async def preview_historical_videos(
         "already_processed": already_processed_count,
         "will_queue": will_queue,
         "destination_channel_name": dest_name,
+        "destination_channel_names": dest_names,
+        "destination_channel_ids": dest_channel_ids,
         "effective_privacy": effective_privacy,
         "has_view_counts": has_view_counts,
         "candidate_scope": candidate_scope,
@@ -1391,6 +1798,11 @@ async def process_historical_batch(
         else:
             effective_config.update(body.overrides.model_dump())
             effective_config["origin"] = "manual_historical"
+
+    active_dest_ids = await _get_active_destination_ids_for_source_async(db, channel)
+    if active_dest_ids and "destination_ids" not in effective_config:
+        effective_config["destination_ids"] = active_dest_ids
+        effective_config["publish_destination_id"] = active_dest_ids[0]
 
     terminal_statuses = [
         JobStatus.COMPLETED.value,

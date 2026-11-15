@@ -19,6 +19,7 @@ Covers:
    - Rejects creating or updating channels with auto_publish=True without valid active destination.
 """
 import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
@@ -438,11 +439,13 @@ async def test_schedule_publish_destination_validation(tmp_path):
         session.add_all([active_dest, inactive_dest, source_ch, clip])
         session.commit()
 
+    future_at = (datetime.now(timezone.utc) + timedelta(days=2)).isoformat().replace("+00:00", "Z")
+
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         # Case 1: Missing destination
         r1 = await client.post("/api/publish/schedule", json={
             "clip_id": clip_id,
-            "scheduled_at": "2026-11-01T12:00:00Z",
+            "scheduled_at": future_at,
         })
         assert r1.status_code == 400
         assert "Publish destination channel is required" in r1.json()["detail"]
@@ -451,7 +454,7 @@ async def test_schedule_publish_destination_validation(tmp_path):
         r2 = await client.post("/api/publish/schedule", json={
             "clip_id": clip_id,
             "destination_channel_id": "nonexistent_dest_id",
-            "scheduled_at": "2026-11-01T12:00:00Z",
+            "scheduled_at": future_at,
         })
         assert r2.status_code == 400
         assert "Invalid destination channel" in r2.json()["detail"]
@@ -460,7 +463,7 @@ async def test_schedule_publish_destination_validation(tmp_path):
         r3 = await client.post("/api/publish/schedule", json={
             "clip_id": clip_id,
             "destination_channel_id": inactive_dest_id,
-            "scheduled_at": "2026-11-01T12:00:00Z",
+            "scheduled_at": future_at,
         })
         assert r3.status_code == 400
         assert "Invalid destination channel" in r3.json()["detail"]
@@ -469,7 +472,7 @@ async def test_schedule_publish_destination_validation(tmp_path):
         r4 = await client.post("/api/publish/schedule", json={
             "clip_id": clip_id,
             "destination_channel_id": source_ch_id,
-            "scheduled_at": "2026-11-01T12:00:00Z",
+            "scheduled_at": future_at,
         })
         assert r4.status_code == 400
         assert "Invalid destination channel" in r4.json()["detail"]
@@ -479,7 +482,7 @@ async def test_schedule_publish_destination_validation(tmp_path):
             r4b = await client.post("/api/publish/schedule", json={
                 "clip_id": clip_id,
                 "destination_channel_id": active_dest_id,
-                "scheduled_at": "2026-11-01T12:00:00Z",
+                "scheduled_at": future_at,
             })
             assert r4b.status_code == 400
             assert "not authorized or OAuth credentials are invalid" in r4b.json()["detail"]
@@ -494,7 +497,7 @@ async def test_schedule_publish_destination_validation(tmp_path):
             r5 = await client.post("/api/publish/schedule", json={
                 "clip_id": clip_id,
                 "destination_channel_id": active_dest_id,
-                "scheduled_at": "2026-11-01T12:00:00Z",
+                "scheduled_at": future_at,
             })
             assert r5.status_code == 200
             assert r5.json()["message"] == "Clip scheduled"

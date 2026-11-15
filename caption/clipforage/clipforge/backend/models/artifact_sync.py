@@ -1,3 +1,5 @@
+import shutil
+from pathlib import Path
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from typing import Optional
@@ -147,9 +149,42 @@ def managed_download_sync(artifact_id: Optional[str] = None, storage_key: Option
             record = query.filter_by(id=artifact_id).first()
         else:
             record = query.filter_by(storage_key=storage_key).first()
-            
+            if not record and storage_key:
+                # 1. Fallback: check if storage_key contains a video/owner ID
+                import re
+                vid_match = re.search(r"v_[a-f0-9]{16}", storage_key)
+                if vid_match:
+                    vid_id = vid_match.group(0)
+                    record = query.filter(
+                        ArtifactRecord.owner_id == vid_id,
+                        ArtifactRecord.artifact_type == "raw_video"
+                    ).first()
+                # 2. Fallback: check if storage_key is an owner_id directly
+                if not record:
+                    record = query.filter(ArtifactRecord.owner_id == storage_key).first()
+                # 3. Fallback: check suffix match on storage_key
+                if not record and "/" in storage_key:
+                    suffix = storage_key.split("uploads/")[-1] if "uploads/" in storage_key else storage_key.lstrip("/")
+                    record = query.filter(ArtifactRecord.storage_key.ilike(f"%{suffix}%")).first()
+
         if not record:
+            # Fallback 4: Direct local file on disk
+            p_direct = Path(storage_key) if storage_key else None
+            if p_direct and p_direct.exists() and p_direct.is_file() and p_direct.stat().st_size > 0:
+                fd, temp_path = tempfile.mkstemp(prefix="clipforge_managed_dl_")
+                os.close(fd)
+                try:
+                    shutil.copy2(str(p_direct), temp_path)
+                    yield temp_path
+                    return
+                finally:
+                    if os.path.exists(temp_path):
+                        try:
+                            os.remove(temp_path)
+                        except Exception:
+                            pass
             raise ValueError(f"Artifact not found")
+
         if record.status not in (ArtifactStatus.READY.value, ArtifactStatus.CREATED.value):
             raise ValueError(f"Artifact is not in a ready state. Status: {record.status}")
             

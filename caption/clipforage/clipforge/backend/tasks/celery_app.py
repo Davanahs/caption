@@ -52,6 +52,10 @@ celery_app.conf.update(
             "task": "backend.services.queue_manager.drain_manual_queue",
             "schedule": 30,  # runs every 30 seconds
         },
+        "stale-job-recovery": {
+            "task": "backend.tasks.orchestration.stale_job_recovery_task",
+            "schedule": 120,  # runs every 120 seconds
+        },
     },
 )
 

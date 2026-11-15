@@ -44,6 +44,8 @@ def clean_test_jobs():
                         Job.id.like("active-job-%"),
                         Job.id.like("queued-job-%"),
                         Job.id.like("test-%"),
+                        Job.id.like("reaper-%"),
+                        Job.id.like("fail-%"),
                     )
                 ).all()
             ]
@@ -74,17 +76,36 @@ def test_active_manual_jobs_count():
     with SyncSessionLocal() as session:
         now = datetime.now(timezone.utc)
         # Create 2 active manual jobs
-        j1 = Job(id=str(uuid.uuid4()), status=JobStatus.DOWNLOADING.value, channel_id=None, is_test=True, created_at=now, updated_at=now)
-        j2 = Job(id=str(uuid.uuid4()), status=JobStatus.ANALYZING.value, channel_id=None, is_test=True, created_at=now, updated_at=now)
+        j1 = Job(id=f"gate-{uuid.uuid4()}", status=JobStatus.DOWNLOADING.value, channel_id=None, is_test=False, source_url="https://youtu.be/real_v1", created_at=now, updated_at=now)
+        j2 = Job(id=f"gate-{uuid.uuid4()}", status=JobStatus.ANALYZING.value, channel_id=None, is_test=False, source_url="https://youtu.be/real_v2", created_at=now, updated_at=now)
         # Create 1 channel automation job (must be ignored by manual count)
-        j3 = Job(id=str(uuid.uuid4()), status=JobStatus.DOWNLOADING.value, channel_id="ch_auto_99", is_test=True, created_at=now, updated_at=now)
+        j3 = Job(id=f"gate-{uuid.uuid4()}", status=JobStatus.DOWNLOADING.value, channel_id="ch_auto_99", is_test=False, source_url="https://youtu.be/auto_v3", created_at=now, updated_at=now)
         # Create 1 completed job (must be ignored)
-        j4 = Job(id=str(uuid.uuid4()), status=JobStatus.COMPLETED.value, channel_id=None, is_test=True, created_at=now, updated_at=now)
+        j4 = Job(id=f"gate-{uuid.uuid4()}", status=JobStatus.COMPLETED.value, channel_id=None, is_test=False, source_url="https://youtu.be/comp_v4", created_at=now, updated_at=now)
         session.add_all([j1, j2, j3, j4])
         session.commit()
 
         active = get_active_manual_jobs_count_sync(session)
         assert active == 2, f"Expected 2 active manual jobs, got {active}"
+
+
+def test_queue_manager_ignores_is_test_and_synthetic_urls():
+    """
+    Verify that jobs with is_test=True OR with synthetic URLs
+    are NEVER counted towards active manual capacity or queued.
+    """
+    with SyncSessionLocal() as session:
+        now = datetime.now(timezone.utc)
+        # Test job with is_test=True
+        j_test = Job(id=f"test-flag-{uuid.uuid4().hex[:6]}", status=JobStatus.DOWNLOADING.value, channel_id=None, is_test=True, source_url="https://youtu.be/some_vid", created_at=now, updated_at=now)
+        # Synthetic URL jobs with is_test=False
+        j_synth1 = Job(id=f"test-synth1-{uuid.uuid4().hex[:6]}", status=JobStatus.DOWNLOADING.value, channel_id=None, is_test=False, source_url="https://www.youtube.com/watch?v=dQw4w9WgXcQ", created_at=now, updated_at=now)
+        j_synth2 = Job(id=f"test-synth2-{uuid.uuid4().hex[:6]}", status=JobStatus.DOWNLOADING.value, channel_id=None, is_test=False, source_url="test_upload.mp4", created_at=now, updated_at=now)
+        session.add_all([j_test, j_synth1, j_synth2])
+        session.commit()
+
+        active = get_active_manual_jobs_count_sync(session)
+        assert active == 0, f"Expected 0 active jobs for test/synthetic fixtures, got {active}"
 
 
 def test_manual_queue_drain_fifo_order():
@@ -102,7 +123,8 @@ def test_manual_queue_drain_fifo_order():
                 id=f"active-job-{i}-{uuid.uuid4().hex[:6]}",
                 status=JobStatus.TRANSCRIBING.value,
                 channel_id=None,
-                is_test=True,
+                is_test=False,
+                source_url=f"https://youtu.be/active_{i}",
                 created_at=now - timedelta(minutes=10 - i),
                 updated_at=now,
             )
@@ -121,7 +143,7 @@ def test_manual_queue_drain_fifo_order():
             source_url="https://youtu.be/vid6",
             config=json.dumps(cfg6),
             channel_id=None,
-            is_test=True,
+            is_test=False,
             created_at=now - timedelta(minutes=2),
             updated_at=now,
             current_step=format_queue_step(1),
@@ -134,7 +156,7 @@ def test_manual_queue_drain_fifo_order():
             source_url="https://youtu.be/vid7",
             config=json.dumps(cfg7),
             channel_id=None,
-            is_test=True,
+            is_test=False,
             created_at=now - timedelta(minutes=1),
             updated_at=now,
             current_step=format_queue_step(2),
@@ -226,7 +248,8 @@ async def test_api_video_url_concurrency_gate():
 
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
-        with patch("backend.services.queue_manager.dispatch_celery_job", return_value="mock-celery-id"):
+        with patch("backend.services.queue_manager.dispatch_celery_job", return_value="mock-celery-id"), \
+             patch("backend.services.llm_router.is_ai_provider_configured", return_value=True):
             # Step 1: Pre-populate 4 active jobs in DB
             now = datetime.now(timezone.utc)
             with SyncSessionLocal() as session:
@@ -235,32 +258,43 @@ async def test_api_video_url_concurrency_gate():
                         id=f"gate-active-{i}-{uuid.uuid4().hex[:6]}",
                         status=JobStatus.DOWNLOADING.value,
                         channel_id=None,
-                        is_test=True,
+                        is_test=False,
+                        source_url=f"https://youtu.be/real_active_{i}",
                         created_at=now,
                         updated_at=now,
                     ))
                 session.commit()
 
-            # Video 5: should fill the 5th slot and be dispatched (queued=False)
-            resp5 = await client.post("/api/videos/url", data={"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "is_test": "true"})
-            assert resp5.status_code == 200
-            data5 = resp5.json()
-            assert data5["queued"] is False
-            assert data5["message"] == "Processing started"
+            created_job_ids = []
+            try:
+                # Video 5: should fill the 5th slot and be dispatched (queued=False)
+                resp5 = await client.post("/api/videos/url", data={"url": "https://www.youtube.com/watch?v=kffacxfA7G4"})
+                assert resp5.status_code == 200
+                data5 = resp5.json()
+                created_job_ids.append(data5["job_id"])
+                assert data5["queued"] is False
+                assert data5["message"] == "Processing started"
 
-            # Video 6: should be placed in queue (#1 in line)
-            resp6 = await client.post("/api/videos/url", data={"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "is_test": "true"})
-            assert resp6.status_code == 200
-            data6 = resp6.json()
-            assert data6["queued"] is True
-            assert data6["queue_position"] == 1
-            assert "Queued (#1 in line" in data6["message"]
+                # Video 6: should be placed in queue (#1 in line)
+                resp6 = await client.post("/api/videos/url", data={"url": "https://www.youtube.com/watch?v=9bZkp7q19f0"})
+                assert resp6.status_code == 200
+                data6 = resp6.json()
+                created_job_ids.append(data6["job_id"])
+                assert data6["queued"] is True
+                assert data6["queue_position"] == 1
+                assert "Queued (#1 in line" in data6["message"]
 
-            # Video 7: should be placed in queue (#2 in line)
-            resp7 = await client.post("/api/videos/url", data={"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ", "is_test": "true"})
-            assert resp7.status_code == 200
-            data7 = resp7.json()
-            assert data7["queued"] is True
-            assert data7["queue_position"] == 2
-            assert "Queued (#2 in line" in data7["message"]
+                # Video 7: should be placed in queue (#2 in line)
+                resp7 = await client.post("/api/videos/url", data={"url": "https://www.youtube.com/watch?v=kJQP7kiw5Fk"})
+                assert resp7.status_code == 200
+                data7 = resp7.json()
+                created_job_ids.append(data7["job_id"])
+                assert data7["queued"] is True
+                assert data7["queue_position"] == 2
+                assert "Queued (#2 in line" in data7["message"]
+            finally:
+                if created_job_ids:
+                    with SyncSessionLocal() as session:
+                        session.query(Job).filter(Job.id.in_(created_job_ids)).delete(synchronize_session=False)
+                        session.commit()
 

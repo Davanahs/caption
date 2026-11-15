@@ -748,3 +748,11 @@ body {
 .recent-job-card:hover .thumbnail-img {
   transform: scale(1.05);
 }
+
+/* ── Gaming Studio Interactive ROI Handles ─────────────────────────── */
+.gameplay-handle,
+.facecam-handle {
+  touch-action: none;
+  user-select: none;
+}
+

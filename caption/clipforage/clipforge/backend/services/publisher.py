@@ -4,6 +4,7 @@ Handles OAuth2 flow and video upload via YouTube Data API v3
 """
 import json
 import os
+import re
 import logging
 from pathlib import Path
 from google.oauth2.credentials import Credentials
@@ -67,9 +68,15 @@ def get_youtube_client(channel_id: str = None):
 
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-            with open(token_file, "w") as f:
-                f.write(creds.to_json())
+            try:
+                creds.refresh(Request())
+                with open(token_file, "w") as f:
+                    f.write(creds.to_json())
+            except Exception as refresh_err:
+                raise ValueError(
+                    f"YouTube OAuth refresh failed for destination channel {channel_id or 'default'}: {refresh_err}. "
+                    f"Please reconnect channel authorization."
+                )
         else:
             raise ValueError(f"YouTube authorization required for destination channel {channel_id or 'default'}. No valid credentials found.")
 
@@ -278,6 +285,37 @@ def sanitize_youtube_tags(raw_tags: list[str] | None, max_total_chars: int = 450
     return clean_tags
 
 
+def sanitize_youtube_description(text: str | None, max_length: int = 5000) -> str:
+    """
+    Sanitizes description for YouTube Data API v3 body.snippet.description:
+    1. Removes disallowed angle brackets '<' and '>' which trigger HttpError 400 invalidDescription.
+    2. Strips ASCII control characters (0x00-0x08, 0x0B, 0x0C, 0x0E-0x1F, 0x7F) while preserving \n and \r.
+    3. Normalizes null bytes and invalid UTF-8 sequences.
+    4. Truncates cleanly to max_length (YouTube limit: 5000 chars).
+    """
+    if not text:
+        return ""
+    clean = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', str(text))
+    clean = clean.replace("<", "").replace(">", "")
+    return clean[:max_length]
+
+
+def sanitize_youtube_title(title: str | None, max_length: int = 100) -> str:
+    """
+    Sanitizes title for YouTube Data API v3 body.snippet.title:
+    1. Removes disallowed angle brackets '<' and '>'.
+    2. Strips newlines and control characters.
+    3. Collapses consecutive spaces.
+    4. Truncates cleanly to max_length (YouTube limit: 100 chars).
+    """
+    if not title:
+        return "Untitled Short"
+    clean = re.sub(r'[\x00-\x1f\x7f]', ' ', str(title))
+    clean = clean.replace("<", "").replace(">", "").strip()
+    clean = re.sub(r'\s+', ' ', clean)
+    return clean[:max_length] or "Untitled Short"
+
+
 def upload_short(
     video_path: Path,
     title: str,
@@ -407,6 +445,9 @@ def upload_short(
     else:
         short_title = title
 
+    sanitized_title = sanitize_youtube_title(short_title, max_length=100)
+    sanitized_desc = sanitize_youtube_description(short_desc, max_length=5000)
+
     status_payload = {
         "privacyStatus": effective_privacy,
     }
@@ -417,8 +458,8 @@ def upload_short(
 
     body = {
         "snippet": {
-            "title": short_title[:100],
-            "description": short_desc[:5000],
+            "title": sanitized_title,
+            "description": sanitized_desc,
             "tags": cleaned_tags,
             "categoryId": effective_category,
         },
@@ -855,8 +896,8 @@ def update_video_metadata(
         raise RuntimeError(f"Video '{youtube_video_id}' not found on YouTube.")
 
     snippet = current["items"][0]["snippet"]
-    snippet["title"] = title[:100]
-    snippet["description"] = description[:5000]
+    snippet["title"] = sanitize_youtube_title(title, max_length=100)
+    snippet["description"] = sanitize_youtube_description(description, max_length=5000)
     snippet["tags"] = cleaned_tags
 
     response = youtube.videos().update(
@@ -948,6 +989,86 @@ def check_channel_authorization(youtube_channel_id: str = None) -> bool:
         return False
 
 
+def get_destination_auth_metadata(
+    youtube_channel_id: str | None,
+    channel_url: str | None = None,
+    channel_name: str | None = None,
+    is_default_destination: bool = False,
+) -> dict:
+    """
+    Inspect non-secret OAuth status and upload permission state for a destination channel.
+    Strictly NEVER returns access_token, refresh_token, or client_secret.
+    """
+    if not youtube_channel_id:
+        return {
+            "is_authorized": False,
+            "upload_permission_status": "revoked",
+            "google_account_identity": None,
+        }
+
+    token_dir = _resolve_token_dir()
+    chan_file = token_dir / f"youtube_token_{youtube_channel_id}.json"
+    disconnected_file = token_dir / f"youtube_token_{youtube_channel_id}.disconnected.json"
+    default_file = token_dir / "youtube_token.json"
+
+    target_file = None
+    if chan_file.exists():
+        target_file = chan_file
+    elif is_default_destination and default_file.exists():
+        target_file = default_file
+
+    identity_hint = None
+    if channel_url and "/@" in channel_url:
+        identity_hint = "@" + channel_url.split("/@")[-1].split("/")[0]
+    elif channel_name:
+        identity_hint = channel_name.strip()
+
+    if target_file is None:
+        return {
+            "is_authorized": False,
+            "upload_permission_status": "revoked" if disconnected_file.exists() else "missing",
+            "google_account_identity": identity_hint,
+        }
+
+    try:
+        raw_meta = json.loads(target_file.read_text(encoding="utf-8"))
+        # Read only non-secret identity labels if present in token JSON metadata
+        account_label = raw_meta.get("account") or raw_meta.get("account_email") or raw_meta.get("email")
+        if account_label:
+            identity_hint = str(account_label)
+        elif identity_hint:
+            identity_hint = f"Google Account ({identity_hint})"
+        else:
+            identity_hint = "Connected Google Account (YouTube OAuth)"
+
+        creds = Credentials.from_authorized_user_file(str(target_file), SCOPES)
+        scopes = set(getattr(creds, "scopes", None) or raw_meta.get("scopes") or [])
+        has_upload_scope = (
+            not scopes
+            or "https://www.googleapis.com/auth/youtube.upload" in scopes
+            or "https://www.googleapis.com/auth/youtube" in scopes
+        )
+        is_usable = bool(creds and (creds.valid or creds.refresh_token))
+        if not is_usable:
+            perm_status = "expired"
+        elif not has_upload_scope:
+            perm_status = "missing_scope"
+        else:
+            perm_status = "granted"
+
+        return {
+            "is_authorized": bool(is_usable and has_upload_scope),
+            "upload_permission_status": perm_status,
+            "google_account_identity": identity_hint,
+        }
+    except Exception:
+        return {
+            "is_authorized": False,
+            "upload_permission_status": "expired",
+            "google_account_identity": identity_hint,
+        }
+
+
 def sync_authorized_destinations():
     """
     Scans the tokens directory for authenticated YouTube credentials.
@@ -962,8 +1083,11 @@ def sync_authorized_destinations():
     from backend.models.models import Channel
     import uuid
 
-    # Look for all youtube_token*.json files
-    token_files = list(token_dir.glob("youtube_token*.json"))
+    # Look for active youtube_token*.json files (never scan disconnected archives)
+    token_files = [
+        tf for tf in token_dir.glob("youtube_token*.json")
+        if not tf.name.endswith(".disconnected.json")
+    ]
     for tf in token_files:
         try:
             creds = Credentials.from_authorized_user_file(str(tf), SCOPES)
@@ -987,8 +1111,18 @@ def sync_authorized_destinations():
             ch_title = item["snippet"]["title"]
             ch_thumb = item["snippet"].get("thumbnails", {}).get("default", {}).get("url")
 
+            # Do not resurrect explicitly disconnected channel from legacy global token file
+            if tf.name == "youtube_token.json" and (token_dir / f"youtube_token_{ch_id}.disconnected.json").exists():
+                continue
+
             with SyncSessionLocal() as session:
                 existing = session.query(Channel).filter_by(youtube_channel_id=ch_id).first()
+                has_default = (
+                    session.query(Channel)
+                    .filter_by(is_destination=True, is_default_destination=True, is_active=True)
+                    .first()
+                    is not None
+                )
                 if not existing:
                     new_ch = Channel(
                         id=str(uuid.uuid4()),
@@ -997,9 +1131,17 @@ def sync_authorized_destinations():
                         channel_url=f"https://youtube.com/channel/{ch_id}",
                         thumbnail_url=ch_thumb,
                         is_destination=True,
-                        is_default_destination=True,
+                        is_default_destination=not has_default,
                         is_active=True,
                         is_test=False,
+                        publishing_settings={
+                            "default_privacy": "private",
+                            "default_category": "22",
+                            "default_license": "youtube",
+                            "default_made_for_kids": False,
+                            "default_age_restricted": False,
+                            "default_tags": "shorts, viral",
+                        },
                     )
                     session.add(new_ch)
                     session.commit()
@@ -1188,7 +1330,7 @@ def get_oauth_url(redirect_uri: str = None, state: str = None, prompt: str = "se
     }
     flow = InstalledAppFlow.from_client_config(client_config, SCOPES)
     flow.redirect_uri = redirect_uri
-    kwargs = {"prompt": prompt}
+    kwargs = {"prompt": prompt, "access_type": "offline", "include_granted_scopes": "true"}
     if state:
         kwargs["state"] = state
     auth_url, _ = flow.authorization_url(**kwargs)
@@ -1282,7 +1424,7 @@ def exchange_code_for_token(code: str, redirect_uri: str = None) -> dict:
                 is_active=True,
                 is_test=False,
                 publishing_settings={
-                    "default_privacy": "public",
+                    "default_privacy": "private",
                     "default_category": "22",
                     "default_license": "youtube",
                     "default_made_for_kids": False,
@@ -1306,7 +1448,7 @@ def exchange_code_for_token(code: str, redirect_uri: str = None) -> dict:
                 db_channel.is_default_destination = True
             if not db_channel.publishing_settings:
                 db_channel.publishing_settings = {
-                    "default_privacy": "public",
+                    "default_privacy": "private",
                     "default_category": "22",
                     "default_license": "youtube",
                     "default_made_for_kids": False,
@@ -1331,14 +1473,17 @@ def exchange_code_for_token(code: str, redirect_uri: str = None) -> dict:
 def validate_destination_ids(destination_ids: list[str], session) -> list[str]:
     """
     Validates every destination ID before creating PublishTargets.
+    Enforces strict channel-isolated OAuth credentials and normalizes to canonical Channel.id.
     Raises ValueError on any invalid destination. Never silently substitutes.
     """
     from backend.models.models import Channel
-    from backend.core.config import settings
 
-    validated = []
+    validated: list[str] = []
+    seen: set[str] = set()
     for dest_id in destination_ids:
-        channel = session.query(Channel).filter_by(id=dest_id).first()
+        channel = session.query(Channel).filter(
+            (Channel.id == dest_id) | (Channel.youtube_channel_id == dest_id)
+        ).first()
         if not channel:
             raise ValueError(f"Destination {dest_id} does not exist")
         if not channel.is_destination:
@@ -1350,15 +1495,24 @@ def validate_destination_ids(destination_ids: list[str], session) -> list[str]:
             raise ValueError(
                 f"Destination {dest_id} ({channel.channel_name}) is inactive"
             )
-        # Verify credential file exists
-        token_file = Path(settings.YOUTUBE_TOKEN_FILE).parent / f"youtube_token_{channel.youtube_channel_id}.json"
-        if not token_file.exists():
-            default_token = Path(settings.YOUTUBE_TOKEN_FILE)
-            if not default_token.exists():
+        # Channel-isolated credential check (no arbitrary sharing of global default token)
+        chan_file = _resolve_token_file(channel.youtube_channel_id)
+        default_file = _resolve_token_file()
+        has_chan_token = chan_file.exists()
+        has_default_token = bool(channel.is_default_destination) and default_file.exists()
+        if not (has_chan_token or has_default_token):
+            raise ValueError(
+                f"No YouTube credentials for destination {channel.channel_name} ({channel.youtube_channel_id})"
+            )
+        # If real credential files exist on disk, verify credentials remain valid/refreshable
+        if chan_file.is_file() or (has_default_token and default_file.is_file()):
+            if not check_channel_authorization(channel.youtube_channel_id):
                 raise ValueError(
-                    f"No YouTube credentials for destination {channel.channel_name} ({channel.youtube_channel_id})"
+                    f"Destination {channel.channel_name} ({channel.youtube_channel_id}) authorization expired or revoked"
                 )
-        validated.append(dest_id)
+        if channel.id not in seen:
+            seen.add(channel.id)
+            validated.append(channel.id)
 
     return validated
 
@@ -1374,9 +1528,9 @@ def resolve_publish_destinations(
        - Explicit empty list ([]) -> BLOCKS publishing. Returns [] (never falls back to defaults).
        - Explicit non-empty list -> Validates and returns validated destination IDs.
     2. If "destination_ids" key is absent from job_config:
-       - Uses source-channel defaults from ChannelDestination where is_default=True.
-       - Falls back to legacy Channel.is_default_destination=True if no ChannelDestination rows exist.
-       - Returns list of validated destination IDs.
+       - Uses source-channel mappings from ChannelDestination where is_default=True.
+       - Never silently falls back to arbitrary global destinations when source or manual job has none.
+       - Returns list of validated active destination IDs.
     """
     from backend.models.models import Channel, ChannelDestination
     from datetime import datetime, timezone
@@ -1408,7 +1562,7 @@ def resolve_publish_destinations(
             # Explicit None/empty in job_config: preserve intentional None (Select at publish time)
             return []
 
-    # destination_ids is absent -> Use source-channel defaults from ChannelDestination
+    # destination_ids is absent -> Use source-channel mappings from ChannelDestination
     if source_channel_id:
         now = datetime.now(timezone.utc)
         cd_rows = session.query(ChannelDestination).filter(
@@ -1417,35 +1571,31 @@ def resolve_publish_destinations(
             (ChannelDestination.expires_at.is_(None) | (ChannelDestination.expires_at > now))
         ).all()
         if cd_rows:
-            dest_ids = [cd.destination_channel_id for cd in cd_rows]
-            try:
-                return validate_destination_ids(dest_ids, session)
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning(f"Error validating source defaults for {source_channel_id}: {e}")
+            valid_active_ids: list[str] = []
+            for cd in cd_rows:
+                try:
+                    valid_active_ids.extend(validate_destination_ids([cd.destination_channel_id], session))
+                except Exception as e:
+                    logger.warning(
+                        f"Skipping unavailable mapped destination {cd.destination_channel_id} for source {source_channel_id}: {e}"
+                    )
+            return list(dict.fromkeys(valid_active_ids))
 
-        # Check source channel's direct publish_destination_id
+        # Legacy single destination field on Channel when no ChannelDestination rows exist
         src_channel = session.query(Channel).filter_by(id=source_channel_id).first()
         if src_channel:
             if src_channel.publish_destination_id:
                 try:
                     return validate_destination_ids([src_channel.publish_destination_id], session)
                 except Exception as e:
-                    import logging
-                    logging.getLogger(__name__).warning(f"Error validating source channel publish_destination_id for {source_channel_id}: {e}")
-            else:
-                # Monitored channel explicitly configured with None (Select at publish time)
-                # Preserve intentional None — do NOT silently fall back to arbitrary default accounts
-                return []
-
-    # Fallback to legacy global default if present and no channel-specific context exists
-    default_ch = session.query(Channel).filter_by(is_default_destination=True, is_active=True).first()
-    if default_ch:
-        try:
-            return validate_destination_ids([default_ch.id], session)
-        except Exception:
+                    logger.warning(
+                        f"Error validating source channel publish_destination_id for {source_channel_id}: {e}"
+                    )
+                    return []
+            # Monitored channel explicitly configured with None (Select at publish time)
             return []
 
+    # Never silently pick an arbitrary global default destination
     return []
 
 

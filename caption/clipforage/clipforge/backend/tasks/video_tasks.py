@@ -137,6 +137,15 @@ def download_task(self, job_id: str, youtube_url: str = None, local_path: str = 
             )
             update_artifact_status_sync(storage_key, ArtifactStatus.READY)
             
+            # Explicitly persist storage_key on Video record so downstream tasks locate the registered artifact
+            from backend.models.database import SyncSessionLocal
+            from backend.models.models import Video
+            with SyncSessionLocal() as session:
+                v_row = session.query(Video).filter_by(id=video_id).first()
+                if v_row and v_row.local_path != storage_key:
+                    v_row.local_path = storage_key
+                    session.commit()
+            
             link_job_video_sync(job_id, video_id)
         else:
             raise ValueError("Must provide either youtube_url or local_path")

@@ -11,6 +11,7 @@ const appDir = path.resolve(__dirname, '../app');
 test('Route Integrity: All Sidebar routes exist as valid Next.js app pages', () => {
   const sidebarRoutes = [
     { name: 'Dashboard', path: '/', pageFile: path.join(appDir, 'page.tsx') },
+    { name: 'Gaming Studio', path: '/gaming', pageFile: path.join(appDir, 'gaming/page.tsx') },
     { name: 'Podcasts', path: '/podcasts', pageFile: path.join(appDir, 'podcasts/page.tsx') },
     { name: 'Upload Studio', path: '/studio', pageFile: path.join(appDir, 'studio/page.tsx') },
     { name: 'Clips', path: '/clips', pageFile: path.join(appDir, 'clips/page.tsx') },

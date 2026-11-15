@@ -26,6 +26,7 @@ import {
   getBatchOutputs,
   StudioOutputClip
 } from '@/lib/studioApi';
+import { getDestinations, PublishDestination } from '@/lib/api';
 
 function formatBytes(bytes: number): string {
   if (!bytes || isNaN(bytes) || bytes === 0) return '0 B';
@@ -51,6 +52,13 @@ export default function UploadStudioPage() {
   const [showProcessModal, setShowProcessModal] = useState(false);
   const [announcement, setAnnouncement] = useState('');
   
+  // Calculations
+  const totalBytes = queue.reduce((sum, item) => sum + (item.metadata?.file_size || 0), 0);
+  const readyCount = queue.filter((item) => item.media_availability === 'available').length;
+  const missingCount = queue.length - readyCount;
+  const isBatchReady = queue.length > 0 && missingCount === 0;
+  const allUploaded = queue.length > 0 && queue.every((item) => item.upload_status === 'uploaded');
+
   // Storage & Error Feedback States
   const [fileSelectionError, setFileSelectionError] = useState<string | null>(null);
   const [reselectError, setReselectError] = useState<string | null>(null);
@@ -77,6 +85,14 @@ export default function UploadStudioPage() {
 
   // Backend deployment probe state
   const [backendStatus, setBackendStatus] = useState<'checking' | 'connected' | 'not_deployed'>('checking');
+
+  // Multi-destination publishing routing state
+  const [destinations, setDestinations] = useState<PublishDestination[]>([]);
+  const [selectedDestinationIds, setSelectedDestinationIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    getDestinations().then(data => setDestinations(data || [])).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -131,7 +147,15 @@ export default function UploadStudioPage() {
           }
           return updated;
         });
-      } catch (err) {
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes('not found') || msg.includes('404')) {
+          console.warn('[UploadStudio] Batch no longer exists on server, clearing stale batch ID:', currentBatchId);
+          setCurrentBatchId(null);
+          setIsProcessingBatch(false);
+          setBatchProcessingStatus('none');
+          return;
+        }
         console.error('[UploadStudio] Poll error:', err);
       }
     }, 2000);
@@ -202,88 +226,24 @@ export default function UploadStudioPage() {
 
   // Refs to ensure window harness always accesses latest state even right after reload
   const queueRef = useRef(queue);
-  queueRef.current = queue;
   const storageSyncStatusRef = useRef(storageSyncStatus);
-  storageSyncStatusRef.current = storageSyncStatus;
   const storageErrorMessageRef = useRef(storageErrorMessage);
-  storageErrorMessageRef.current = storageErrorMessage;
   const isUploadingBatchRef = useRef(isUploadingBatch);
-  isUploadingBatchRef.current = isUploadingBatch;
   const currentBatchIdRef = useRef(currentBatchId);
-  currentBatchIdRef.current = currentBatchId;
   const isProcessingBatchRef = useRef(isProcessingBatch);
-  isProcessingBatchRef.current = isProcessingBatch;
   const batchProcessingStatusRef = useRef(batchProcessingStatus);
-  batchProcessingStatusRef.current = batchProcessingStatus;
   const activeProcessingVideoIdRef = useRef(activeProcessingVideoId);
-  activeProcessingVideoIdRef.current = activeProcessingVideoId;
-
-  // Expose diagnostic harness for automated test execution immediately
-  if (typeof window !== 'undefined') {
-    (window as unknown as { __clipforgeStudio: unknown }).__clipforgeStudio = {
-      getQueue: () => (queueRef.current !== undefined ? queueRef.current : []),
-      getStorageSyncStatus: () => storageSyncStatusRef.current,
-      getStorageErrorMessage: () => storageErrorMessageRef.current,
-      setStorageSimulationMode,
-      getStorageSimulationMode,
-      saveStagedQueue,
-      loadStagedQueue,
-      reattachFileBlob,
-      clearStagedQueue,
-      handleUploadBatch: () => handleUploadBatch(),
-      handleClearQueue: () => handleClearQueue(),
-      deleteBatch: async () => {
-        if (currentBatchIdRef.current) {
-          await deleteStudioBatch(currentBatchIdRef.current);
-          currentBatchIdRef.current = null;
-          await clearStagedQueue();
-          setQueue([]);
-        }
-      },
-      getIsUploadingBatch: () => isUploadingBatchRef.current,
-      getCurrentBatchId: () => currentBatchIdRef.current,
-      getIsProcessingBatch: () => isProcessingBatchRef.current,
-      getBatchProcessingStatus: () => batchProcessingStatusRef.current,
-      getActiveProcessingVideoId: () => activeProcessingVideoIdRef.current,
-      handleProcessBatch: () => handleProcessBatch(),
-      handleCancelBatchProcessing: () => handleCancelBatchProcessing(),
-      handleRetryVideo: (id: string) => handleRetryVideo(id),
-    };
-  }
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      (window as unknown as { __clipforgeStudio: unknown }).__clipforgeStudio = {
-        getQueue: () => (queueRef.current !== undefined ? queueRef.current : []),
-        getStorageSyncStatus: () => storageSyncStatusRef.current,
-        getStorageErrorMessage: () => storageErrorMessageRef.current,
-        setStorageSimulationMode,
-        getStorageSimulationMode,
-        saveStagedQueue,
-        loadStagedQueue,
-        reattachFileBlob,
-        clearStagedQueue,
-        handleUploadBatch: () => handleUploadBatch(),
-        handleClearQueue: () => handleClearQueue(),
-        deleteBatch: async () => {
-          if (currentBatchIdRef.current) {
-            await deleteStudioBatch(currentBatchIdRef.current);
-            currentBatchIdRef.current = null;
-            await clearStagedQueue();
-            setQueue([]);
-          }
-        },
-        getIsUploadingBatch: () => isUploadingBatchRef.current,
-        getCurrentBatchId: () => currentBatchIdRef.current,
-        getIsProcessingBatch: () => isProcessingBatchRef.current,
-        getBatchProcessingStatus: () => batchProcessingStatusRef.current,
-        getActiveProcessingVideoId: () => activeProcessingVideoIdRef.current,
-        handleProcessBatch: () => handleProcessBatch(),
-        handleCancelBatchProcessing: () => handleCancelBatchProcessing(),
-        handleRetryVideo: (id: string) => handleRetryVideo(id),
-      };
-    }
-  }, [queue, storageSyncStatus, storageErrorMessage, isUploadingBatch, currentBatchId, isProcessingBatch, batchProcessingStatus, activeProcessingVideoId]);
+    queueRef.current = queue;
+    storageSyncStatusRef.current = storageSyncStatus;
+    storageErrorMessageRef.current = storageErrorMessage;
+    isUploadingBatchRef.current = isUploadingBatch;
+    currentBatchIdRef.current = currentBatchId;
+    isProcessingBatchRef.current = isProcessingBatch;
+    batchProcessingStatusRef.current = batchProcessingStatus;
+    activeProcessingVideoIdRef.current = activeProcessingVideoId;
+  });
 
   // Sync state mutations to IndexedDB
   const syncQueueToStorage = useCallback(async (newQueue: StagedVideoItem[]) => {
@@ -525,7 +485,9 @@ export default function UploadStudioPage() {
         }
       }
 
-      const batch = await createStudioBatch(idempotencyKey, `Studio Batch (${queue.length} files)`);
+      const batch = await createStudioBatch(idempotencyKey, `Studio Batch (${queue.length} files)`, {
+        destination_ids: selectedDestinationIds
+      });
       setCurrentBatchId(batch.id);
 
       const updatedQueue = [...queue];
@@ -607,7 +569,9 @@ export default function UploadStudioPage() {
     setAnnouncement('Starting sequential batch processing...');
 
     try {
-      const res = await processStudioBatch(currentBatchId);
+      const res = await processStudioBatch(currentBatchId, {
+        destination_ids: selectedDestinationIds
+      });
       setBatchProcessingStatus(res.status);
       setActiveProcessingVideoId(res.active_video_id || null);
       setAnnouncement('Batch processing started in preserved queue order.');
@@ -650,12 +614,41 @@ export default function UploadStudioPage() {
     }
   };
 
-  // Calculations
-  const totalBytes = queue.reduce((sum, item) => sum + (item.metadata?.file_size || 0), 0);
-  const readyCount = queue.filter((item) => item.media_availability === 'available').length;
-  const missingCount = queue.length - readyCount;
-  const isBatchReady = queue.length > 0 && missingCount === 0;
-  const allUploaded = queue.length > 0 && queue.every((item) => item.upload_status === 'uploaded');
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as unknown as { __clipforgeStudio: unknown }).__clipforgeStudio = {
+        getQueue: () => (queueRef.current !== undefined ? queueRef.current : []),
+        getStorageSyncStatus: () => storageSyncStatusRef.current,
+        getStorageErrorMessage: () => storageErrorMessageRef.current,
+        setStorageSimulationMode,
+        getStorageSimulationMode,
+        saveStagedQueue,
+        loadStagedQueue,
+        reattachFileBlob,
+        clearStagedQueue,
+        handleUploadBatch: () => handleUploadBatch(),
+        handleClearQueue: () => handleClearQueue(),
+        deleteBatch: async () => {
+          if (currentBatchIdRef.current) {
+            await deleteStudioBatch(currentBatchIdRef.current);
+            currentBatchIdRef.current = null;
+            await clearStagedQueue();
+            setQueue([]);
+          }
+        },
+        getIsUploadingBatch: () => isUploadingBatchRef.current,
+        getCurrentBatchId: () => currentBatchIdRef.current,
+        getIsProcessingBatch: () => isProcessingBatchRef.current,
+        getBatchProcessingStatus: () => batchProcessingStatusRef.current,
+        getActiveProcessingVideoId: () => activeProcessingVideoIdRef.current,
+        handleProcessBatch: () => handleProcessBatch(),
+        handleCancelBatchProcessing: () => handleCancelBatchProcessing(),
+        handleRetryVideo: (id: string) => handleRetryVideo(id),
+        setBatchProcessingStatusForTest: (status: string | null) => setBatchProcessingStatus(status),
+        setIsProcessingBatchForTest: (isProc: boolean) => setIsProcessingBatch(isProc),
+      };
+    }
+  }, [queue, storageSyncStatus, storageErrorMessage, isUploadingBatch, currentBatchId, isProcessingBatch, batchProcessingStatus, activeProcessingVideoId]);
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px', color: '#f8fafc' }}>
@@ -1065,12 +1058,15 @@ export default function UploadStudioPage() {
                 if (currentBatchId) {
                   try {
                     await deleteStudioBatch(currentBatchId);
+                  } catch (err) {
+                    console.warn('[UploadStudio] Server delete warning (proceeding with local cleanup):', err);
+                  } finally {
                     setCurrentBatchId(null);
+                    setBatchProcessingStatus('none');
+                    setIsProcessingBatch(false);
                     await clearStagedQueue();
                     setQueue([]);
                     setAnnouncement('Batch deleted from server and local queue cleared.');
-                  } catch (err) {
-                    console.error('[UploadStudio] Failed to delete batch:', err);
                   }
                 }
               }}
@@ -1165,6 +1161,112 @@ export default function UploadStudioPage() {
           </button>
         </div>
       </div>
+
+      {/* Studio Batch Destination Routing Selector */}
+      {(() => {
+        const isChannelLocked = isProcessingBatch || batchProcessingStatus === 'processing' || batchProcessingStatus === 'queued';
+        return (
+          <div style={{
+            marginTop: 14,
+            marginBottom: 16,
+            padding: '12px 16px',
+            borderRadius: 10,
+            background: isChannelLocked ? 'rgba(99,102,241,0.06)' : 'rgba(255,255,255,0.03)',
+            border: isChannelLocked ? '1px solid rgba(99,102,241,0.3)' : '1px solid var(--border)',
+            transition: 'all 0.2s ease'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, flexWrap: 'wrap', gap: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                  🎯 Multi-Destination Routing &amp; Channel Outros ({selectedDestinationIds.length} selected)
+                </span>
+                {isChannelLocked && (
+                  <span
+                    data-testid="locked-channel-badge"
+                    style={{
+                      fontSize: 10.5,
+                      fontWeight: 700,
+                      padding: '2px 8px',
+                      borderRadius: 12,
+                      background: 'rgba(239, 68, 68, 0.2)',
+                      color: '#fca5a5',
+                      border: '1px solid rgba(239, 68, 68, 0.4)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4
+                    }}
+                  >
+                    🔒 Channels Locked (Processing Active)
+                  </span>
+                )}
+              </div>
+              <a href="/youtube-channels" style={{ fontSize: 11, color: isChannelLocked ? 'var(--text-muted)' : 'var(--accent)', textDecoration: 'none', pointerEvents: isChannelLocked ? 'none' : 'auto' }}>
+                Manage Destinations →
+              </a>
+            </div>
+            <div style={{ fontSize: 11, color: isChannelLocked ? '#fca5a5' : 'var(--text-muted)', marginBottom: 8 }}>
+              {isChannelLocked
+                ? '🔒 Destination channels are locked while the batch is processing and cannot be changed. To modify destinations, cancel the batch.'
+                : 'Generated shorts in this batch will be routed to each selected destination and concatenated with its configured outro. You can select multiple channels before starting.'}
+            </div>
+
+            {destinations.length === 0 ? (
+              <div style={{ fontSize: 11, color: '#f59e0b', padding: '6px 10px', background: 'rgba(245,158,11,0.08)', borderRadius: 6 }}>
+                ⚠️ No destination channels connected. Clips will be saved as drafts.{' '}
+                <a href="/youtube-channels" style={{ color: '#f59e0b', textDecoration: 'underline' }}>Connect channel</a>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {destinations.map(d => {
+                  const isChecked = selectedDestinationIds.includes(d.id);
+                  return (
+                    <label
+                      key={d.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '6px 10px',
+                        borderRadius: 6,
+                        background: isChecked ? (isChannelLocked ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.15)') : 'rgba(255,255,255,0.02)',
+                        border: isChecked ? (isChannelLocked ? '1px solid #818cf8' : '1px solid var(--accent)') : '1px solid var(--border)',
+                        cursor: isChannelLocked ? 'not-allowed' : 'pointer',
+                        opacity: isChannelLocked && !isChecked ? 0.4 : 1,
+                        fontSize: 12,
+                        transition: 'opacity 0.2s ease'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        disabled={isChannelLocked}
+                        onChange={e => {
+                          if (isChannelLocked) return;
+                          const checked = e.target.checked;
+                          setSelectedDestinationIds(prev =>
+                            checked ? [...prev, d.id] : prev.filter(id => id !== d.id)
+                          );
+                        }}
+                      />
+                      <span style={{ fontWeight: 600 }}>{d.channel_name}</span>
+                      {isChecked && isChannelLocked && (
+                        <span style={{ fontSize: 9.5, color: '#a5b4fc', fontWeight: 700 }}>🔒 Locked</span>
+                      )}
+                      {d.has_outro ? (
+                        <span className="badge" style={{ fontSize: 9.5, background: 'rgba(99,102,241,0.15)', color: 'var(--accent)' }}>
+                          {d.outro?.outro_type === 'video' ? '🎬' : '🖼️'} {d.outro?.duration_seconds || 5}s
+                        </span>
+                      ) : (
+                        <span className="badge" style={{ fontSize: 9.5, opacity: 0.6 }}>⚪ No Outro</span>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Queue List */}
       {isLoading ? (
@@ -1645,6 +1747,21 @@ export default function UploadStudioPage() {
                     <span>Progress: {clip.publish_progress}%</span>
                   )}
                 </div>
+
+                {clip.targets && clip.targets.length > 0 && (
+                  <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
+                    {clip.targets.map((t: any) => (
+                      <span
+                        key={t.id}
+                        className={`badge ${t.status === 'published' ? 'badge-success' : t.status === 'failed' ? 'badge-danger' : 'badge-primary'}`}
+                        style={{ fontSize: 9.5 }}
+                        title={`Target: ${t.destination_name || 'Channel'}`}
+                      >
+                        📺 {t.destination_name || 'Target'} {t.has_outro ? (t.outro_type === 'video' ? '🎬' : '🖼️') : ''}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 <div style={{ marginTop: 'auto', paddingTop: 8, display: 'flex', gap: 8 }}>
                   <Link

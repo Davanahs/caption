@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     BASE_DIR: Path = Path(__file__).resolve().parent.parent.parent
     UPLOAD_DIR: Path = BASE_DIR / "uploads"
     OUTPUT_DIR: Path = BASE_DIR / "outputs"
+    STORAGE_DIR: Path = BASE_DIR / "storage"
 
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://clipforge_user:clipforge_password@localhost:5433/clipforge"
@@ -104,7 +105,7 @@ class Settings(BaseSettings):
     ]
 
     class Config:
-        env_file = ".env"
+        env_file = [".env", str(Path(__file__).resolve().parent.parent.parent / ".env")]
         env_file_encoding = "utf-8"
         extra = "ignore"
 
@@ -114,3 +115,4 @@ settings = Settings()
 # Ensure directories exist
 settings.UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 settings.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+settings.STORAGE_DIR.mkdir(parents=True, exist_ok=True)

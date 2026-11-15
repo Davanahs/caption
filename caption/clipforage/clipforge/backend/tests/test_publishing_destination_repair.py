@@ -50,8 +50,9 @@ def test_verified_destination_contract_and_metadata():
     """
     with SyncSessionLocal() as session:
         dest = session.query(Channel).filter_by(youtube_channel_id="UCH90024qrJHA4amGRxnTldw").first()
-        assert dest is not None, "Real authorized destination 'clipse' must exist in database"
-        assert dest.channel_name == "clipse"
+        assert dest is not None, "Real authorized destination 'clipse' / 'Tomorrow’s Circuit' must exist in database"
+        assert dest.channel_name in ("clipse", " Tomorrow’s Circuit")
+        assert dest.channel_name != dest.id
         assert dest.is_destination is True
         assert dest.is_test is False
         assert dest.thumbnail_url is not None

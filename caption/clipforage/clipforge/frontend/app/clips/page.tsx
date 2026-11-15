@@ -3,13 +3,15 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   listClips, deleteClip, downloadClipUrl, thumbnailUrl, publishNow, getClipMetadata,
+  getDestinations, getClipDestinationPreviewInfo, getClipDestinationPreviewUrl,
   previewCleanup, executeCleanup, CleanupPreviewResponse, CleanupExecuteResponse,
   getBrollPlan, applyBrollPlan, BrollPlan,
   getSfxPlan, generateSfxPlan, applySfxPlan, SFXPlan,
   getHookPlan, generateHookPlan, applyHookPlan, HookPlan,
   getDubbingLanguages, getClipDubbing, triggerClipDubbing, getDubbingTaskStatus,
   DubbingLanguage, DubbingPlanItem,
-  listClipVariants, downloadVariantUrl, ClipVariantItem
+  listClipVariants, downloadVariantUrl, ClipVariantItem,
+  type ClipDestinationPreviewInfo
 } from '@/lib/api';
 import { RetentionHeatmap } from '@/components/RetentionHeatmap';
 import { useFocusTrap } from '@/lib/useFocusTrap';
@@ -71,6 +73,24 @@ function PreviewModal({ clip, onClose, onRestyled }: { clip: any; onClose: () =>
   const [variants, setVariants] = useState<ClipVariantItem[]>([]);
   const [selectedVariantId, setSelectedVariantId] = useState<string>('original');
   const [loadingVariants, setLoadingVariants] = useState<boolean>(false);
+  const [destPreviewInfo, setDestPreviewInfo] = useState<ClipDestinationPreviewInfo | null>(null);
+
+  useEffect(() => {
+    if (!selectedVariantId.startsWith('dest_')) {
+      setTimeout(() => setDestPreviewInfo(null), 0);
+      return;
+    }
+    const destId = selectedVariantId.replace('dest_', '');
+    let isCancelled = false;
+    getClipDestinationPreviewInfo(clip.id, destId)
+      .then(info => {
+        if (!isCancelled) setDestPreviewInfo(info);
+      })
+      .catch(() => {
+        if (!isCancelled) setDestPreviewInfo(null);
+      });
+    return () => { isCancelled = true; };
+  }, [clip.id, selectedVariantId]);
 
   const fetchVariants = () => {
     setLoadingVariants(true);
@@ -86,7 +106,7 @@ function PreviewModal({ clip, onClose, onRestyled }: { clip: any; onClose: () =>
   useFocusTrap(true, modalContainerRef, onClose);
 
   useEffect(() => {
-    fetchVariants();
+    setTimeout(() => fetchVariants(), 0);
 
     getClipMetadata(clip.id).then((d: any) => {
       if (d && d.title) setMeta(d);
@@ -295,9 +315,13 @@ function PreviewModal({ clip, onClose, onRestyled }: { clip: any; onClose: () =>
 
   const sl = SCORE_LABEL(clip.score);
   const selectedVariant = variants.find(v => v.variant_id === selectedVariantId);
-  const activeVideoUrl = selectedVariantId === 'original'
-    ? downloadClipUrl(clip.id)
-    : downloadVariantUrl(clip.id, selectedVariantId);
+  const isDestVariant = selectedVariantId.startsWith('dest_');
+  const targetDestId = isDestVariant ? selectedVariantId.replace('dest_', '') : null;
+  const activeVideoUrl = isDestVariant && targetDestId
+    ? getClipDestinationPreviewUrl(clip.id, targetDestId)
+    : (selectedVariantId === 'original'
+      ? downloadClipUrl(clip.id)
+      : downloadVariantUrl(clip.id, selectedVariantId));
 
   let attributionText = '';
   if (selectedVariant && selectedVariant.metadata) {
@@ -379,6 +403,29 @@ function PreviewModal({ clip, onClose, onRestyled }: { clip: any; onClose: () =>
                 </button>
               );
             })}
+            {/* Destination Outro Variants */}
+            {clip.targets && clip.targets.map((t: any) => {
+              const destKey = `dest_${t.destination_channel_id}`;
+              const isSelected = selectedVariantId === destKey;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => { setSelectedVariantId(destKey); setVideoError(false); }}
+                  style={{
+                    fontSize: 11, fontWeight: 600, padding: '5px 10px', borderRadius: 12, cursor: 'pointer',
+                    background: isSelected ? 'var(--accent)' : 'rgba(99,102,241,0.15)',
+                    color: isSelected ? '#fff' : 'var(--accent)',
+                    border: '1px solid rgba(99,102,241,0.35)',
+                    boxShadow: isSelected ? '0 0 10px rgba(99,102,241,0.5)' : 'none',
+                    transition: 'all 0.15s ease'
+                  }}
+                  title={`Destination: ${t.destination_name || 'Channel'}`}
+                >
+                  🎯 {t.destination_name || 'Dest'} {t.has_outro ? (t.outro_type === 'video' ? '🎬' : '🖼️') : ''}
+                </button>
+              );
+            })}
           </div>
 
           <div style={{
@@ -425,6 +472,29 @@ function PreviewModal({ clip, onClose, onRestyled }: { clip: any; onClose: () =>
               pointerEvents: 'none', userSelect: 'none',
             }}>📱 9:16 YOUTUBE SHORTS FORMAT</div>
           </div>
+
+          {/* Destination Duration Breakdown Banner */}
+          {destPreviewInfo && (
+            <div style={{ marginTop: 8, padding: '8px 12px', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, fontSize: 11, width: '100%', textAlign: 'left' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                <span style={{ color: 'var(--text-muted)' }}>Duration Breakdown:</span>
+                <span style={{ fontWeight: 600 }}>
+                  {destPreviewInfo.base_duration.toFixed(1)}s base + {destPreviewInfo.outro_duration.toFixed(1)}s outro = <strong>{destPreviewInfo.combined_duration.toFixed(1)}s</strong>
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Outro:</span>
+                <span style={{ color: destPreviewInfo.has_outro ? 'var(--accent)' : 'var(--text-muted)' }}>
+                  {destPreviewInfo.has_outro ? `${destPreviewInfo.outro?.outro_type === 'video' ? '🎬 Video' : '🖼️ Image'} Outro` : 'None (Base video only)'}
+                </span>
+              </div>
+              {destPreviewInfo.combined_duration > 60 && (
+                <div style={{ marginTop: 4, padding: '4px 6px', background: 'rgba(234,179,8,0.15)', borderRadius: 4, color: '#fbbf24', fontSize: 10 }}>
+                  ⚠️ Exceeds 60s Shorts cap ({destPreviewInfo.combined_duration.toFixed(1)}s). Will publish as standard video.
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Active variant label & attribution */}
           <div style={{ marginTop: 8, textAlign: 'center', width: '100%' }}>
@@ -1105,8 +1175,10 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
 // ── Main page ────────────────────────────────────────────────────────────────
 export default function ClipsPage() {
   const [clips, setClips]             = useState<any[]>([]);
+  const [destinations, setDestinations] = useState<any[]>([]);
   const [loading, setLoading]         = useState(true);
   const [filter, setFilter]           = useState<'all' | 'draft' | 'published'>('all');
+  const [destFilter, setDestFilter]   = useState<string>('all');
   const [sortBy, setSortBy]           = useState<'score' | 'date' | 'duration'>('date');
   const [groupBySource, setGroupBySource] = useState(false);
   const [search, setSearch]           = useState('');
@@ -1172,15 +1244,27 @@ export default function ClipsPage() {
 
   const load = () => {
     setLoading(true);
-    listClips()
-      .then(data => { setClips(data); setLoading(false); })
-      .catch(() => setLoading(false));
+    Promise.all([
+      listClips().catch(() => []),
+      getDestinations().catch(() => [])
+    ]).then(([clipData, destData]) => {
+      setClips(clipData || []);
+      setDestinations(destData || []);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   };
   useEffect(() => { load(); }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this clip?')) return;
-    await deleteClip(id);
+    try {
+      await deleteClip(id);
+    } catch (err: any) {
+      if (!err?.message?.includes('not found') && !err?.message?.includes('404')) {
+        alert(`Failed to delete clip: ${err?.message || err}`);
+        return;
+      }
+    }
     setClips(c => c.filter(x => x.id !== id));
     setSelectedIds(prev => {
       const next = new Set(prev);
@@ -1211,18 +1295,33 @@ export default function ClipsPage() {
     if (!confirm(`Delete ${selectedIds.size} selected clip${selectedIds.size > 1 ? 's' : ''}? This action cannot be undone.`)) return;
     setBulkActionRunning(true);
     let count = 0;
+    const failed: string[] = [];
+    const successfulIds = new Set<string>();
     try {
       for (const id of Array.from(selectedIds)) {
         count++;
         setBulkActionProgress(`Deleting clip ${count} of ${selectedIds.size}...`);
         try {
           await deleteClip(id);
-        } catch (err) {
-          console.error('Bulk delete failed for', id, err);
+          successfulIds.add(id);
+        } catch (err: any) {
+          if (err?.message?.includes('not found') || err?.message?.includes('404')) {
+            successfulIds.add(id);
+          } else {
+            console.error('Bulk delete failed for', id, err);
+            failed.push(id);
+          }
         }
       }
-      setClips(c => c.filter(x => !selectedIds.has(x.id)));
-      setSelectedIds(new Set());
+      setClips(c => c.filter(x => !successfulIds.has(x.id)));
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        successfulIds.forEach(id => next.delete(id));
+        return next;
+      });
+      if (failed.length > 0) {
+        alert(`${failed.length} clip${failed.length > 1 ? 's' : ''} failed to delete.`);
+      }
     } finally {
       setBulkActionRunning(false);
       setBulkActionProgress(null);
@@ -1261,6 +1360,14 @@ export default function ClipsPage() {
 
   // 1. status filter
   if (filter !== 'all') processed = processed.filter(c => c.publish_status === filter);
+
+  // 1b. destination filter
+  if (destFilter !== 'all') {
+    processed = processed.filter(c => 
+      (c.targets && c.targets.some((t: any) => t.destination_channel_id === destFilter)) ||
+      c.publish_destination_id === destFilter
+    );
+  }
 
   // 2. search
   if (search.trim()) {
@@ -1492,6 +1599,29 @@ export default function ClipsPage() {
             </Pill>
           ))}
         </div>
+
+        {/* Destination filter */}
+        {destinations.length > 0 && (
+          <>
+            <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, letterSpacing: 0.5 }}>DESTINATION</span>
+              <select
+                className="input-field"
+                value={destFilter}
+                onChange={e => setDestFilter(e.target.value)}
+                style={{ fontSize: 12, padding: '4px 8px', height: 32, width: 'auto' }}
+              >
+                <option value="all">All Destinations</option>
+                {destinations.map(d => (
+                  <option key={d.id} value={d.id}>
+                    {d.channel_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
 
         <div style={{ width: 1, height: 24, background: 'var(--border)' }} />
 
@@ -1725,9 +1855,38 @@ export default function ClipsPage() {
                           whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
                         }}>📁 {clip.source_title}</p>
                       )}
-                      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>
+                      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
                         {clip.start_time?.toFixed(1)}s – {clip.end_time?.toFixed(1)}s · {formatDate(clip.created_at)}
                       </p>
+
+                      {/* Destination Targets Badges */}
+                      {clip.targets && clip.targets.length > 0 ? (
+                        <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 10 }}>
+                          {clip.targets.map((t: any) => (
+                            <span
+                              key={t.id}
+                              className={`badge ${
+                                t.status === 'published' ? 'badge-success' :
+                                t.status === 'failed' ? 'badge-danger' :
+                                t.status === 'publishing' || t.status === 'rendering_outro' ? 'badge-primary' :
+                                'badge-muted'
+                              }`}
+                              style={{ fontSize: 9.5, display: 'flex', alignItems: 'center', gap: 3 }}
+                              title={`${t.destination_name || 'Destination'}: ${t.status}${t.has_outro ? ` (${t.outro_type} outro)` : ''}`}
+                            >
+                              📺 {t.destination_name || 'Dest'}
+                              {t.has_outro && <span>{t.outro_type === 'video' ? '🎬' : '🖼️'}</span>}
+                              {t.status === 'published' && ' ✓'}
+                            </span>
+                          ))}
+                        </div>
+                      ) : clip.publish_destination_id ? (
+                        <div style={{ marginBottom: 10 }}>
+                          <span className="badge badge-info" style={{ fontSize: 9.5 }}>
+                            🎯 1 Destination Mapped
+                          </span>
+                        </div>
+                      ) : null}
 
                       {/* Actions */}
                       <div style={{ display: 'flex', gap: 6 }}>

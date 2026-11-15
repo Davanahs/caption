@@ -1,5 +1,6 @@
 import math
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 from backend.models.layout import LayoutPlan, RegionModel, AudioPolicy, BackgroundPolicy, ScaleMode, LayoutMode
 
 class LayoutEngine:
@@ -270,11 +271,57 @@ class LayoutEngine:
                 audio_policy=AudioPolicy.PRIMARY_ONLY
             )
 
+    @staticmethod
+    def create_gaming_plan(
+        config: Union[Dict[str, Any], Any],
+        source_w: int,
+        source_h: int,
+        canvas_w: int = 1080,
+        canvas_h: int = 1920
+    ) -> LayoutPlan:
+        """
+        Creates a canonical, validated LayoutPlan for Dual-Region Gaming Layout.
+        Layer 1 (Gameplay): fills 9:16 vertical canvas (1080x1920), z_order=1.
+        Layer 2 (Facecam PiP): overlay at facecam destination, z_order=2.
+        Delegates directly to backend.services.gaming_geometry.create_gaming_layout_plan.
+        """
+        from backend.services.gaming_geometry import create_gaming_layout_plan
+
+        if isinstance(config, dict):
+            cfg = dict(config or {})
+            if "gameplay_roi" not in cfg:
+                cfg["gameplay_roi"] = {"x": 0.0, "y": 0.0, "width": 1.0, "height": 1.0}
+            if "facecam_roi" not in cfg:
+                cfg["facecam_roi"] = {"x": 0.70, "y": 0.05, "width": 0.25, "height": 0.25}
+            if "facecam_placement" not in cfg:
+                cfg["facecam_placement"] = "top-right"
+            cw = cfg.get("canvas_w", cfg.get("canvas_width", canvas_w))
+            ch = cfg.get("canvas_h", cfg.get("canvas_height", canvas_h))
+            cfg["canvas_w"] = cw
+            cfg["canvas_width"] = cw
+            cfg["canvas_h"] = ch
+            cfg["canvas_height"] = ch
+        elif config is not None:
+            cfg = config
+        else:
+            cfg = {
+                "gameplay_roi": {"x": 0.0, "y": 0.0, "width": 1.0, "height": 1.0},
+                "facecam_roi": {"x": 0.70, "y": 0.05, "width": 0.25, "height": 0.25},
+                "facecam_placement": "top-right",
+                "canvas_w": canvas_w,
+                "canvas_width": canvas_w,
+                "canvas_h": canvas_h,
+                "canvas_height": canvas_h,
+            }
+
+        return create_gaming_layout_plan(cfg, source_w, source_h)
+
     @classmethod
     def resolve_plan(cls, mode_str: str, source_w: int, source_h: int, canvas_w: int = 1080, canvas_h: int = 1920) -> LayoutPlan:
         if not mode_str:
             return cls.create_vertical_plan(source_w, source_h, canvas_w, canvas_h)
             
+        mode_lower = (mode_str or "").lower()
         try:
             mode = LayoutMode(mode_str)
         except ValueError:
@@ -290,6 +337,8 @@ class LayoutEngine:
             return cls.create_stacked_plan(source_w, source_h, canvas_w, canvas_h)
         elif mode == LayoutMode.CREATIVE_TRANSFORM:
             return cls.create_transform_plan(source_w, source_h, canvas_w, canvas_h)
+        elif mode == LayoutMode.GAMING or mode_lower == "gaming":
+            return cls.create_gaming_plan({}, source_w, source_h, canvas_w, canvas_h)
         else:
             return cls.create_vertical_plan(source_w, source_h, canvas_w, canvas_h)
 

@@ -1,0 +1,1671 @@
+{
+  "version": "1.0.0",
+  "name": "GamingGeometryGoldenVectors",
+  "description": "Authoritative cross-language golden vectors for ClipForge dual-region gaming layout geometry and preview-to-FFmpeg parity.",
+  "invariants": {
+    "normalized_bounds": "[0.0, 1.0]",
+    "min_roi_size": 0.05,
+    "canvas_aspect_ratio": "9:16",
+    "default_canvas_width": 1080,
+    "default_canvas_height": 1920,
+    "yuv420p_even_pixels": "coord % 2 == 0",
+    "even_pixel_formula": "floor((coord * dim) / 2) * 2",
+    "zero_caption_invariant": "-sn flag, no subtitle filters"
+  },
+  "vectors": [
+    {
+      "id": "vector-01-1080p-standard-top-right",
+      "category": "standard-16-9",
+      "description": "Standard 1080p 16:9 source with full-screen gameplay ROI and top-right facecam preset",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.7,
+          "y": 0.05,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 1080
+        },
+        "facecam_crop": {
+          "x": 1344,
+          "y": 54,
+          "w": 480,
+          "h": 270
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.777778,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1920:1080:0:0",
+        "ffmpeg_crop_facecam": "crop=480:270:1344:54",
+        "ffmpeg_filtergraph": "[0:v]crop=1920:1080:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=480:270:1344:54,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-02-720p-standard-top-left",
+      "category": "standard-16-9",
+      "description": "Standard 720p 16:9 source with centered gameplay ROI and top-left facecam preset",
+      "input": {
+        "src_w": 1280,
+        "src_h": 720,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.2,
+          "y": 0.0,
+          "width": 0.6,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.05,
+          "y": 0.05,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "top-left",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.05,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 256,
+          "y": 0,
+          "w": 768,
+          "h": 720
+        },
+        "facecam_crop": {
+          "x": 64,
+          "y": 36,
+          "w": 320,
+          "h": 180
+        },
+        "facecam_dest": {
+          "x": 54,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 2.666667,
+        "gameplay_scaled_w": 2048,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=768:720:256:0",
+        "ffmpeg_crop_facecam": "crop=320:180:64:36",
+        "ffmpeg_filtergraph": "[0:v]crop=768:720:256:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=320:180:64:36,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=54:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-03-4k-highres-bottom-right",
+      "category": "high-resolution",
+      "description": "High-resolution 4K UHD (3840x2160) source with bottom-right facecam preset",
+      "input": {
+        "src_w": 3840,
+        "src_h": 2160,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.1,
+          "y": 0.1,
+          "width": 0.8,
+          "height": 0.8
+        },
+        "facecam_roi": {
+          "x": 0.75,
+          "y": 0.6,
+          "width": 0.2,
+          "height": 0.3
+        },
+        "facecam_placement": "bottom-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.74,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 384,
+          "y": 216,
+          "w": 3072,
+          "h": 1728
+        },
+        "facecam_crop": {
+          "x": 2880,
+          "y": 1296,
+          "w": 768,
+          "h": 648
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 1420,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.111111,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=3072:1728:384:216",
+        "ffmpeg_crop_facecam": "crop=768:648:2880:1296",
+        "ffmpeg_filtergraph": "[0:v]crop=3072:1728:384:216,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=768:648:2880:1296,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=1420:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-04-1440p-qhd-bottom-left",
+      "category": "high-resolution",
+      "description": "1440p QHD (2560x1440) source with bottom-left facecam preset",
+      "input": {
+        "src_w": 2560,
+        "src_h": 1440,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.15,
+          "y": 0.05,
+          "width": 0.7,
+          "height": 0.9
+        },
+        "facecam_roi": {
+          "x": 0.05,
+          "y": 0.65,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "bottom-left",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.05,
+          "y": 0.74,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 384,
+          "y": 72,
+          "w": 1792,
+          "h": 1296
+        },
+        "facecam_crop": {
+          "x": 128,
+          "y": 936,
+          "w": 640,
+          "h": 360
+        },
+        "facecam_dest": {
+          "x": 54,
+          "y": 1420,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.481481,
+        "gameplay_scaled_w": 2655,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1792:1296:384:72",
+        "ffmpeg_crop_facecam": "crop=640:360:128:936",
+        "ffmpeg_filtergraph": "[0:v]crop=1792:1296:384:72,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=640:360:128:936,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=54:y=1420:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-05-ultrawide-21-9-1080p",
+      "category": "ultrawide-21-9",
+      "description": "Ultrawide 21:9 1080p source (2560x1080) with centered gameplay action crop",
+      "input": {
+        "src_w": 2560,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.25,
+          "y": 0.0,
+          "width": 0.5,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.8,
+          "y": 0.1,
+          "width": 0.15,
+          "height": 0.35
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 640,
+          "y": 0,
+          "w": 1280,
+          "h": 1080
+        },
+        "facecam_crop": {
+          "x": 2048,
+          "y": 108,
+          "w": 384,
+          "h": 378
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.777778,
+        "gameplay_scaled_w": 2276,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1280:1080:640:0",
+        "ffmpeg_crop_facecam": "crop=384:378:2048:108",
+        "ffmpeg_filtergraph": "[0:v]crop=1280:1080:640:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=384:378:2048:108,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-06-ultrawide-21-9-1440p",
+      "category": "ultrawide-21-9",
+      "description": "Ultrawide 21:9 1440p source (3440x1440) with top-left facecam preset",
+      "input": {
+        "src_w": 3440,
+        "src_h": 1440,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.3,
+          "y": 0.0,
+          "width": 0.4,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.02,
+          "y": 0.05,
+          "width": 0.18,
+          "height": 0.3
+        },
+        "facecam_placement": "top-left",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.05,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 1032,
+          "y": 0,
+          "w": 1376,
+          "h": 1440
+        },
+        "facecam_crop": {
+          "x": 68,
+          "y": 72,
+          "w": 618,
+          "h": 432
+        },
+        "facecam_dest": {
+          "x": 54,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.333333,
+        "gameplay_scaled_w": 1835,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1376:1440:1032:0",
+        "ffmpeg_crop_facecam": "crop=618:432:68:72",
+        "ffmpeg_filtergraph": "[0:v]crop=1376:1440:1032:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=618:432:68:72,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=54:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-07-standard-4-3-sd",
+      "category": "standard-4-3",
+      "description": "Standard 4:3 SD source (640x480) with full-frame gameplay and top-right facecam",
+      "input": {
+        "src_w": 640,
+        "src_h": 480,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.6,
+          "y": 0.05,
+          "width": 0.35,
+          "height": 0.35
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 640,
+          "h": 480
+        },
+        "facecam_crop": {
+          "x": 384,
+          "y": 24,
+          "w": 224,
+          "h": 168
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 4.0,
+        "gameplay_scaled_w": 2560,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=640:480:0:0",
+        "ffmpeg_crop_facecam": "crop=224:168:384:24",
+        "ffmpeg_filtergraph": "[0:v]crop=640:480:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=224:168:384:24,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-08-standard-4-3-hd",
+      "category": "standard-4-3",
+      "description": "Standard 4:3 HD source (1440x1080) with bottom-right facecam preset",
+      "input": {
+        "src_w": 1440,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.1,
+          "y": 0.0,
+          "width": 0.8,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.65,
+          "y": 0.1,
+          "width": 0.3,
+          "height": 0.3
+        },
+        "facecam_placement": "bottom-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.74,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 144,
+          "y": 0,
+          "w": 1152,
+          "h": 1080
+        },
+        "facecam_crop": {
+          "x": 936,
+          "y": 108,
+          "w": 432,
+          "h": 324
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 1420,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.777778,
+        "gameplay_scaled_w": 2048,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1152:1080:144:0",
+        "ffmpeg_crop_facecam": "crop=432:324:936:108",
+        "ffmpeg_filtergraph": "[0:v]crop=1152:1080:144:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=432:324:936:108,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=1420:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-09-vertical-9-16-source",
+      "category": "vertical-9-16",
+      "description": "Vertical 9:16 source (1080x1920) with cropped gameplay and top-left facecam overlay",
+      "input": {
+        "src_w": 1080,
+        "src_h": 1920,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.2,
+          "width": 1.0,
+          "height": 0.6
+        },
+        "facecam_roi": {
+          "x": 0.1,
+          "y": 0.02,
+          "width": 0.4,
+          "height": 0.15
+        },
+        "facecam_placement": "top-left",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.05,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 384,
+          "w": 1080,
+          "h": 1152
+        },
+        "facecam_crop": {
+          "x": 108,
+          "y": 38,
+          "w": 432,
+          "h": 288
+        },
+        "facecam_dest": {
+          "x": 54,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.666667,
+        "gameplay_scaled_w": 1800,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1080:1152:0:384",
+        "ffmpeg_crop_facecam": "crop=432:288:108:38",
+        "ffmpeg_filtergraph": "[0:v]crop=1080:1152:0:384,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=432:288:108:38,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=54:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-10-odd-dimension-1080p-plus-one",
+      "category": "odd-dimension",
+      "description": "Odd-dimension source 1921x1081 truncated safely to 1920x1080 even pixels",
+      "input": {
+        "src_w": 1921,
+        "src_h": 1081,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.7,
+          "y": 0.05,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 1080
+        },
+        "facecam_crop": {
+          "x": 1344,
+          "y": 54,
+          "w": 480,
+          "h": 270
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.777778,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1920:1080:0:0",
+        "ffmpeg_crop_facecam": "crop=480:270:1344:54",
+        "ffmpeg_filtergraph": "[0:v]crop=1920:1080:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=480:270:1344:54,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-11-odd-dimension-720p-plus-one",
+      "category": "odd-dimension",
+      "description": "Odd-dimension source 1281x721 truncated safely to 1280x720 even pixels",
+      "input": {
+        "src_w": 1281,
+        "src_h": 721,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.1,
+          "y": 0.1,
+          "width": 0.8,
+          "height": 0.8
+        },
+        "facecam_roi": {
+          "x": 0.05,
+          "y": 0.05,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "top-left",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.05,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 128,
+          "y": 72,
+          "w": 1024,
+          "h": 576
+        },
+        "facecam_crop": {
+          "x": 64,
+          "y": 36,
+          "w": 320,
+          "h": 180
+        },
+        "facecam_dest": {
+          "x": 54,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 3.333333,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1024:576:128:72",
+        "ffmpeg_crop_facecam": "crop=320:180:64:36",
+        "ffmpeg_filtergraph": "[0:v]crop=1024:576:128:72,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=320:180:64:36,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=54:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-12-odd-dimension-custom-853x481",
+      "category": "odd-dimension",
+      "description": "Odd non-standard source 853x481 truncated safely to 852x480 even pixels",
+      "input": {
+        "src_w": 853,
+        "src_h": 481,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.65,
+          "y": 0.05,
+          "width": 0.3,
+          "height": 0.3
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 852,
+          "h": 480
+        },
+        "facecam_crop": {
+          "x": 554,
+          "y": 24,
+          "w": 254,
+          "h": 144
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 4.0,
+        "gameplay_scaled_w": 3408,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=852:480:0:0",
+        "ffmpeg_crop_facecam": "crop=254:144:554:24",
+        "ffmpeg_filtergraph": "[0:v]crop=852:480:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=254:144:554:24,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-13-preset-top-left",
+      "category": "placement-presets",
+      "description": "Explicit verification of facecam preset top-left placement geometry",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.05,
+          "y": 0.05,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "top-left",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.05,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 1080
+        },
+        "facecam_crop": {
+          "x": 96,
+          "y": 54,
+          "w": 480,
+          "h": 270
+        },
+        "facecam_dest": {
+          "x": 54,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.777778,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1920:1080:0:0",
+        "ffmpeg_crop_facecam": "crop=480:270:96:54",
+        "ffmpeg_filtergraph": "[0:v]crop=1920:1080:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=480:270:96:54,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=54:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-14-preset-top-right",
+      "category": "placement-presets",
+      "description": "Explicit verification of facecam preset top-right placement geometry",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.7,
+          "y": 0.05,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 1080
+        },
+        "facecam_crop": {
+          "x": 1344,
+          "y": 54,
+          "w": 480,
+          "h": 270
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.777778,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1920:1080:0:0",
+        "ffmpeg_crop_facecam": "crop=480:270:1344:54",
+        "ffmpeg_filtergraph": "[0:v]crop=1920:1080:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=480:270:1344:54,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-15-preset-bottom-left",
+      "category": "placement-presets",
+      "description": "Explicit verification of facecam preset bottom-left placement geometry",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.05,
+          "y": 0.7,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "bottom-left",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.05,
+          "y": 0.74,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 1080
+        },
+        "facecam_crop": {
+          "x": 96,
+          "y": 756,
+          "w": 480,
+          "h": 270
+        },
+        "facecam_dest": {
+          "x": 54,
+          "y": 1420,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.777778,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1920:1080:0:0",
+        "ffmpeg_crop_facecam": "crop=480:270:96:756",
+        "ffmpeg_filtergraph": "[0:v]crop=1920:1080:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=480:270:96:756,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=54:y=1420:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-16-preset-bottom-right",
+      "category": "placement-presets",
+      "description": "Explicit verification of facecam preset bottom-right placement geometry",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.7,
+          "y": 0.7,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "bottom-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.74,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 1080
+        },
+        "facecam_crop": {
+          "x": 1344,
+          "y": 756,
+          "w": 480,
+          "h": 270
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 1420,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.777778,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1920:1080:0:0",
+        "ffmpeg_crop_facecam": "crop=480:270:1344:756",
+        "ffmpeg_filtergraph": "[0:v]crop=1920:1080:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=480:270:1344:756,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=1420:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-17-custom-placement-center-floating",
+      "category": "custom-placement",
+      "description": "Facecam placed manually in center of 9:16 canvas",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.4,
+          "y": 0.4,
+          "width": 0.2,
+          "height": 0.2
+        },
+        "facecam_placement": "custom",
+        "facecam_output_rect": {
+          "x": 0.3,
+          "y": 0.4,
+          "width": 0.4,
+          "height": 0.2
+        }
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.3,
+          "y": 0.4,
+          "width": 0.4,
+          "height": 0.2
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 1080
+        },
+        "facecam_crop": {
+          "x": 768,
+          "y": 432,
+          "w": 384,
+          "h": 216
+        },
+        "facecam_dest": {
+          "x": 324,
+          "y": 768,
+          "w": 432,
+          "h": 384
+        },
+        "gameplay_scale_factor": 1.777778,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1920:1080:0:0",
+        "ffmpeg_crop_facecam": "crop=384:216:768:432",
+        "ffmpeg_filtergraph": "[0:v]crop=1920:1080:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=384:216:768:432,scale=432:384:force_original_aspect_ratio=increase,crop=432:384[v1];[v0][v1]overlay=x=324:y=768:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-18-custom-placement-large-pip",
+      "category": "custom-placement",
+      "description": "Large facecam PiP overlay configured across top half of 9:16 canvas",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.6,
+          "y": 0.0,
+          "width": 0.4,
+          "height": 0.4
+        },
+        "facecam_placement": "custom",
+        "facecam_output_rect": {
+          "x": 0.5,
+          "y": 0.02,
+          "width": 0.46,
+          "height": 0.35
+        }
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.5,
+          "y": 0.02,
+          "width": 0.46,
+          "height": 0.35
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 1920,
+          "h": 1080
+        },
+        "facecam_crop": {
+          "x": 1152,
+          "y": 0,
+          "w": 768,
+          "h": 432
+        },
+        "facecam_dest": {
+          "x": 540,
+          "y": 38,
+          "w": 496,
+          "h": 672
+        },
+        "gameplay_scale_factor": 1.777778,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1920:1080:0:0",
+        "ffmpeg_crop_facecam": "crop=768:432:1152:0",
+        "ffmpeg_filtergraph": "[0:v]crop=1920:1080:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=768:432:1152:0,scale=496:672:force_original_aspect_ratio=increase,crop=496:672[v1];[v0][v1]overlay=x=540:y=38:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-19-boundary-minimum-size",
+      "category": "boundary-limits",
+      "description": "Minimum permissible normalized size (0.05 x 0.05) for both ROIs",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.5,
+          "y": 0.5,
+          "width": 0.05,
+          "height": 0.05
+        },
+        "facecam_roi": {
+          "x": 0.1,
+          "y": 0.1,
+          "width": 0.05,
+          "height": 0.05
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 960,
+          "y": 540,
+          "w": 96,
+          "h": 54
+        },
+        "facecam_crop": {
+          "x": 192,
+          "y": 108,
+          "w": 96,
+          "h": 54
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 35.555556,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=96:54:960:540",
+        "ffmpeg_crop_facecam": "crop=96:54:192:108",
+        "ffmpeg_filtergraph": "[0:v]crop=96:54:960:540,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=96:54:192:108,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-20-boundary-touch-top-left",
+      "category": "boundary-limits",
+      "description": "Boundary touch at top-left origin (x=0.0, y=0.0)",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.3,
+          "height": 0.3
+        },
+        "facecam_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 0.2,
+          "height": 0.2
+        },
+        "facecam_placement": "top-left",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.05,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 576,
+          "h": 324
+        },
+        "facecam_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 384,
+          "h": 216
+        },
+        "facecam_dest": {
+          "x": 54,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 5.925926,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=576:324:0:0",
+        "ffmpeg_crop_facecam": "crop=384:216:0:0",
+        "ffmpeg_filtergraph": "[0:v]crop=576:324:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=384:216:0:0,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=54:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-21-boundary-touch-bottom-right",
+      "category": "boundary-limits",
+      "description": "Boundary touch at bottom-right edge (x+w=1.0, y+h=1.0)",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.7,
+          "y": 0.7,
+          "width": 0.3,
+          "height": 0.3
+        },
+        "facecam_roi": {
+          "x": 0.75,
+          "y": 0.75,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "bottom-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.74,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 1344,
+          "y": 756,
+          "w": 576,
+          "h": 324
+        },
+        "facecam_crop": {
+          "x": 1440,
+          "y": 810,
+          "w": 480,
+          "h": 270
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 1420,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 5.925926,
+        "gameplay_scaled_w": 3413,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=576:324:1344:756",
+        "ffmpeg_crop_facecam": "crop=480:270:1440:810",
+        "ffmpeg_filtergraph": "[0:v]crop=576:324:1344:756,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=480:270:1440:810,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=1420:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-22-subpixel-high-precision-fractional",
+      "category": "subpixel-precision",
+      "description": "Fractional 6-decimal-place coordinates testing subpixel precision and even-pixel flooring",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.123456,
+          "y": 0.234567,
+          "width": 0.345678,
+          "height": 0.456789
+        },
+        "facecam_roi": {
+          "x": 0.54321,
+          "y": 0.09876,
+          "width": 0.22222,
+          "height": 0.18181
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 236,
+          "y": 252,
+          "w": 662,
+          "h": 492
+        },
+        "facecam_crop": {
+          "x": 1042,
+          "y": 106,
+          "w": 426,
+          "h": 196
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 3.902439,
+        "gameplay_scaled_w": 2583,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=662:492:236:252",
+        "ffmpeg_crop_facecam": "crop=426:196:1042:106",
+        "ffmpeg_filtergraph": "[0:v]crop=662:492:236:252,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=426:196:1042:106,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-23-letterbox-container-taller",
+      "category": "letterbox-viewport",
+      "description": "16:9 video in 800x800 square container with top/bottom letterbox black bars; center click inside video",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "container": {
+          "left": 0,
+          "top": 0,
+          "width": 800,
+          "height": 800
+        },
+        "pointer": {
+          "clientX": 400,
+          "clientY": 400
+        }
+      },
+      "expected": {
+        "is_valid": true,
+        "render_rect": {
+          "x": 0,
+          "y": 175,
+          "width": 800,
+          "height": 450
+        },
+        "normalized_pointer": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    },
+    {
+      "id": "vector-24-letterbox-container-wider",
+      "category": "letterbox-viewport",
+      "description": "16:9 video in 1200x540 wide container with left/right pillarbox black bars; center click inside video",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "container": {
+          "left": 0,
+          "top": 0,
+          "width": 1200,
+          "height": 540
+        },
+        "pointer": {
+          "clientX": 600,
+          "clientY": 270
+        }
+      },
+      "expected": {
+        "is_valid": true,
+        "render_rect": {
+          "x": 120,
+          "y": 0,
+          "width": 960,
+          "height": 540
+        },
+        "normalized_pointer": {
+          "x": 0.5,
+          "y": 0.5
+        }
+      }
+    },
+    {
+      "id": "vector-25-letterbox-click-top-black-bar-clamped",
+      "category": "letterbox-viewport",
+      "description": "Pointer click inside top black bar clamped safely to norm_y=0.0",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "container": {
+          "left": 0,
+          "top": 0,
+          "width": 800,
+          "height": 800
+        },
+        "pointer": {
+          "clientX": 400,
+          "clientY": 50
+        }
+      },
+      "expected": {
+        "is_valid": true,
+        "render_rect": {
+          "x": 0,
+          "y": 175,
+          "width": 800,
+          "height": 450
+        },
+        "normalized_pointer": {
+          "x": 0.5,
+          "y": 0.0
+        }
+      }
+    },
+    {
+      "id": "vector-26-letterbox-click-bottom-black-bar-clamped",
+      "category": "letterbox-viewport",
+      "description": "Pointer click inside bottom black bar clamped safely to norm_y=1.0",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "container": {
+          "left": 0,
+          "top": 0,
+          "width": 800,
+          "height": 800
+        },
+        "pointer": {
+          "clientX": 400,
+          "clientY": 750
+        }
+      },
+      "expected": {
+        "is_valid": true,
+        "render_rect": {
+          "x": 0,
+          "y": 175,
+          "width": 800,
+          "height": 450
+        },
+        "normalized_pointer": {
+          "x": 0.5,
+          "y": 1.0
+        }
+      }
+    },
+    {
+      "id": "vector-27-invalid-negative-coordinate",
+      "category": "validation-rejection",
+      "description": "Negative coordinate in gameplay_roi.x (-0.05) explicitly rejected with ValueError",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": -0.05,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.7,
+          "y": 0.05,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": false,
+        "error_type": "ValueError",
+        "error_field": "gameplay_roi.x",
+        "error_message_substring": "negative coordinate"
+      }
+    },
+    {
+      "id": "vector-28-invalid-out-of-bounds-overflow",
+      "category": "validation-rejection",
+      "description": "Overflow coordinate in gameplay_roi (x=0.80, width=0.30, sum=1.10) explicitly rejected with ValueError",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.8,
+          "y": 0.0,
+          "width": 0.3,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.7,
+          "y": 0.05,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": false,
+        "error_type": "ValueError",
+        "error_field": "gameplay_roi",
+        "error_message_substring": "out of bounds"
+      }
+    },
+    {
+      "id": "vector-29-invalid-below-minimum-size",
+      "category": "validation-rejection",
+      "description": "Facecam ROI width (0.02) below minimum size (0.05) explicitly rejected with ValueError",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.7,
+          "y": 0.05,
+          "width": 0.02,
+          "height": 0.25
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": false,
+        "error_type": "ValueError",
+        "error_field": "facecam_roi.width",
+        "error_message_substring": "must be >= 0.05"
+      }
+    },
+    {
+      "id": "vector-30-invalid-non-finite-coordinate",
+      "category": "validation-rejection",
+      "description": "Non-finite coordinate (NaN) in gameplay_roi.y explicitly rejected with ValueError",
+      "input": {
+        "src_w": 1920,
+        "src_h": 1080,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": "NaN",
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.7,
+          "y": 0.05,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": false,
+        "error_type": "ValueError",
+        "error_field": "gameplay_roi.y",
+        "error_message_substring": "non-finite coordinate"
+      }
+    },
+    {
+      "id": "vector-31-odd-dimension-1919x1079",
+      "category": "odd-dimension",
+      "description": "Odd-dimension source 1919x1079 truncated safely to 1918x1078 even pixels with top-right facecam preset",
+      "input": {
+        "src_w": 1919,
+        "src_h": 1079,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.0,
+          "y": 0.0,
+          "width": 1.0,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.7,
+          "y": 0.05,
+          "width": 0.25,
+          "height": 0.25
+        },
+        "facecam_placement": "top-right",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.65,
+          "y": 0.04,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 0,
+          "y": 0,
+          "w": 1918,
+          "h": 1078
+        },
+        "facecam_crop": {
+          "x": 1342,
+          "y": 52,
+          "w": 478,
+          "h": 268
+        },
+        "facecam_dest": {
+          "x": 702,
+          "y": 76,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.781076,
+        "gameplay_scaled_w": 3416,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1918:1078:0:0",
+        "ffmpeg_crop_facecam": "crop=478:268:1342:52",
+        "ffmpeg_filtergraph": "[0:v]crop=1918:1078:0:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=478:268:1342:52,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=702:y=76:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    },
+    {
+      "id": "vector-32-ultrawide-21-9-3840x1600",
+      "category": "ultrawide-21-9",
+      "description": "4K Ultrawide 21:9 source (3840x1600) with center gameplay and bottom-left facecam preset",
+      "input": {
+        "src_w": 3840,
+        "src_h": 1600,
+        "canvas_w": 1080,
+        "canvas_h": 1920,
+        "gameplay_roi": {
+          "x": 0.25,
+          "y": 0.0,
+          "width": 0.5,
+          "height": 1.0
+        },
+        "facecam_roi": {
+          "x": 0.05,
+          "y": 0.05,
+          "width": 0.15,
+          "height": 0.3
+        },
+        "facecam_placement": "bottom-left",
+        "facecam_output_rect": null
+      },
+      "expected": {
+        "is_valid": true,
+        "facecam_resolved_output_rect": {
+          "x": 0.05,
+          "y": 0.74,
+          "width": 0.3,
+          "height": 0.22
+        },
+        "gameplay_crop": {
+          "x": 960,
+          "y": 0,
+          "w": 1920,
+          "h": 1600
+        },
+        "facecam_crop": {
+          "x": 192,
+          "y": 80,
+          "w": 576,
+          "h": 480
+        },
+        "facecam_dest": {
+          "x": 54,
+          "y": 1420,
+          "w": 324,
+          "h": 422
+        },
+        "gameplay_scale_factor": 1.2,
+        "gameplay_scaled_w": 2304,
+        "gameplay_scaled_h": 1920,
+        "ffmpeg_crop_gameplay": "crop=1920:1600:960:0",
+        "ffmpeg_crop_facecam": "crop=576:480:192:80",
+        "ffmpeg_filtergraph": "[0:v]crop=1920:1600:960:0,scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920[v0];[1:v]crop=576:480:192:80,scale=324:422:force_original_aspect_ratio=increase,crop=324:422[v1];[v0][v1]overlay=x=54:y=1420:eof_action=pass:repeatlast=0,setsar=1[outv]"
+      }
+    }
+  ]
+}

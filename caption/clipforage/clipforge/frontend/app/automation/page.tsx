@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   listChannels, 
   addChannel, 
@@ -8,6 +9,9 @@ import {
   deleteChannel, 
   checkChannelNow, 
   getDestinations, 
+  updateChannelDestinations,
+  ChannelMappedDestination,
+  PublishDestination,
   getChannelVideos, 
   processChannelVideo,
   processChannelVideosBatch,
@@ -72,24 +76,33 @@ export default function AutomationPage() {
   // Multi-video selection: Map of videoId -> video object
   const [selectedVideos, setSelectedVideos] = useState<Record<string, { id: string; url: string; title: string; duration?: number; channelId: string }>>({});
   const [isBatchProcessing, setIsBatchProcessing] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [error, setError] = useState('');
 
   // ── Add Channel Form ─────────────────────────────────────────────────
   const [form, setForm] = useState<{
     channel_url: string;
     auto_clip: boolean;
     auto_publish: boolean;
+    destination_channel_ids: string[];
     publish_destination_id: string;
     profile: ChannelProcessingProfile;
   }>({ 
     channel_url: '', 
     auto_clip: true, 
     auto_publish: false, 
+    destination_channel_ids: [],
     publish_destination_id: '',
     profile: { ...DEFAULT_PROFILE }
   });
   const [showAdvancedAdd, setShowAdvancedAdd] = useState(false);
   const [adding, setAdding] = useState(false);
   const [checking, setChecking] = useState<string | null>(null);
+
+  // ── Multi-Destination Mapping Modal ─────────────────────────────────
+  const [mappingChannel, setMappingChannel] = useState<any | null>(null);
+  const [channelDestIds, setChannelDestIds] = useState<string[]>([]);
+  const [savingChannelDests, setSavingChannelDests] = useState(false);
 
   // ── Channel Profile Editor Modal ─────────────────────────────────────
   const [editingChannel, setEditingChannel] = useState<any | null>(null);
@@ -118,6 +131,39 @@ export default function AutomationPage() {
   // ── Decision History ─────────────────────────────────────────────────
   const [decisionHistory, setDecisionHistory] = useState<DecisionHistoryItem[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // ── Paginated Videos ─────────────────────────────────────────────────
+  const fetchChannelVideos = async (channelId: string, page: number = 1, overrideSort?: 'latest' | 'most_viewed') => {
+    setLoadingVideos(prev => ({ ...prev, [channelId]: true }));
+    const activeSort = overrideSort || videoSortModes[channelId] || 'latest';
+    try {
+      const res = await getChannelVideos(channelId, page, 8, activeSort, 50);
+      setVideoData(prev => ({ ...prev, [channelId]: res }));
+      setVideoPages(prev => ({ ...prev, [channelId]: page }));
+      setExpandedChannels(prev => ({ ...prev, [channelId]: true }));
+
+      // Restore selected video if previously saved for this channel
+      if (typeof window !== 'undefined') {
+        const sp = new URLSearchParams(window.location.search);
+        const storedVidId = sp.get('video') || localStorage.getItem('last_automation_video_id');
+        if (storedVidId && res.items) {
+          const match = res.items.find(v => v.id === storedVidId);
+          if (match) {
+            setSelectedVideo({
+              id: match.id,
+              url: match.url,
+              title: match.title,
+              channelId
+            });
+          }
+        }
+      }
+    } catch (e: any) {
+      console.error('Failed to load channel videos:', e);
+      setError(`Failed to retrieve channel videos: ${e.message}`);
+    }
+    setLoadingVideos(prev => ({ ...prev, [channelId]: false }));
+  };
 
   // ── Historical Video Processing State (Two-Action Model) ───────────────
   const [historicalChannelId, setHistoricalChannelId] = useState<string | null>(null);
@@ -202,10 +248,6 @@ export default function AutomationPage() {
     }
   };
 
-  // ── Feedback Messages ────────────────────────────────────────────────
-  const [msg, setMsg] = useState('');
-  const [error, setError] = useState('');
-
   // ── Load Baseline Data ───────────────────────────────────────────────
   const load = () => {
     setLoading(true);
@@ -238,8 +280,10 @@ export default function AutomationPage() {
       const sp = new URLSearchParams(window.location.search);
       const urlCh = sp.get('channel') || localStorage.getItem('last_automation_channel_id');
       if (urlCh) {
-        setSelectedChannelId(urlCh);
-        fetchChannelVideos(urlCh, 1);
+        setTimeout(() => {
+          setSelectedChannelId(urlCh);
+          fetchChannelVideos(urlCh, 1);
+        }, 0);
       }
     }
   }, []);
@@ -281,8 +325,11 @@ export default function AutomationPage() {
   // ── Add Channel ──────────────────────────────────────────────────────
   const handleAdd = async () => {
     if (!form.channel_url.trim()) return;
-    if (form.auto_publish && !form.publish_destination_id) {
-      setError('Cannot enable auto-publish without selecting a valid publish destination.');
+    const chosenDests = form.destination_channel_ids.length > 0 
+      ? form.destination_channel_ids 
+      : (form.publish_destination_id ? [form.publish_destination_id] : []);
+    if (form.auto_publish && chosenDests.length === 0) {
+      setError('Cannot enable auto-publish without selecting at least one valid publishing destination.');
       return;
     }
     setAdding(true); 
@@ -293,7 +340,8 @@ export default function AutomationPage() {
         channel_url: form.channel_url.trim(),
         auto_clip: form.auto_clip,
         auto_publish: form.auto_publish,
-        publish_destination_id: form.publish_destination_id || undefined,
+        destination_channel_ids: chosenDests,
+        publish_destination_id: chosenDests[0] || undefined,
         processing_profile: form.profile
       });
       setMsg(`✅ Successfully monitored: ${res.channel_name}`);
@@ -301,6 +349,7 @@ export default function AutomationPage() {
         channel_url: '', 
         auto_clip: true, 
         auto_publish: false, 
+        destination_channel_ids: [],
         publish_destination_id: '',
         profile: { ...DEFAULT_PROFILE }
       });
@@ -314,8 +363,9 @@ export default function AutomationPage() {
 
   const handleToggle = async (id: string, field: string, val: any) => {
     const targetCh = channels.find(c => c.id === id);
-    if (field === 'auto_publish' && val === true && !targetCh?.publish_destination_id) {
-      setError('Cannot enable auto-publish: Please select a destination channel first.');
+    const hasDests = (targetCh?.destinations && targetCh.destinations.length > 0) || !!targetCh?.publish_destination_id;
+    if (field === 'auto_publish' && val === true && !hasDests) {
+      setError('Cannot enable auto-publish: Please map at least one destination channel first.');
       return;
     }
     if (field === 'publish_destination_id' && !val && targetCh?.auto_publish) {
@@ -333,6 +383,21 @@ export default function AutomationPage() {
     } catch (e: any) {
       setError(e.message || `Failed to update ${field}`);
     }
+  };
+
+  const handleSaveChannelDestinations = async () => {
+    if (!mappingChannel) return;
+    setSavingChannelDests(true);
+    setError('');
+    try {
+      await updateChannelDestinations(mappingChannel.id, channelDestIds);
+      setMsg(`✅ Updated destination routing for ${mappingChannel.channel_name}`);
+      setMappingChannel(null);
+      load();
+    } catch (e: any) {
+      setError(e.message || 'Failed to update destination routing');
+    }
+    setSavingChannelDests(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -370,39 +435,6 @@ export default function AutomationPage() {
     }
     setChecking(null);
     load();
-  };
-
-  // ── Paginated Videos ─────────────────────────────────────────────────
-  const fetchChannelVideos = async (channelId: string, page: number = 1, overrideSort?: 'latest' | 'most_viewed') => {
-    setLoadingVideos(prev => ({ ...prev, [channelId]: true }));
-    const activeSort = overrideSort || videoSortModes[channelId] || 'latest';
-    try {
-      const res = await getChannelVideos(channelId, page, 8, activeSort, 50);
-      setVideoData(prev => ({ ...prev, [channelId]: res }));
-      setVideoPages(prev => ({ ...prev, [channelId]: page }));
-      setExpandedChannels(prev => ({ ...prev, [channelId]: true }));
-
-      // Restore selected video if previously saved for this channel
-      if (typeof window !== 'undefined') {
-        const sp = new URLSearchParams(window.location.search);
-        const storedVidId = sp.get('video') || localStorage.getItem('last_automation_video_id');
-        if (storedVidId && res.items) {
-          const match = res.items.find(v => v.id === storedVidId);
-          if (match) {
-            setSelectedVideo({
-              id: match.id,
-              url: match.url,
-              title: match.title,
-              channelId
-            });
-          }
-        }
-      }
-    } catch (e: any) {
-      console.error('Failed to load channel videos:', e);
-      setError(`Failed to retrieve channel videos: ${e.message}`);
-    }
-    setLoadingVideos(prev => ({ ...prev, [channelId]: false }));
   };
 
   const handleToggleSortMode = (channelId: string, mode: 'latest' | 'most_viewed') => {
@@ -1196,13 +1228,13 @@ export default function AutomationPage() {
             {error && <div style={{ color: 'var(--danger)', fontSize: 13, fontWeight: 600 }}>⚠️ {error}</div>}
           </div>
           {msg && (msg.includes('queued') || msg.includes('Processing initiated') || msg.includes('scheduled')) && (
-            <a 
+            <Link 
               href="/" 
               className="btn-primary" 
               style={{ fontSize: 12, padding: '6px 14px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
             >
               📊 View on Dashboard &rarr;
-            </a>
+            </Link>
           )}
         </div>
       )}
@@ -1254,33 +1286,108 @@ export default function AutomationPage() {
             Auto-publish generated clips (Mock Mode)
           </label>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Publish Destination:</span>
-            <select
-              className="input-field"
-              style={{ fontSize: 12, padding: '6px 10px', width: 'auto', minWidth: 0, maxWidth: '100%' }}
-              value={form.publish_destination_id}
-              onChange={e => setForm(f => ({ ...f, publish_destination_id: e.target.value }))}
-            >
-              <option value="">None (Select at publish time)</option>
-              {destinations.map(d => (
-                <option key={d.id} value={d.id} disabled={d.is_authorized === false}>
-                  {d.channel_name} ({d.youtube_channel_id}){d.is_default_destination ? ' (Default)' : ''}
-                  {d.is_authorized === false ? ' (Needs Reauthorization)' : ''}
-                </option>
-              ))}
-            </select>
-            {destinations.length === 0 ? (
-              <span style={{ fontSize: 11, color: '#f59e0b' }}>
-                ⚠️ No destinations connected.{' '}
-                <a href="/youtube-channels" style={{ color: '#f59e0b', textDecoration: 'underline' }}>Connect channel</a>
+        </div>
+
+        {/* Multi-Destination Selection Block */}
+        <div style={{
+          marginTop: 14,
+          marginBottom: showAdvancedAdd ? 18 : 0,
+          padding: '14px 16px',
+          borderRadius: 10,
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid var(--border)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
+            <div>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>
+                🎯 Where should clips from this channel be published?
               </span>
-            ) : (
-              <a href="/youtube-channels" style={{ fontSize: 11, color: 'var(--text-muted)', textDecoration: 'none' }}>
-                Manage destinations →
-              </a>
-            )}
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                Select one or multiple destination YouTube channels. Generated clips will be routed to each selected destination with its configured outro.
+              </div>
+            </div>
+            <a href="/youtube-channels" style={{ fontSize: 11, color: 'var(--accent)', textDecoration: 'none' }}>
+              + Manage Destinations →
+            </a>
           </div>
+
+          {destinations.length === 0 ? (
+            <div style={{ fontSize: 12, color: '#f59e0b', padding: '8px 12px', background: 'rgba(245,158,11,0.08)', borderRadius: 6, border: '1px solid rgba(245,158,11,0.2)' }}>
+              ⚠️ No destination channels connected yet. Clips will be saved as drafts until published manually.{' '}
+              <a href="/youtube-channels" style={{ color: '#f59e0b', textDecoration: 'underline', fontWeight: 600 }}>Connect a destination channel</a>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 10, marginTop: 10 }}>
+              {destinations.map(d => {
+                const isChecked = form.destination_channel_ids.includes(d.id);
+                const isUnauthorized = d.is_authorized === false;
+                return (
+                  <label
+                    key={d.id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      padding: '10px 12px',
+                      borderRadius: 8,
+                      background: isChecked ? 'rgba(99,102,241,0.1)' : 'rgba(0,0,0,0.2)',
+                      border: isChecked ? '1px solid var(--accent)' : '1px solid var(--border)',
+                      cursor: isUnauthorized ? 'not-allowed' : 'pointer',
+                      opacity: isUnauthorized ? 0.6 : 1,
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      disabled={isUnauthorized}
+                      onChange={e => {
+                        const checked = e.target.checked;
+                        setForm(f => {
+                          const next = checked
+                            ? [...f.destination_channel_ids, d.id]
+                            : f.destination_channel_ids.filter(id => id !== d.id);
+                          return {
+                            ...f,
+                            destination_channel_ids: next,
+                            publish_destination_id: next[0] || ''
+                          };
+                        });
+                      }}
+                      style={{ marginTop: 3 }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>{d.channel_name}</span>
+                        {d.is_default_destination && (
+                          <span className="badge badge-primary" style={{ fontSize: 9, padding: '1px 5px' }}>Default</span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>
+                        {d.youtube_channel_id}
+                      </div>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 4 }}>
+                        {d.has_outro ? (
+                          <span className="badge" style={{ fontSize: 9.5, background: 'rgba(99,102,241,0.15)', color: 'var(--accent)' }}>
+                            {d.outro_type === 'video' ? '🎬 Video Outro' : '🖼️ Image Outro'} · {d.outro_duration || 5}s
+                          </span>
+                        ) : (
+                          <span className="badge" style={{ fontSize: 9.5, background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)' }}>
+                            ⚪ No Outro
+                          </span>
+                        )}
+                        {d.ready_for_publishing ? (
+                          <span className="badge badge-success" style={{ fontSize: 9.5 }}>✓ Ready</span>
+                        ) : isUnauthorized ? (
+                          <span className="badge badge-warning" style={{ fontSize: 9.5 }}>⚠️ Needs Reauth</span>
+                        ) : null}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Advanced Default Profile Settings Drawer */}
@@ -1369,14 +1476,76 @@ export default function AutomationPage() {
                             Active
                           </span>
                         )}
-                        {ch.publish_destination_id && (
+                        {ch.publish_destination_id && (!ch.destinations || ch.destinations.length === 0) && (
                           <span className="badge badge-info" style={{ fontSize: 10 }}>
-                            🎯 Linked Destination
+                            🎯 1 Destination
+                          </span>
+                        )}
+                        {ch.destinations && ch.destinations.length > 0 && (
+                          <span className="badge badge-info" style={{ fontSize: 10 }}>
+                            🎯 {ch.destinations.length} Destination{ch.destinations.length > 1 ? 's' : ''}
                           </span>
                         )}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
                         {ch.clips_generated} clips generated · Last checked: {ch.last_checked_at_ist || (ch.last_checked_at ? new Date(ch.last_checked_at).toLocaleString() : 'Never')}
+                      </div>
+
+                      {/* Mapped Destinations Row */}
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center', marginTop: 6 }}>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Publish To:</span>
+                        {ch.destinations && ch.destinations.length > 0 ? (
+                          ch.destinations.map((d: any) => {
+                            const isDisconnected = d.is_connected === false || d.is_authorized === false;
+                            return (
+                              <span
+                                key={d.channel_id || d.id}
+                                className={`badge ${isDisconnected ? 'badge-warning' : 'badge-primary'}`}
+                                style={{
+                                  fontSize: 10,
+                                  background: isDisconnected ? 'rgba(234,179,8,0.15)' : 'rgba(99,102,241,0.15)',
+                                  border: `1px solid ${isDisconnected ? '#eab308' : 'rgba(99,102,241,0.3)'}`,
+                                  color: isDisconnected ? '#facc15' : 'var(--accent)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 4
+                                }}
+                                title={isDisconnected ? 'Destination disconnected - mapping preserved' : 'Active destination'}
+                              >
+                                {isDisconnected ? '⚠️' : '🎯'} {d.channel_name}
+                                {d.has_outro && (
+                                  <span style={{ opacity: 0.85, fontSize: 9 }}>
+                                    {d.outro_type === 'video' ? '🎬' : '🖼️'}
+                                  </span>
+                                )}
+                                {isDisconnected && <span style={{ fontSize: 9, opacity: 0.9 }}>(Disconnected)</span>}
+                              </span>
+                            );
+                          })
+                        ) : ch.publish_destination_id ? (
+                          <span className="badge badge-info" style={{ fontSize: 10 }}>
+                            🎯 Single Destination Linked
+                          </span>
+                        ) : (
+                          <span style={{ fontSize: 11, color: ch.auto_publish ? '#ef4444' : 'var(--text-muted)' }}>
+                            {ch.auto_publish ? '⚠️ None mapped (Auto-publish blocked)' : 'None mapped (Draft mode)'}
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          className="btn-ghost"
+                          style={{ fontSize: 10, padding: '2px 8px', borderRadius: 4, marginLeft: 2 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMappingChannel(ch);
+                            const initialIds = (ch.destinations && ch.destinations.length > 0)
+                              ? ch.destinations.map((d: any) => d.id || d.channel_id)
+                              : (ch.publish_destination_id ? [ch.publish_destination_id] : []);
+                            setChannelDestIds(initialIds);
+                          }}
+                        >
+                          ✏️ Edit Routing
+                        </button>
                       </div>
 
                       {/* Profile Settings Badges */}
@@ -1399,23 +1568,22 @@ export default function AutomationPage() {
                       </div>
                     </div>
 
-                    {/* Destination Assignment Selector */}
+                    {/* Destination Assignment Button */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }} onClick={e => e.stopPropagation()}>
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Destination:</span>
-                      <select
-                        className="input-field"
-                        style={{ fontSize: 11, padding: '4px 8px', minWidth: 150 }}
-                        value={ch.publish_destination_id || ''}
-                        onChange={e => handleToggle(ch.id, 'publish_destination_id', e.target.value || null)}
+                      <button
+                        type="button"
+                        className="btn-ghost"
+                        style={{ fontSize: 11, padding: '5px 10px', display: 'flex', alignItems: 'center', gap: 6 }}
+                        onClick={() => {
+                          setMappingChannel(ch);
+                          const initialIds = (ch.destinations && ch.destinations.length > 0)
+                            ? ch.destinations.map((d: any) => d.id || d.channel_id)
+                            : (ch.publish_destination_id ? [ch.publish_destination_id] : []);
+                          setChannelDestIds(initialIds);
+                        }}
                       >
-                        <option value="">None (Select at publish time)</option>
-                        {destinations.map(d => (
-                          <option key={d.id} value={d.id} disabled={d.is_authorized === false}>
-                            {d.channel_name} ({d.youtube_channel_id})
-                            {d.is_authorized === false ? ' (Needs Reauthorization)' : ''}
-                          </option>
-                        ))}
-                      </select>
+                        🎯 Destinations ({ch.destinations?.length || (ch.publish_destination_id ? 1 : 0)})
+                      </button>
                     </div>
 
                     {/* Toggles */}
@@ -2209,6 +2377,121 @@ export default function AutomationPage() {
                 disabled={savingProfile}
               >
                 {savingProfile ? '⏳ Saving...' : 'Save Profile Defaults'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: Multi-Destination Routing Mapping ───────────────── */}
+      {mappingChannel && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.7)',
+          backdropFilter: 'blur(6px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '12px 10px'
+        }}>
+          <div className="glass" style={{ maxWidth: 640, width: '100%', maxHeight: 'min(96vh, 720px)', overflowY: 'auto', padding: '18px 22px', borderRadius: 12 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+              🎯 Publishing Destinations for {mappingChannel.channel_name}
+            </h3>
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 14, lineHeight: 1.4 }}>
+              Where should clips from this source channel be published? You can select multiple destination channels. Each destination will render its own configured outro and track publishing independently.
+            </p>
+
+            {destinations.length === 0 ? (
+              <div style={{ padding: '12px 16px', background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.3)', borderRadius: 8, color: '#fbbf24', fontSize: 12 }}>
+                ⚠️ No destination channels connected. <a href="/youtube-channels" style={{ color: '#fbbf24', textDecoration: 'underline' }}>Connect a destination channel</a> to enable automated publishing.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+                {destinations.map(d => {
+                  const isChecked = channelDestIds.includes(d.id);
+                  const isDisconnected = d.is_connected === false || d.is_authorized === false;
+                  return (
+                    <label
+                      key={d.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: 12,
+                        padding: '10px 14px',
+                        borderRadius: 8,
+                        background: isChecked ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)',
+                        border: isChecked ? '1px solid var(--accent)' : '1px solid var(--border)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={e => {
+                            const checked = e.target.checked;
+                            setChannelDestIds(prev => 
+                              checked ? [...prev, d.id] : prev.filter(id => id !== d.id)
+                            );
+                          }}
+                        />
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                            {d.channel_name}
+                            {d.is_default_destination && <span className="badge badge-primary" style={{ fontSize: 9 }}>Default</span>}
+                            {isDisconnected && <span className="badge badge-warning" style={{ fontSize: 9 }}>⚠️ Disconnected</span>}
+                          </div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                            {d.youtube_channel_id}
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                        {d.has_outro ? (
+                          <span className="badge" style={{ fontSize: 10, background: 'rgba(99,102,241,0.15)', color: 'var(--accent)' }}>
+                            {d.outro_type === 'video' ? '🎬 Video Outro' : '🖼️ Image Outro'} · {d.outro_duration || 5}s
+                          </span>
+                        ) : (
+                          <span className="badge" style={{ fontSize: 10, background: 'rgba(255,255,255,0.05)', color: 'var(--text-muted)' }}>
+                            ⚪ No Outro
+                          </span>
+                        )}
+                        {d.ready_for_publishing ? (
+                          <span className="badge badge-success" style={{ fontSize: 10 }}>✓ Ready</span>
+                        ) : null}
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+
+            {channelDestIds.length === 0 && mappingChannel.auto_publish && (
+              <div style={{ padding: '8px 12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, color: '#f87171', fontSize: 11, marginBottom: 14 }}>
+                ⚠️ Auto-publish is currently ON for this channel. Removing all destinations will prevent automatic publishing.
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
+              <button
+                type="button"
+                className="btn-ghost"
+                onClick={() => setMappingChannel(null)}
+                disabled={savingChannelDests}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-primary"
+                onClick={handleSaveChannelDestinations}
+                disabled={savingChannelDests}
+              >
+                {savingChannelDests ? '⏳ Saving...' : 'Save Destinations'}
               </button>
             </div>
           </div>

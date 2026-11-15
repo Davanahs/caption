@@ -46,6 +46,7 @@
 | `FE-DSH-009` | Process Video Config Modal | "Configure Your Clips" | Click -> `confirmAndProcess(config)` | `submitYouTubeUrl` (`POST /api/videos/url`) | `BE-VID-002` | Opens modernized modal with YouTube thumbnail, mode toggle (AI Highlights vs. Equal Split), dynamic segment calculator, duration slider, 6 visual layout cards, and parameter forwarding (`targetDuration`, `segmentationStrategy`) | Verified working |
 | `FE-DSH-010` | Podcast / Interview Manual Selection | "🎙️ Podcast / Interview" button & Quick Link | Click -> `setIsPodcastModalOpen(true)` | `submitYouTubeUrl` (`POST /api/videos/url`) | `BE-VID-002` | Opens interactive preview modal with 16:9 player, dual speaker bounding box overlays, mode toggle (Select vs. Watch), duration, stacked composition selector, and 9:16 vertical preview | **Verified working (New Feature)** |
 | `FE-DSH-011` | Podcast Frame Preview & Shot Inspector | Shot table rows & `#frame-preview-status-badge` | Click / Enter / Space on shot row | `getVideoFrameUrl` (`GET /api/videos/{id}/frame`) | `BE-VID-010` | Cancels prior in-flight frame fetch via AbortController, renders loading spinner (`⏳ Fetching Shot Frame...`), fetches and caches real source video frame at shot midpoint, updates canvas to `📸 Real Frame @ {ts}s (Shot {id})` with full visual alignment, or graceful geometry fallback badge | **Verified working (New Feature)** |
+| `FE-DSH-012` | Cancel All Failed Jobs | "✕ Cancel All Failed" button in Pipeline Status | Click -> `handleCancelAllFailed()` | `cancelAllFailedJobs` (`POST /api/jobs/cancel-all-failed`) | `BE-JOB-010` | Cancels all failed jobs in bulk, transitions status to cancelled, clears failed queue counter and last fail banner | **Verified working (New Feature)** |
 
 ---
 
@@ -94,6 +95,7 @@
 | `FE-YTC-006` | Save Settings Button | "Save Settings" | Click -> `handleSaveSettings` | `updateYoutubeChannelSettings` (`PATCH /api/youtube-channels/{id}/settings`) | `BE-YTC-006` | Saves JSON settings, updates card badge | Verified working |
 | `FE-YTC-007` | Set as Default Toggle | "★ Set as Default" / "★ Default Destination" | Click -> `handleSetDefault(channelId)` | `setPrimaryDefaultDestination` (`POST /api/youtube-channels/{id}/set-default`) | `BE-YTC-007` | Atomically updates default destination flag across cards | Verified working |
 | `FE-YTC-008` | Disconnect Button | "Disconnect" button | Click -> `handleDisconnect(channel)` | `disconnectYoutubeChannel` (`POST /api/youtube-channels/{id}/disconnect`) | `BE-YTC-008` | Confirmation dialog -> unsets destination, revokes auth | Verified working |
+| `FE-YTC-009` | Remove Channel Button | "Remove" button (on test or disconnected channels with 0 mappings) | Click -> `handleRemoveChannel(channel)` | `deleteYoutubeChannel` (`DELETE /api/youtube-channels/{id}`) | `BE-YTC-010` | Confirmation dialog -> permanently deletes eligible channel record and associated outro | Verified working |
 
 ---
 
@@ -147,6 +149,7 @@
 | `FE-POD-004` | Analyze Camera Cuts Button | "🎬 Analyze Camera Cuts & Shots" (`#analyze-shots-btn`) | Click -> `handleAnalyzeShots` | `analyzePodcastShots` (`POST /api/videos/podcast/analyze-shots`) | `BE-VID-006` | Detects camera cuts, correlates participant appearances / face tracking by composition mode (`fixed_two_person` or `visibility_driven`), populates interactive shot schedule table | **Verified working** |
 | `FE-POD-005` | Shot Speaker Override Dropdown | Participant selector dropdown per shot row | Change -> `handleOverrideShot(shotId, newSpeaker)` | None (Local state `shotSchedule`) | N/A | Updates active participant classification for that shot interval; recalculates active 9:16 crop | **Verified working** |
 | `FE-POD-006` | Generate Camera-Following Clips | "⚡ Generate Camera-Following Clip" (`#generate-advanced-clips-btn`) | Click -> `handleConfirm(config)` | `submitYouTubeUrl` (`POST /api/videos/url`) | `BE-VID-002` | Submits URL with `shot_schedule`, `composition` (`fixed_two_person` | `visibility_driven`), `mode="advanced_podcast"`, queues Celery job dispatching to dedicated renderer | **Verified working** |
+| `FE-POD-007` | System Storage Local Upload | "📁 System Storage" (`#podcast-tab-file-btn`) | Drop / File Pick -> `handleSelectLocalFile(file)` -> `handleConfirm(config)` | `uploadVideoFile` (`POST /api/videos/upload`) | `BE-VID-001` | Allows uploading local video files (MP4/MOV/MKV/WEBM) directly from system storage into Podcast Studio with interactive bounding boxes and 9:16 layout composition | **Verified working** |
 
 ---
 
@@ -286,6 +289,20 @@
 1. **`FINDING-P3-01`: Deprecation Warnings on Pydantic v1 `Config`**
    - **Impact:** Pydantic deprecation warnings on class-based `Config` in `backend/core/config.py` and `studio.py`. Non-breaking; recommend migration to `ConfigDict` in future refactoring pass.
 
+### Page 9: Gaming Studio (`/gaming`)
+- **Route:** `/gaming`
+- **Page Component:** `frontend/app/gaming/page.tsx`
+- **Modal Component:** `frontend/components/gaming/GamingSelectionModal.tsx`
+- **Preview Canvas Component:** `frontend/components/gaming/GamingCompositeCanvas.tsx`
+- **Key Interactive Controls & Endpoints:**
+  - YouTube URL Input & Open Studio -> validates URL and mounts `GamingSelectionModal`.
+  - Live Video Stream Proxy -> `GET /api/videos/preview-stream?url={url}`: streams progressive MP4 to HTML5 player with Range support.
+  - Video Container Backdrop Click -> toggles play/pause on video and live 9:16 composite canvas in lockstep.
+  - Direct ROI Drag & Resize (`#gameplay-roi-box`, `#facecam-roi-box`) -> updates normalized coordinates live while background video plays continuously.
+  - Live 9:16 Composite Canvas (`#gaming-composite-canvas`) -> renders real-time 60 FPS live video frames cropped to gameplay & facecam selections.
+  - Process Video -> `POST /api/videos/url` or `POST /api/videos/upload` with `gaming_layout` payload.
+  - Current Status: **Verified working**.
+
 ---
 
 ## 6. Recommended Next Deep Forensic Pass
@@ -293,3 +310,28 @@
 1. **Live Celery Concurrency Stress Test:** Run concurrent multi-video batches (10+ videos) through Celery workers to monitor task queue latency and worker memory consumption during video decoding.
 2. **YouTube Quota Rate-Limit Simulation:** Test destination token refresh and error handling under simulated YouTube API HTTP 429 quota exhaustion.
 3. **Pydantic v2 Migration:** Update `Config` classes across API route schemas to `ConfigDict` to eliminate console warnings.
+
+
+---
+
+### Section 9: Multi-Destination Publishing & Outro Interactions
+
+#### `FE-DEST-001` — YouTube Channels Destination Outro Setup & Preview
+- **Page / Component:** `/youtube-channels` (`app/youtube-channels/page.tsx`)
+- **Interactive Control:** Connect Destination modal Step 2 optional outro setup, card outro badge (`🎬 Video Outro`, `🖼️ Image Outro`, `⚪ No Outro`), Outro Upload/Replace modal, 9:16 Outro Preview modal, Outro Delete action.
+- **Backend Endpoints:** `GET /api/youtube-channels/`, `POST /api/youtube-channels/{id}/outro`, `DELETE /api/youtube-channels/{id}/outro`, `GET /api/youtube-channels/{id}/outro/preview`.
+
+#### `FE-DEST-002` — Monitoring Channels "Where should clips from this channel be published?"
+- **Page / Component:** `/automation` (`app/automation/page.tsx`)
+- **Interactive Control:** Multi-destination selection checkboxes in Add/Edit Source Channel modal, destination mapping chips on channel rows with disconnected warning flags.
+- **Backend Endpoints:** `GET /api/youtube-channels/`, `GET /api/channels/{id}/destinations`, `POST /api/channels/{id}/destinations`.
+
+#### `FE-DEST-003` — Final Output Preview Switcher & Target Queue
+- **Page / Component:** `/publish` (`app/publish/page.tsx`)
+- **Interactive Control:** Destination Switcher tabs for Final Output Preview, duration breakdown (`base + outro = combined`), >60s Shorts warning, per-target publishing status rows, retry button, cancel button.
+- **Backend Endpoints:** `GET /api/publish/clips/{id}/destinations/{dest_id}/preview-info`, `GET /api/publish/clips/{id}/destinations/{dest_id}/preview`, `GET /api/publish/clips/{id}/targets`, `POST /api/publish/targets/{id}/retry`, `POST /api/publish/targets/{id}/cancel`.
+
+#### `FE-DEST-004` — Multi-Destination Ingestion Controls
+- **Page / Component:** `/` (Dashboard / Process Video modal), `/gaming` (Gaming Selection modal), `/studio` (Upload Studio)
+- **Interactive Control:** Multi-select destination checkboxes attached to raw video upload, YouTube URL intake, and batch intake.
+- **Backend Endpoints:** `POST /api/videos/upload`, `POST /api/videos/url`, `POST /api/studio/batches`.

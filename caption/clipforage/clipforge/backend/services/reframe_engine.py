@@ -303,8 +303,8 @@ async def reframe_to_vertical(
         if mode == "blur" or mode == "fill_blur": mode = "blur_background"
         if mode == "fit" or mode == "fit_black": mode = "static_wide"
         if mode == "crop": mode = "center_crop"
-        if mode == "split" or mode == "split_screen": mode = "multi_split"
-        if mode == "stacked": mode = "stacked_16_9"
+        if mode == "split" or mode == "split_screen" or mode == "multi_split": mode = "blur_background"
+        if mode == "stacked" or mode == "stacked_16_9": mode = "blur_background"
         if mode == "transform": mode = "creative_transform"
         
         try:
@@ -318,7 +318,7 @@ async def reframe_to_vertical(
         input_ratio = width / height
         target_ratio = target_w / target_h
         
-        if input_ratio <= target_ratio + 0.02 and parsed_mode != LayoutMode.BLUR_BACKGROUND:
+        if input_ratio <= target_ratio + 0.02 and parsed_mode != LayoutMode.BLUR_BACKGROUND and parsed_mode != LayoutMode.GAMING:
             # Already vertical-ish
             plan.regions[0].scale_mode = ScaleMode.CONTAIN
             
@@ -432,9 +432,12 @@ async def reframe_to_vertical(
             ffmpeg_cmd.extend(["-map", "0:a?"])
             
         ffmpeg_cmd.extend([
+            "-sws_flags", "lanczos+accurate_rnd",
             "-y",
+            "-sn",
             "-c:v", "libx264", "-c:a", "aac", 
             "-preset", "fast", "-crf", "18",
+            "-pix_fmt", "yuv420p",
             "-movflags", "+faststart", 
             "-f", "mp4",
             str(output_path)

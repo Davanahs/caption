@@ -10,17 +10,20 @@ import {
   normalizedToDisplay,
   getOutputPreviewGeometry,
 } from '@/lib/podcastCoordinates';
-import { extractYouTubeVideoId, analyzePodcastShots, getVideoFrameUrl } from '@/lib/api';
+import { extractYouTubeVideoId, analyzePodcastShots, getVideoFrameUrl, getDestinations, PublishDestination } from '@/lib/api';
 import { useFocusTrap } from '@/lib/useFocusTrap';
 
 export interface PodcastProcessingConfig {
+  sourceType?: 'url' | 'file';
   url: string;
+  file?: File | null;
   regions: PodcastRegion[];
   composition: 'camera_following' | 'visibility_driven' | 'stacked' | 'single_region' | 'advanced_podcast' | 'fixed_two_person';
   targetDuration: number;
   clipMode: 'ai_highlights' | 'equal_split';
   clipsCount: number;
   shotSchedule?: any[];
+  destinationIds?: string[];
 }
 
 export interface PodcastSelectionModalProps {
@@ -28,9 +31,11 @@ export interface PodcastSelectionModalProps {
   onClose: () => void;
   onConfirm: (config: PodcastProcessingConfig) => Promise<void> | void;
   initialUrl?: string;
+  initialFile?: File | null;
   initialMode?: 'manual' | 'advanced' | 'camera_following' | 'visibility_driven';
   isSubmitting?: boolean;
   errorMessage?: string;
+  isInline?: boolean;
 }
 
 export default function PodcastSelectionModal({
@@ -38,9 +43,11 @@ export default function PodcastSelectionModal({
   onClose,
   onConfirm,
   initialUrl = '',
+  initialFile = null,
   initialMode = 'manual',
   isSubmitting = false,
   errorMessage = '',
+  isInline = false,
 }: PodcastSelectionModalProps) {
   // ── 2-Feature Podcast Studio State ──
   // Feature 1: 'camera_following' (Standard Continuous Camera Follower)
@@ -63,7 +70,13 @@ export default function PodcastSelectionModal({
   const frameAbortRef = useRef<AbortController | null>(null);
   const frameRequestSeqRef = useRef<number>(0);
 
-  // ── Intake & URL State ──
+  // ── Intake & Source State (YouTube URL or Local System Storage) ──
+  const [sourceType, setSourceType] = useState<'url' | 'file'>(initialFile ? 'file' : 'url');
+  const [selectedFile, setSelectedFile] = useState<File | null>(initialFile || null);
+  const [localVideoUrl, setLocalVideoUrl] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [urlInput, setUrlInput] = useState<string>(initialUrl);
   const [loadedUrl, setLoadedUrl] = useState<string>('');
   const [videoId, setVideoId] = useState<string | null>(null);
@@ -82,6 +95,25 @@ export default function PodcastSelectionModal({
   const [clipStyle, setClipStyle] = useState<'ai_highlights' | 'equal_split'>('ai_highlights');
   const [clipsCount, setClipsCount] = useState<number>(3);
   const [localError, setLocalError] = useState<string>('');
+  const nextIdRef = useRef<number>(1);
+
+  // ── Destination Selection State ──
+  const [destinations, setDestinations] = useState<PublishDestination[]>([]);
+  const [selectedDestinationIds, setSelectedDestinationIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getDestinations()
+      .then((dests) => {
+        if (!cancelled && Array.isArray(dests)) {
+          setDestinations(dests);
+        }
+      })
+      .catch((err) => console.error('Failed to load destinations in Podcast modal:', err));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // ── Canonical Output Preview Geometry (Live 9:16 Mirror) ──
   const outputPreviewGeom = useMemo(() => {
@@ -132,7 +164,7 @@ export default function PodcastSelectionModal({
   const abortControllerRef = useRef<AbortController | null>(null);
   const analysisSessionRef = useRef<number>(0);
 
-  // Abort any pending background polling and revoke frame URLs when component unmounts
+  // Abort any pending background polling and revoke frame & local video URLs when component unmounts
   useEffect(() => {
     return () => {
       if (abortControllerRef.current) {
@@ -143,6 +175,11 @@ export default function PodcastSelectionModal({
         frameAbortRef.current.abort();
         frameAbortRef.current = null;
       }
+      if (localVideoUrl) {
+        try {
+          URL.revokeObjectURL(localVideoUrl);
+        } catch (_) {}
+      }
       frameCacheRef.current.forEach((objUrl) => {
         try {
           URL.revokeObjectURL(objUrl);
@@ -150,22 +187,17 @@ export default function PodcastSelectionModal({
       });
       frameCacheRef.current.clear();
     };
-  }, []);
+  }, [localVideoUrl]);
 
   // ── Timestamp-Accurate Source Frame Extraction Effect ──
   useEffect(() => {
-    if (!videoId) {
-      setExtractedFrameUrl(null);
-      setFrameTimestamp(null);
-      setFrameError(null);
-      return;
-    }
-
-    if (shotSchedule.length === 0 || selectedShotId === null) {
-      setExtractedFrameUrl(null);
-      setFrameTimestamp(null);
-      setFrameError(null);
-      return;
+    if (!videoId || shotSchedule.length === 0 || selectedShotId === null) {
+      const resetTimer = setTimeout(() => {
+        setExtractedFrameUrl(null);
+        setFrameTimestamp(null);
+        setFrameError(null);
+      }, 0);
+      return () => clearTimeout(resetTimer);
     }
 
     const activeShot = shotSchedule.find(s => s.shot_id === selectedShotId);
@@ -176,11 +208,14 @@ export default function PodcastSelectionModal({
 
     // Client-side cache hit
     if (frameCacheRef.current.has(cacheKey)) {
-      setExtractedFrameUrl(frameCacheRef.current.get(cacheKey)!);
-      setFrameTimestamp(targetTs);
-      setFrameError(null);
-      setIsFrameLoading(false);
-      return;
+      const cached = frameCacheRef.current.get(cacheKey)!;
+      const hitTimer = setTimeout(() => {
+        setExtractedFrameUrl(cached);
+        setFrameTimestamp(targetTs);
+        setFrameError(null);
+        setIsFrameLoading(false);
+      }, 0);
+      return () => clearTimeout(hitTimer);
     }
 
     // Cancel in-flight frame request to prevent race conditions
@@ -191,8 +226,10 @@ export default function PodcastSelectionModal({
     frameAbortRef.current = controller;
     const currentSeq = ++frameRequestSeqRef.current;
 
-    setIsFrameLoading(true);
-    setFrameError(null);
+    const startTimer = setTimeout(() => {
+      setIsFrameLoading(true);
+      setFrameError(null);
+    }, 0);
 
     const frameUrl = getVideoFrameUrl(videoId, targetTs, selectedShotId);
 
@@ -225,28 +262,47 @@ export default function PodcastSelectionModal({
       });
 
     return () => {
+      clearTimeout(startTimer);
       controller.abort();
     };
   }, [videoId, selectedShotId, shotSchedule]);
 
-  // Synchronize initial URL and workflow mode
-  useEffect(() => {
-    if (isOpen) {
-      setLocalError('');
-      if (initialMode) {
-        setSelectedFeature(initialMode === 'advanced' || initialMode === 'visibility_driven' ? 'visibility_driven' : 'camera_following');
+  // Handle local video selection from system storage
+  const handleSelectLocalFile = useCallback((file: File) => {
+    if (!file) return;
+    setLocalVideoUrl(prevUrl => {
+      if (prevUrl) {
+        try { URL.revokeObjectURL(prevUrl); } catch (_) {}
       }
-      if (initialUrl && initialUrl !== loadedUrl) {
-        setUrlInput(initialUrl);
-        handleLoadPreview(initialUrl);
-      } else if (!videoId) {
-        // If empty, reset
-        setRegions(createDefaultPodcastRegions());
-      }
-    }
-  }, [isOpen, initialUrl, initialMode]);
+      return URL.createObjectURL(file);
+    });
+    setSelectedFile(file);
+    setSourceType('file');
+    setLoadedUrl('');
+    setVideoId(null);
+    setVideoTitle(file.name);
+    setPreviewLoaded(true);
+    setUrlError(null);
+    setLocalError('');
 
-  // Handle URL loading and preview initialization
+    // Reset or populate default 2-speaker regions when loading video
+    if (regions.length === 0) {
+      const defaults = createDefaultPodcastRegions();
+      setRegions(defaults);
+      setSelectedRegionId(defaults[0].id);
+    }
+  }, [regions.length]);
+
+  const handleFileDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleSelectLocalFile(e.dataTransfer.files[0]);
+    }
+  }, [handleSelectLocalFile]);
+
+  // Handle URL loading and preview initialization (hoisted above useEffect)
   const handleLoadPreview = (rawUrl?: string) => {
     const targetUrl = (rawUrl !== undefined ? rawUrl : urlInput).trim();
     setUrlError(null);
@@ -265,6 +321,14 @@ export default function PodcastSelectionModal({
       return;
     }
 
+    setLocalVideoUrl(prevUrl => {
+      if (prevUrl) {
+        try { URL.revokeObjectURL(prevUrl); } catch (_) {}
+      }
+      return null;
+    });
+    setSelectedFile(null);
+    setSourceType('url');
     setVideoId(id);
     setLoadedUrl(targetUrl);
     setPreviewLoaded(true);
@@ -278,16 +342,38 @@ export default function PodcastSelectionModal({
     }
   };
 
+  // Synchronize initial file or URL and workflow mode
+  useEffect(() => {
+    const syncTimer = setTimeout(() => {
+      if (isOpen) {
+        setLocalError('');
+        if (initialMode) {
+          setSelectedFeature(initialMode === 'advanced' || initialMode === 'visibility_driven' ? 'visibility_driven' : 'camera_following');
+        }
+        if (initialFile) {
+          handleSelectLocalFile(initialFile);
+        } else if (initialUrl && initialUrl !== loadedUrl) {
+          setUrlInput(initialUrl);
+          handleLoadPreview(initialUrl);
+        } else if (!videoId && !localVideoUrl) {
+          // If empty, reset
+          setRegions(createDefaultPodcastRegions());
+        }
+      }
+    }, 0);
+    return () => clearTimeout(syncTimer);
+  }, [isOpen, initialFile, initialUrl, initialMode, loadedUrl, videoId, localVideoUrl, handleSelectLocalFile]);
+
   // ── Keyboard Focus Trap & Accessibility Management ──
   const modalContainerRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(isOpen, modalContainerRef, onClose, isSubmitting);
+  useFocusTrap(isOpen && !isInline, modalContainerRef, onClose, isSubmitting);
 
   // ── Area Manipulation Helpers ──
   const handleAddArea = () => {
     const newIndex = regions.length + 1;
     const color = REGION_COLORS[(newIndex - 1) % REGION_COLORS.length];
     const newRegion: PodcastRegion = {
-      id: `area-${Date.now()}`,
+      id: `area-${nextIdRef.current++}`,
       label: `Area ${newIndex} (Speaker ${newIndex})`,
       x: Math.min(0.7, 0.1 + (newIndex - 1) * 0.2),
       y: 0.15,
@@ -338,7 +424,7 @@ export default function PodcastSelectionModal({
     const norm = displayToNormalized(e.clientX, e.clientY, rect);
 
     if (action === 'draw') {
-      const newId = `area-${Date.now()}`;
+      const newId = `area-${nextIdRef.current++}`;
       const color = REGION_COLORS[regions.length % REGION_COLORS.length];
       const newRegion: PodcastRegion = {
         id: newId,
@@ -462,6 +548,10 @@ export default function PodcastSelectionModal({
   }, [onClose]);
 
   const handleAnalyzeShots = async () => {
+    if (sourceType === 'file') {
+      setLocalError('Shot pre-analysis is designed for YouTube URLs. For local files, AI Smart Director will process dynamic cuts automatically during clip generation.');
+      return;
+    }
     if (!loadedUrl) {
       setLocalError('Please load a video URL preview first.');
       return;
@@ -581,9 +671,16 @@ export default function PodcastSelectionModal({
 
   // ── Form Submission ──
   const handleSubmit = async () => {
-    if (!videoId || !loadedUrl) {
-      setLocalError('Please load a valid YouTube video preview first.');
-      return;
+    if (sourceType === 'file') {
+      if (!selectedFile) {
+        setLocalError('Please select a video file from your system storage.');
+        return;
+      }
+    } else {
+      if (!videoId || !loadedUrl) {
+        setLocalError('Please load a valid YouTube video preview first.');
+        return;
+      }
     }
     if (regions.length === 0) {
       setLocalError('Please select at least one speaker area on the video frame.');
@@ -592,58 +689,48 @@ export default function PodcastSelectionModal({
 
     setLocalError('');
     await onConfirm({
-      url: loadedUrl,
+      sourceType,
+      url: loadedUrl || '',
+      file: selectedFile,
       regions,
       composition: selectedFeature,
       targetDuration: clipDuration,
       clipMode: clipStyle,
       clipsCount,
       shotSchedule: selectedFeature === 'visibility_driven' && shotSchedule.length > 0 ? shotSchedule : undefined,
+      destinationIds: selectedDestinationIds.length > 0 ? selectedDestinationIds : undefined,
     });
   };
 
   if (!isOpen) return null;
 
-  return (
+  const studioContent = (
     <div
-      role="dialog"
-      aria-modal="true"
+      ref={modalContainerRef}
+      tabIndex={-1}
+      role={isInline ? 'region' : 'dialog'}
+      aria-modal={isInline ? undefined : 'true'}
       aria-labelledby="podcast-modal-title"
       aria-describedby="podcast-modal-description"
+      className="glass"
       style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 9999,
+        width: '100%',
+        maxWidth: isInline ? '100%' : '1240px',
+        height: isInline ? 'calc(100vh - 48px)' : 'min(94vh, 900px)',
+        minHeight: isInline ? '680px' : undefined,
+        maxHeight: isInline ? 'calc(100vh - 48px)' : '94vh',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(5, 8, 16, 0.85)',
-        backdropFilter: 'blur(10px)',
-        padding: '16px',
+        flexDirection: 'column',
+        backgroundColor: '#0f172a',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        borderRadius: '16px',
+        boxShadow: isInline ? '0 10px 30px rgba(0, 0, 0, 0.5)' : '0 25px 60px -15px rgba(0, 0, 0, 0.85)',
         overflow: 'hidden',
+        color: '#f8fafc',
+        fontFamily: "'Inter', -apple-system, sans-serif",
+        position: 'relative',
       }}
     >
-      <div
-        ref={modalContainerRef}
-        tabIndex={-1}
-        className="glass"
-        style={{
-          width: '100%',
-          maxWidth: '1240px',
-          height: 'min(94vh, 900px)',
-          maxHeight: '94vh',
-          display: 'flex',
-          flexDirection: 'column',
-          backgroundColor: '#0f172a',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
-          borderRadius: '16px',
-          boxShadow: '0 25px 60px -15px rgba(0, 0, 0, 0.85)',
-          overflow: 'hidden',
-          color: '#f8fafc',
-          fontFamily: "'Inter', -apple-system, sans-serif",
-          position: 'relative',
-        }}
-      >
         {/* ── Top Header ── */}
         <div
           style={{
@@ -846,23 +933,40 @@ export default function PodcastSelectionModal({
                 touchAction: 'none',
               }}
             >
-              {videoId ? (
+              {videoId || localVideoUrl ? (
                 <>
-                  {/* YouTube Embedded Player */}
-                  <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1`}
-                    title="Podcast Video Preview"
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      width: '100%',
-                      height: '100%',
-                      border: 'none',
-                      pointerEvents: interactionMode === 'playback' ? 'auto' : 'none',
-                    }}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                  {/* Local Video or YouTube Embedded Player */}
+                  {localVideoUrl ? (
+                    <video
+                      ref={localVideoRef}
+                      src={localVideoUrl}
+                      controls={interactionMode === 'playback'}
+                      playsInline
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                        pointerEvents: interactionMode === 'playback' ? 'auto' : 'none',
+                      }}
+                    />
+                  ) : videoId ? (
+                    <iframe
+                      src={`https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&rel=0&modestbranding=1`}
+                      title="Podcast Video Preview"
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                        pointerEvents: interactionMode === 'playback' ? 'auto' : 'none',
+                      }}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  ) : null}
 
                   {/* Interactive Area Selection Overlay (Active during edit mode) */}
                   {interactionMode === 'edit' && (
@@ -881,13 +985,8 @@ export default function PodcastSelectionModal({
                       }}
                     >
                       {/* Render Each Selected Bounding Box */}
-                      {regions.map((region, idx) => {
+                      {regions.map((region) => {
                         const isSelected = region.id === selectedRegionId;
-                        const containerRect = videoContainerRef.current?.getBoundingClientRect() || {
-                          width: 800,
-                          height: 450,
-                        };
-                        const disp = normalizedToDisplay(region, containerRect);
 
                         return (
                           <div
@@ -895,10 +994,10 @@ export default function PodcastSelectionModal({
                             onPointerDown={e => handlePointerDown(e, 'move', region.id)}
                             style={{
                               position: 'absolute',
-                              left: `${disp.left}px`,
-                              top: `${disp.top}px`,
-                              width: `${disp.width}px`,
-                              height: `${disp.height}px`,
+                              left: `${region.x * 100}%`,
+                              top: `${region.y * 100}%`,
+                              width: `${region.width * 100}%`,
+                              height: `${region.height * 100}%`,
                               border: `2px solid ${region.color}`,
                               backgroundColor: `${region.color}20`,
                               boxShadow: isSelected
@@ -1018,9 +1117,11 @@ export default function PodcastSelectionModal({
                     textAlign: 'center',
                   }}
                 >
-                  <div style={{ fontSize: '38px' }}>📺</div>
+                  <div style={{ fontSize: '38px' }}>{sourceType === 'file' ? '📁' : '📺'}</div>
                   <div style={{ fontSize: '15px', fontWeight: 600, color: '#94a3b8' }}>
-                    Paste a YouTube link on the right to load video preview
+                    {sourceType === 'file'
+                      ? 'Upload a video from system storage on the right to load preview'
+                      : 'Paste a YouTube link on the right to load video preview'}
                   </div>
                   <div style={{ fontSize: '12px', maxWidth: '380px' }}>
                     Once loaded, you can play the video, pause at any interview frame, and draw or adjust speaker regions.
@@ -1700,65 +1801,251 @@ export default function PodcastSelectionModal({
           >
             {/* Step 1: Paste YouTube Link */}
             <div>
-              <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span>1. Paste YouTube Link</span>
+                <span style={{ fontSize: '11px', color: '#818cf8', fontWeight: 600 }}>Source Mode</span>
               </div>
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <input
-                  id="podcast-youtube-url-input"
-                  type="text"
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  value={urlInput}
-                  onChange={e => {
-                    setUrlInput(e.target.value);
-                    if (urlError) setUrlError(null);
-                  }}
-                  onKeyDown={e => e.key === 'Enter' && handleLoadPreview()}
-                  aria-label="YouTube Video Link"
-                  aria-invalid={!!urlError}
-                  aria-describedby={urlError ? "podcast-url-error-msg" : undefined}
+
+              {/* Source Mode Toggle: YouTube Link vs System Storage */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: 'rgba(15, 23, 42, 0.8)',
+                  borderRadius: '10px',
+                  padding: '3px',
+                  gap: '4px',
+                  marginBottom: '10px',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                }}
+              >
+                <button
+                  id="podcast-tab-url-btn"
+                  type="button"
+                  onClick={() => { setSourceType('url'); setLocalError(''); }}
                   style={{
                     flex: 1,
-                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.15)',
-                    borderRadius: '6px',
-                    padding: '8px 12px',
-                    color: '#fff',
+                    padding: '7px 10px',
+                    borderRadius: '7px',
                     fontSize: '12px',
-                    outline: 'none',
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => handleLoadPreview()}
-                  style={{
-                    padding: '8px 12px',
-                    backgroundColor: '#3b82f6',
-                    color: '#fff',
+                    fontWeight: 700,
                     border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: 600,
                     cursor: 'pointer',
-                    whiteSpace: 'nowrap',
+                    transition: 'all 0.15s ease',
+                    background: sourceType === 'url' ? '#4f46e5' : 'transparent',
+                    color: sourceType === 'url' ? '#ffffff' : '#94a3b8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
                   }}
                 >
-                  Load
+                  <span>🔗 YouTube URL</span>
+                </button>
+                <button
+                  id="podcast-tab-file-btn"
+                  type="button"
+                  onClick={() => { setSourceType('file'); setLocalError(''); }}
+                  style={{
+                    flex: 1,
+                    padding: '7px 10px',
+                    borderRadius: '7px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    background: sourceType === 'file' ? '#4f46e5' : 'transparent',
+                    color: sourceType === 'file' ? '#ffffff' : '#94a3b8',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <span>📁 System Storage</span>
                 </button>
               </div>
 
-              {urlError && (
-                <div
-                  id="podcast-url-error-msg"
-                  role="alert"
-                  style={{ fontSize: '11px', color: '#f87171', marginTop: '6px' }}
-                >
-                  {urlError}
+              {sourceType === 'url' ? (
+                <>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <input
+                      id="podcast-youtube-url-input"
+                      type="text"
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      value={urlInput}
+                      onChange={e => {
+                        setUrlInput(e.target.value);
+                        if (urlError) setUrlError(null);
+                      }}
+                      onKeyDown={e => e.key === 'Enter' && handleLoadPreview()}
+                      aria-label="YouTube Video Link"
+                      aria-invalid={!!urlError}
+                      aria-describedby={urlError ? "podcast-url-error-msg" : undefined}
+                      style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        borderRadius: '6px',
+                        padding: '8px 12px',
+                        color: '#fff',
+                        fontSize: '12px',
+                        outline: 'none',
+                      }}
+                    />
+                    <button
+                      id="load-podcast-url-btn"
+                      type="button"
+                      onClick={() => handleLoadPreview()}
+                      style={{
+                        padding: '8px 12px',
+                        backgroundColor: '#3b82f6',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      Load
+                    </button>
+                  </div>
+
+                  {urlError && (
+                    <div
+                      id="podcast-url-error-msg"
+                      role="alert"
+                      style={{ fontSize: '11px', color: '#f87171', marginTop: '6px' }}
+                    >
+                      {urlError}
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* System Storage Dropzone & File Selection */
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <input
+                    ref={fileInputRef}
+                    id="podcast-file-input"
+                    type="file"
+                    accept="video/mp4,video/quicktime,video/webm,video/x-matroska,video/*"
+                    style={{ display: 'none' }}
+                    onChange={e => {
+                      if (e.target.files && e.target.files[0]) {
+                        handleSelectLocalFile(e.target.files[0]);
+                      }
+                    }}
+                  />
+
+                  {selectedFile ? (
+                    <div
+                      id="podcast-selected-file-info"
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: '8px',
+                        background: 'rgba(79, 70, 229, 0.15)',
+                        border: '1px solid rgba(99, 102, 241, 0.4)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '8px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                        <span style={{ fontSize: '18px' }}>🎬</span>
+                        <div style={{ overflow: 'hidden' }}>
+                          <div
+                            style={{
+                              fontSize: '12px',
+                              fontWeight: 700,
+                              color: '#c7d2fe',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                              maxWidth: '170px',
+                            }}
+                          >
+                            {selectedFile.name}
+                          </div>
+                          <div style={{ fontSize: '10px', color: '#94a3b8' }}>
+                            {(selectedFile.size / (1024 * 1024)).toFixed(1)} MB · Ready for clipping
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        id="podcast-reselect-file-btn"
+                        onClick={() => fileInputRef.current?.click()}
+                        style={{
+                          fontSize: '11px',
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          background: 'rgba(255, 255, 255, 0.08)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#e2e8f0',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        Change
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      id="podcast-file-dropzone"
+                      onDragOver={e => { e.preventDefault(); setIsDragOver(true); }}
+                      onDragLeave={() => setIsDragOver(false)}
+                      onDrop={handleFileDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      style={{
+                        padding: '16px',
+                        borderRadius: '8px',
+                        border: isDragOver ? '2px solid #6366f1' : '2px dashed rgba(255, 255, 255, 0.2)',
+                        background: isDragOver ? 'rgba(79, 70, 229, 0.12)' : 'rgba(0, 0, 0, 0.25)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        textAlign: 'center',
+                        gap: '6px',
+                        transition: 'all 0.2s ease',
+                      }}
+                    >
+                      <span style={{ fontSize: '24px' }}>📁</span>
+                      <div style={{ fontSize: '12px', fontWeight: 600, color: '#e2e8f0' }}>
+                        Drop video here or click to browse
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                        Supports MP4, MOV, MKV, WEBM from storage
+                      </div>
+                      <button
+                        type="button"
+                        id="podcast-browse-file-btn"
+                        style={{
+                          marginTop: '4px',
+                          padding: '6px 14px',
+                          borderRadius: '6px',
+                          background: 'linear-gradient(135deg, #4f46e5 0%, #6366f1 100%)',
+                          border: 'none',
+                          color: '#fff',
+                          fontSize: '11px',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Select Video File
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
 
               {/* Video metadata card when loaded */}
-              {videoId && (
+              {sourceType === 'url' && videoId && (
                 <div
                   style={{
                     marginTop: '10px',
@@ -2108,6 +2395,82 @@ export default function PodcastSelectionModal({
                 </select>
               </div>
 
+              {/* Publish Destinations Selector */}
+              <div style={{ marginBottom: '16px' }}>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    fontSize: '11px',
+                    fontWeight: 600,
+                    color: '#94a3b8',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    marginBottom: '6px',
+                  }}
+                >
+                  <span>Publish Destinations</span>
+                  <span style={{ color: selectedDestinationIds.length > 0 ? '#818cf8' : '#64748b', fontSize: '10px' }}>
+                    {selectedDestinationIds.length === 0 ? 'No destination' : `${selectedDestinationIds.length} selected`}
+                  </span>
+                </label>
+                {destinations.length === 0 ? (
+                  <p style={{ fontSize: '11px', color: '#64748b', margin: 0, fontStyle: 'italic' }}>No channels connected</p>
+                ) : (
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                      maxHeight: '120px',
+                      overflowY: 'auto',
+                      padding: '4px',
+                      borderRadius: '6px',
+                      background: 'rgba(15, 23, 42, 0.6)',
+                      border: '1px solid rgba(255, 255, 255, 0.08)',
+                    }}
+                  >
+                    {destinations.map((d) => {
+                      const isChecked = selectedDestinationIds.includes(d.id);
+                      return (
+                        <label
+                          key={d.id}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            background: isChecked ? 'rgba(79, 70, 229, 0.15)' : 'transparent',
+                            cursor: 'pointer',
+                            fontSize: '11px',
+                            color: '#e2e8f0',
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => {
+                              setSelectedDestinationIds((prev) =>
+                                isChecked ? prev.filter((id) => id !== d.id) : [...prev, d.id]
+                              );
+                            }}
+                            style={{ accentColor: '#4f46e5' }}
+                          />
+                          <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {d.channel_name || 'Channel'}
+                          </span>
+                          <span style={{ fontSize: '9px', color: d.has_outro ? '#34d399' : '#64748b' }}>
+                            {d.has_outro ? `${d.outro?.outro_type === 'video' ? '🎬' : '🖼️'} ${d.outro?.duration_seconds || 5}s` : 'None'}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               {/* Error Display */}
               {(localError || errorMessage) && (
                 <div
@@ -2130,13 +2493,13 @@ export default function PodcastSelectionModal({
                 id={selectedFeature === 'visibility_driven' ? 'generate-advanced-clips-btn' : 'generate-clips-btn'}
                 type="button"
                 onClick={handleSubmit}
-                disabled={isSubmitting || !videoId || regions.length === 0}
+                disabled={isSubmitting || (sourceType === 'file' ? !selectedFile : !videoId) || regions.length === 0}
                 style={{
                   width: '100%',
                   padding: '12px',
                   borderRadius: '8px',
                   background:
-                    isSubmitting || !videoId || regions.length === 0
+                    isSubmitting || (sourceType === 'file' ? !selectedFile : !videoId) || regions.length === 0
                       ? 'rgba(59, 130, 246, 0.4)'
                       : selectedFeature === 'visibility_driven'
                       ? 'linear-gradient(135deg, #4f46e5, #7c3aed)'
@@ -2146,7 +2509,7 @@ export default function PodcastSelectionModal({
                   fontWeight: 700,
                   border: 'none',
                   cursor:
-                    isSubmitting || !videoId || regions.length === 0
+                    isSubmitting || (sourceType === 'file' ? !selectedFile : !videoId) || regions.length === 0
                       ? 'not-allowed'
                       : 'pointer',
                   boxShadow: selectedFeature === 'visibility_driven' ? '0 4px 14px rgba(99, 102, 241, 0.4)' : '0 4px 14px rgba(37, 99, 235, 0.4)',
@@ -2240,6 +2603,32 @@ export default function PodcastSelectionModal({
           ))}
         </div>
       </div>
+  );
+
+  if (isInline) {
+    return studioContent;
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="podcast-modal-title"
+      aria-describedby="podcast-modal-description"
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 9999,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(5, 8, 16, 0.85)',
+        backdropFilter: 'blur(10px)',
+        padding: '16px',
+        overflow: 'hidden',
+      }}
+    >
+      {studioContent}
     </div>
   );
 }

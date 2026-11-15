@@ -7,13 +7,16 @@ import os
 import math
 import re
 import tempfile
+import time
+import asyncio
+import httpx
 from pathlib import Path
-from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException, BackgroundTasks, Request
+from fastapi.responses import JSONResponse, FileResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, desc
+from sqlalchemy import select, desc, or_
 from backend.models.database import get_db
-from backend.models.models import Video, Job, JobStatus
+from backend.models.models import Video, Job, JobStatus, Channel, ChannelDestination
 from backend.core.config import settings
 from backend.services.downloader import get_video_info, extract_youtube_id
 from datetime import datetime
@@ -97,6 +100,94 @@ def validate_clip_mode_and_duration(
     return effective_mode
 
 
+def _parse_destination_ids_param(raw_destination_ids: str | None) -> list[str] | None:
+    """Parse destination_ids passed as JSON array string or comma-separated IDs."""
+    if raw_destination_ids is None:
+        return None
+    if hasattr(raw_destination_ids, "default"):
+        raw_destination_ids = raw_destination_ids.default
+        if raw_destination_ids is None:
+            return None
+    trimmed = str(raw_destination_ids).strip()
+    if trimmed.startswith("[") and trimmed.endswith("]"):
+        try:
+            parsed = json.loads(trimmed)
+            if isinstance(parsed, list):
+                return [str(x).strip() for x in parsed if str(x).strip()]
+        except Exception:
+            return [x.strip() for x in trimmed.strip("[]").split(",") if x.strip()]
+    if trimmed:
+        return [x.strip() for x in trimmed.split(",") if x.strip()]
+    return []
+
+
+async def _validate_manual_destinations_async(db: AsyncSession, raw_dest_ids: list[str]) -> list[str]:
+    """Validate explicit destination IDs and normalize to canonical Channel.id list (preserving order)."""
+    validated: list[str] = []
+    seen: set[str] = set()
+    for raw_id in raw_dest_ids:
+        candidate = str(raw_id).strip()
+        if not candidate:
+            continue
+        res = await db.execute(
+            select(Channel).where(or_(Channel.id == candidate, Channel.youtube_channel_id == candidate))
+        )
+        ch = res.scalar_one_or_none()
+        if not ch:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid publish destination '{candidate}': channel does not exist",
+            )
+        if not ch.is_destination:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Channel '{ch.channel_name}' ({candidate}) is not configured as a publishing destination",
+            )
+        if not ch.is_active:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Publish destination '{ch.channel_name}' ({candidate}) is disconnected or inactive",
+            )
+        if ch.id not in seen:
+            seen.add(ch.id)
+            validated.append(ch.id)
+    return validated
+
+
+async def _resolve_source_channel_destinations_async(db: AsyncSession, channel_id: str) -> list[str]:
+    """Load active ChannelDestination mappings (or legacy publish_destination_id) for a source channel."""
+    ch_res = await db.execute(select(Channel).where(Channel.id == channel_id))
+    source_ch = ch_res.scalar_one_or_none()
+    if not source_ch:
+        return []
+    now = datetime.utcnow()
+    cd_res = await db.execute(
+        select(ChannelDestination.destination_channel_id)
+        .join(Channel, Channel.id == ChannelDestination.destination_channel_id)
+        .where(
+            ChannelDestination.source_channel_id == source_ch.id,
+            ChannelDestination.is_default == True,
+            Channel.is_destination == True,
+            Channel.is_active == True,
+        )
+    )
+    mapped_ids = list(dict.fromkeys(cd_res.scalars().all()))
+    if mapped_ids:
+        return mapped_ids
+    if source_ch.publish_destination_id:
+        leg_res = await db.execute(
+            select(Channel.id).where(
+                Channel.id == source_ch.publish_destination_id,
+                Channel.is_destination == True,
+                Channel.is_active == True,
+            )
+        )
+        leg_id = leg_res.scalar_one_or_none()
+        if leg_id:
+            return [leg_id]
+    return []
+
+
 @router.post("/url")
 async def process_youtube_url(
     url: str = Form(...),
@@ -117,6 +208,7 @@ async def process_youtube_url(
     regions: str | None = Form(None),
     podcast_composition: str | None = Form(None),
     shot_schedule: str | None = Form(None),
+    gaming_layout: str | None = Form(None),
     is_test: bool = Form(False),
     db: AsyncSession = Depends(get_db)
 ):
@@ -132,8 +224,41 @@ async def process_youtube_url(
         elif hasattr(is_test, "default"):
             is_test_val = bool(is_test.default)
 
+    # Auto-detect synthetic test fixtures and test URLs
+    if not is_test_val and url:
+        from backend.services.queue_manager import SYNTHETIC_URL_PREFIXES
+        if any(url.startswith(prefix) for prefix in SYNTHETIC_URL_PREFIXES) or any(
+            marker in url.lower() for marker in ("mock", "test", "stale", "errvid", "dqw4w9wgxcq")
+        ):
+            is_test_val = True
+
     if hasattr(shot_schedule, "default"):
         shot_schedule = shot_schedule.default
+
+    if hasattr(gaming_layout, "default"):
+        gaming_layout = gaming_layout.default
+    if hasattr(reframe_mode, "default"):
+        reframe_mode = reframe_mode.default
+    if hasattr(hook_title, "default"):
+        hook_title = hook_title.default
+    if hasattr(num_clips, "default"):
+        num_clips = num_clips.default
+    if hasattr(clips_count, "default"):
+        clips_count = clips_count.default
+    if hasattr(enable_broll, "default"):
+        enable_broll = enable_broll.default
+    if hasattr(enable_hook, "default"):
+        enable_hook = enable_hook.default
+    if hasattr(target_language, "default"):
+        target_language = target_language.default
+    if hasattr(publish_destination_id, "default"):
+        publish_destination_id = publish_destination_id.default
+    if hasattr(max_clip_duration, "default"):
+        max_clip_duration = max_clip_duration.default
+    if hasattr(target_duration, "default"):
+        target_duration = target_duration.default
+    if hasattr(segmentation_strategy, "default"):
+        segmentation_strategy = segmentation_strategy.default
     if hasattr(regions, "default"):
         regions = regions.default
     if hasattr(podcast_composition, "default"):
@@ -242,30 +367,55 @@ async def process_youtube_url(
             except Exception as e:
                 raise HTTPException(status_code=400, detail=f"Invalid shot_schedule configuration: {str(e)}")
 
-    # Parse destination_ids if provided
-    parsed_destination_ids = None
-    if destination_ids is not None:
-        trimmed = destination_ids.strip()
-        if trimmed.startswith("[") and trimmed.endswith("]"):
-            try:
-                parsed_destination_ids = json.loads(trimmed)
-            except Exception:
-                parsed_destination_ids = [x.strip() for x in trimmed.strip("[]").split(",") if x.strip()]
-        elif trimmed:
-            parsed_destination_ids = [x.strip() for x in trimmed.split(",") if x.strip()]
+    # Parse and validate destination_ids / publish_destination_id before dispatching job
+    parsed_destination_ids = _parse_destination_ids_param(destination_ids)
+    if parsed_destination_ids is not None:
+        if len(parsed_destination_ids) > 0:
+            parsed_destination_ids = await _validate_manual_destinations_async(db, parsed_destination_ids)
+            if not publish_destination_id:
+                publish_destination_id = parsed_destination_ids[0]
         else:
-            parsed_destination_ids = []
+            # Explicit empty destination list means draft-only / select at publish time
+            publish_destination_id = None
+    elif publish_destination_id:
+        validated = await _validate_manual_destinations_async(db, [publish_destination_id])
+        publish_destination_id = validated[0]
+        parsed_destination_ids = validated
+    elif channel_id:
+        inherited_ids = await _resolve_source_channel_destinations_async(db, channel_id)
+        if inherited_ids:
+            parsed_destination_ids = inherited_ids
+            publish_destination_id = inherited_ids[0]
+    # Validate gaming_layout if provided
+    parsed_gaming_layout = None
+    if gaming_layout is not None:
+        raw_gaming = None
+        if isinstance(gaming_layout, str):
+            trimmed = gaming_layout.strip()
+            if trimmed:
+                try:
+                    raw_gaming = json.loads(trimmed)
+                except Exception as e:
+                    raise HTTPException(status_code=422, detail=f"Invalid gaming_layout JSON: {str(e)}")
+            else:
+                raise HTTPException(status_code=422, detail="gaming_layout cannot be empty")
+        elif isinstance(gaming_layout, dict):
+            raw_gaming = gaming_layout
+        else:
+            raise HTTPException(status_code=422, detail="gaming_layout must be a JSON string or object")
 
-    # If channel_id is provided and publish_destination_id is not explicitly specified,
-    # inherit the monitored channel's configured publish_destination_id
-    if channel_id and not publish_destination_id:
-        from backend.models.models import Channel
-        ch_res = await db.execute(select(Channel).where(Channel.id == channel_id))
-        source_ch = ch_res.scalar_one_or_none()
-        if source_ch:
-            publish_destination_id = source_ch.publish_destination_id
-            if publish_destination_id and parsed_destination_ids is None:
-                parsed_destination_ids = [publish_destination_id]
+        if raw_gaming is not None:
+            from backend.services.gaming_geometry import validate_gaming_layout
+            try:
+                validate_gaming_layout(raw_gaming)
+                parsed_gaming_layout = raw_gaming
+            except ValueError as ve:
+                raise HTTPException(status_code=422, detail=f"Invalid gaming_layout configuration: {str(ve)}")
+            except Exception as e:
+                raise HTTPException(status_code=422, detail=f"Invalid gaming_layout configuration: {str(e)}")
+        else:
+            raise HTTPException(status_code=422, detail="gaming_layout cannot be empty")
+
     # Auto-configure Equal Split strategy and target duration
     if clip_mode == "equal_split":
         if not segmentation_strategy:
@@ -274,9 +424,14 @@ async def process_youtube_url(
             target_duration = float(max_clip_duration)
 
     # Determine effective mode and composition
-    is_advanced = bool(parsed_shot_schedule or podcast_composition in ("advanced_podcast", "camera_following", "fixed_two_person", "visibility_driven"))
-    effective_podcast_comp = podcast_composition or ("advanced_podcast" if is_advanced else ("stacked" if parsed_regions and len(parsed_regions) > 1 else "single_region"))
-    effective_job_mode = "advanced_podcast" if is_advanced else ("podcast_interview" if parsed_regions else "standard")
+    if parsed_gaming_layout:
+        effective_job_mode = "gaming"
+        reframe_mode = "gaming"
+        effective_podcast_comp = None
+    else:
+        is_advanced = bool(parsed_shot_schedule or podcast_composition in ("advanced_podcast", "camera_following", "fixed_two_person", "visibility_driven"))
+        effective_podcast_comp = podcast_composition or ("advanced_podcast" if is_advanced else ("stacked" if parsed_regions and len(parsed_regions) > 1 else "single_region"))
+        effective_job_mode = "advanced_podcast" if is_advanced else ("podcast_interview" if parsed_regions else "standard")
 
     # Create job record
     job_id = str(uuid.uuid4())
@@ -299,6 +454,7 @@ async def process_youtube_url(
         "segmentation_strategy": segmentation_strategy,
         "regions": parsed_regions,
         "podcast_composition": effective_podcast_comp,
+        "gaming_layout": parsed_gaming_layout,
     }
 
     config_data = {
@@ -318,6 +474,7 @@ async def process_youtube_url(
         "regions": parsed_regions,
         "shot_schedule": parsed_shot_schedule,
         "podcast_composition": effective_podcast_comp,
+        "gaming_layout": parsed_gaming_layout,
         "mode": effective_job_mode,
         "dispatch_kwargs": dispatch_kwargs,
     }
@@ -344,7 +501,7 @@ async def process_youtube_url(
         dispatch_celery_job,
     )
 
-    active_count = await get_active_manual_jobs_count_async(db)
+    active_count = await get_active_manual_jobs_count_async(db, include_test=is_test_val)
     if active_count < MAX_CONCURRENT_MANUAL_JOBS:
         task_id = dispatch_celery_job(job_id, dispatch_kwargs)
         job.celery_task_id = task_id
@@ -352,7 +509,7 @@ async def process_youtube_url(
         await db.commit()
         return {"job_id": job_id, "message": "Processing started", "url": url, "queued": False}
     else:
-        position = await get_pending_queue_position_async(db, job_id)
+        position = await get_pending_queue_position_async(db, job_id, include_test=is_test_val)
         job.current_step = format_queue_step(position)
         await db.commit()
         return {
@@ -553,8 +710,10 @@ class BatchURLRequest(BaseModel):
     target_language: str | None = "none"
     reframe_mode: str | None = None
     publish_destination_id: str | None = None
+    destination_ids: list[str] | None = None
     target_duration: float | None = None
     segmentation_strategy: str | None = None
+    is_test: bool = False
 
 @router.post("/batch")
 async def process_youtube_urls_batch(
@@ -564,7 +723,7 @@ async def process_youtube_urls_batch(
     """
     Submit multiple YouTube URLs for batch processing.
     POST /api/videos/batch
-    Body: { "urls": ["https://...", "https://..."], "clips_count": 3 }
+    Body: { "urls": ["https://...", "https://..."], "clips_count": 3, "destination_ids": [...] }
     """
     from backend.tasks.orchestration import start_video_processing_task
 
@@ -575,6 +734,20 @@ async def process_youtube_urls_batch(
     effective_clip_mode = validate_clip_mode_and_duration(
         req.clip_mode, req.max_clip_duration, req.target_duration
     )
+
+    validated_dest_ids: list[str] | None = None
+    eff_publish_dest_id: str | None = req.publish_destination_id
+    if req.destination_ids is not None:
+        if len(req.destination_ids) > 0:
+            validated_dest_ids = await _validate_manual_destinations_async(db, req.destination_ids)
+            if not eff_publish_dest_id:
+                eff_publish_dest_id = validated_dest_ids[0]
+        else:
+            validated_dest_ids = []
+            eff_publish_dest_id = None
+    elif req.publish_destination_id:
+        validated_dest_ids = await _validate_manual_destinations_async(db, [req.publish_destination_id])
+        eff_publish_dest_id = validated_dest_ids[0]
 
     results = []
     skipped = []
@@ -605,7 +778,8 @@ async def process_youtube_urls_batch(
             "enable_hook": req.enable_hook or False,
             "target_language": req.target_language,
             "clips_count": req.clips_count if req.clip_mode != "equal_split" else None,
-            "publish_destination_id": req.publish_destination_id,
+            "publish_destination_id": eff_publish_dest_id,
+            "destination_ids": validated_dest_ids,
             "target_duration": effective_target_duration,
             "segmentation_strategy": effective_seg_strategy,
         }
@@ -621,7 +795,8 @@ async def process_youtube_urls_batch(
             "enable_broll": req.enable_broll or False,
             "enable_hook": req.enable_hook or False,
             "target_language": req.target_language,
-            "publish_destination_id": req.publish_destination_id,
+            "publish_destination_id": eff_publish_dest_id,
+            "destination_ids": validated_dest_ids,
             "target_duration": effective_target_duration,
             "segmentation_strategy": effective_seg_strategy,
         }
@@ -634,7 +809,8 @@ async def process_youtube_urls_batch(
             current_step="Queued (Batch)",
             source_url=url,
             source_title=f"youtube.com/watch?v={yt_id}",
-            config=json.dumps(config_data)
+            config=json.dumps(config_data),
+            is_test=bool(req.is_test),
         )
         db.add(job)
         await db.commit()
@@ -647,7 +823,7 @@ async def process_youtube_urls_batch(
             dispatch_celery_job,
         )
 
-        active_count = await get_active_manual_jobs_count_async(db)
+        active_count = await get_active_manual_jobs_count_async(db, include_test=bool(req.is_test))
         if active_count < MAX_CONCURRENT_MANUAL_JOBS:
             task_id = dispatch_celery_job(job_id, dispatch_kwargs)
             job.celery_task_id = task_id
@@ -661,7 +837,7 @@ async def process_youtube_urls_batch(
                 "queued": False
             })
         else:
-            position = await get_pending_queue_position_async(db, job_id)
+            position = await get_pending_queue_position_async(db, job_id, include_test=bool(req.is_test))
             job.current_step = format_queue_step(position)
             await db.commit()
             results.append({
@@ -697,18 +873,79 @@ async def upload_video_file(
     enable_hook: bool = Form(False),
     target_language: str | None = Form(None),
     publish_destination_id: str | None = Form(None),
+    destination_ids: str | None = Form(None),
     target_duration: float | None = Form(None),
     segmentation_strategy: str | None = Form(None),
+    gaming_layout: str | None = Form(None),
+    regions: str | None = Form(None),
+    podcast_composition: str | None = Form(None),
+    shot_schedule: str | None = Form(None),
+    is_test: bool = Form(False),
     db: AsyncSession = Depends(get_db)
 ):
     """Upload a local MP4/MOV file for processing."""
     from backend.tasks.orchestration import start_video_processing_task
+
+    is_test_val = False
+    if is_test is not None:
+        if isinstance(is_test, bool):
+            is_test_val = is_test
+        elif isinstance(is_test, str):
+            is_test_val = is_test.lower() in ("true", "1", "yes")
+        elif hasattr(is_test, "default"):
+            is_test_val = bool(is_test.default)
+
+    if hasattr(gaming_layout, "default"):
+        gaming_layout = gaming_layout.default
+    if hasattr(reframe_mode, "default"):
+        reframe_mode = reframe_mode.default
+    if hasattr(hook_title, "default"):
+        hook_title = hook_title.default
+    if hasattr(num_clips, "default"):
+        num_clips = num_clips.default
+    if hasattr(clips_count, "default"):
+        clips_count = clips_count.default
+    if hasattr(enable_broll, "default"):
+        enable_broll = enable_broll.default
+    if hasattr(enable_hook, "default"):
+        enable_hook = enable_hook.default
+    if hasattr(target_language, "default"):
+        target_language = target_language.default
+    if hasattr(publish_destination_id, "default"):
+        publish_destination_id = publish_destination_id.default
+    if hasattr(max_clip_duration, "default"):
+        max_clip_duration = max_clip_duration.default
+    if hasattr(target_duration, "default"):
+        target_duration = target_duration.default
+    if hasattr(segmentation_strategy, "default"):
+        segmentation_strategy = segmentation_strategy.default
+
+    if hasattr(regions, "default"):
+        regions = regions.default
+    if hasattr(podcast_composition, "default"):
+        podcast_composition = podcast_composition.default
+    if hasattr(shot_schedule, "default"):
+        shot_schedule = shot_schedule.default
 
     if not file.filename.lower().endswith((".mp4", ".mov", ".avi", ".mkv", ".webm")):
         raise HTTPException(status_code=400, detail="Unsupported file format. Use MP4, MOV, AVI, MKV, or WebM")
 
     # Validate mode and duration bounds
     clip_mode = validate_clip_mode_and_duration(clip_mode, max_clip_duration, target_duration)
+
+    # Parse and validate destinations BEFORE saving uploaded file to disk
+    parsed_destination_ids = _parse_destination_ids_param(destination_ids)
+    if parsed_destination_ids is not None:
+        if len(parsed_destination_ids) > 0:
+            parsed_destination_ids = await _validate_manual_destinations_async(db, parsed_destination_ids)
+            if not publish_destination_id:
+                publish_destination_id = parsed_destination_ids[0]
+        else:
+            publish_destination_id = None
+    elif publish_destination_id:
+        validated = await _validate_manual_destinations_async(db, [publish_destination_id])
+        publish_destination_id = validated[0]
+        parsed_destination_ids = validated
 
     # Save uploaded file
     video_id = str(uuid.uuid4())
@@ -718,6 +955,118 @@ async def upload_video_file(
 
     with open(file_path, "wb") as f:
         shutil.copyfileobj(file.file, f)
+
+    # Validate gaming_layout if provided
+    parsed_gaming_layout = None
+    if gaming_layout is not None:
+        raw_gaming = None
+        if isinstance(gaming_layout, str):
+            trimmed = gaming_layout.strip()
+            if trimmed:
+                try:
+                    raw_gaming = json.loads(trimmed)
+                except Exception as e:
+                    if file_path.exists():
+                        try: file_path.unlink()
+                        except Exception: pass
+                    raise HTTPException(status_code=422, detail=f"Invalid gaming_layout JSON: {str(e)}")
+            else:
+                if file_path.exists():
+                    try: file_path.unlink()
+                    except Exception: pass
+                raise HTTPException(status_code=422, detail="gaming_layout cannot be empty")
+        elif isinstance(gaming_layout, dict):
+            raw_gaming = gaming_layout
+        else:
+            if file_path.exists():
+                try: file_path.unlink()
+                except Exception: pass
+            raise HTTPException(status_code=422, detail="gaming_layout must be a JSON string or object")
+
+        if raw_gaming is not None:
+            from backend.services.gaming_geometry import validate_gaming_layout
+            try:
+                validate_gaming_layout(raw_gaming)
+                parsed_gaming_layout = raw_gaming
+            except ValueError as ve:
+                if file_path.exists():
+                    try: file_path.unlink()
+                    except Exception: pass
+                raise HTTPException(status_code=422, detail=f"Invalid gaming_layout configuration: {str(ve)}")
+            except Exception as e:
+                if file_path.exists():
+                    try: file_path.unlink()
+                    except Exception: pass
+                raise HTTPException(status_code=422, detail=f"Invalid gaming_layout configuration: {str(e)}")
+        else:
+            if file_path.exists():
+                try: file_path.unlink()
+                except Exception: pass
+            raise HTTPException(status_code=422, detail="gaming_layout cannot be empty")
+
+    # Validate podcast custom regions if provided
+    parsed_regions = None
+    if regions is not None:
+        trimmed_regions = regions.strip()
+        if trimmed_regions:
+            try:
+                raw_regions = json.loads(trimmed_regions)
+                if not isinstance(raw_regions, list):
+                    raise ValueError("regions must be a JSON array")
+                parsed_regions = []
+                for idx, r in enumerate(raw_regions):
+                    if not isinstance(r, dict):
+                        raise ValueError(f"Region item {idx} must be an object")
+                    rx = float(r.get("x", 0.0))
+                    ry = float(r.get("y", 0.0))
+                    rw = float(r.get("width") if r.get("width") is not None else r.get("w", 0.0))
+                    rh = float(r.get("height") if r.get("height") is not None else r.get("h", 0.0))
+                    if not (0.0 <= rx <= 1.0 and 0.0 <= ry <= 1.0):
+                        raise ValueError(f"Region {idx} coordinates out of [0, 1] range: x={rx}, y={ry}")
+                    if rw <= 0.0 or rh <= 0.0:
+                        raise ValueError(f"Region {idx} dimensions must be positive: w={rw}, h={rh}")
+                    if rx + rw > 1.001 or ry + rh > 1.001:
+                        raise ValueError(f"Region {idx} exceeds bounds: x={rx}+w={rw}={rx+rw}, y={ry}+h={rh}={ry+rh}")
+                    parsed_regions.append({
+                        "id": str(r.get("id", f"region-{idx+1}")),
+                        "label": str(r.get("label", f"Area {idx+1}")),
+                        "x": rx,
+                        "y": ry,
+                        "width": min(rw, 1.0 - rx),
+                        "height": min(rh, 1.0 - ry),
+                    })
+            except Exception as e:
+                if file_path.exists():
+                    try: file_path.unlink()
+                    except Exception: pass
+                raise HTTPException(status_code=400, detail=f"Invalid regions configuration: {str(e)}")
+
+    # Validate podcast shot schedule if provided
+    parsed_shot_schedule = None
+    if shot_schedule is not None:
+        trimmed_sched = shot_schedule.strip()
+        if trimmed_sched:
+            try:
+                raw_sched = json.loads(trimmed_sched)
+                if not isinstance(raw_sched, list):
+                    raise ValueError("shot_schedule must be a JSON array")
+                parsed_shot_schedule = []
+                for idx, s in enumerate(raw_sched):
+                    if not isinstance(s, dict):
+                        raise ValueError(f"Shot item {idx} must be an object")
+                    s_t = float(s.get("start_time", 0.0))
+                    e_t = float(s.get("end_time", 0.0))
+                    if s_t < 0.0 or e_t < s_t:
+                        raise ValueError(f"Invalid shot interval: start={s_t}, end={e_t}")
+                    parsed_shot_schedule.append(s)
+            except Exception as e:
+                if file_path.exists():
+                    try: file_path.unlink()
+                    except Exception: pass
+                raise HTTPException(status_code=400, detail=f"Invalid shot_schedule configuration: {str(e)}")
+
+    if parsed_gaming_layout:
+        reframe_mode = "gaming"
 
     if clip_mode == "equal_split":
         if not segmentation_strategy:
@@ -736,10 +1085,16 @@ async def upload_video_file(
         "target_language": target_language,
         "clips_count": (clips_count or num_clips) if clip_mode != "equal_split" else None,
         "publish_destination_id": publish_destination_id,
+        "destination_ids": parsed_destination_ids,
         "target_duration": target_duration,
         "segmentation_strategy": segmentation_strategy,
         "source_type": "local",
         "local_path": str(file_path),
+        "gaming_layout": parsed_gaming_layout,
+        "regions": parsed_regions,
+        "podcast_composition": podcast_composition,
+        "shot_schedule": parsed_shot_schedule,
+        "mode": "gaming" if parsed_gaming_layout else ("podcast" if parsed_regions else "standard"),
     }
 
     dispatch_kwargs = {
@@ -755,8 +1110,13 @@ async def upload_video_file(
         "enable_hook": enable_hook,
         "target_language": target_language,
         "publish_destination_id": publish_destination_id,
+        "destination_ids": parsed_destination_ids,
         "target_duration": target_duration,
         "segmentation_strategy": segmentation_strategy,
+        "gaming_layout": parsed_gaming_layout,
+        "regions": parsed_regions,
+        "podcast_composition": podcast_composition,
+        "shot_schedule": parsed_shot_schedule,
     }
     config_data["dispatch_kwargs"] = dispatch_kwargs
 
@@ -767,7 +1127,8 @@ async def upload_video_file(
         current_step="Queued",
         source_url=file.filename,
         source_title=file.filename,
-        config=json.dumps(config_data)
+        config=json.dumps(config_data),
+        is_test=is_test_val,
     )
     db.add(job)
     await db.commit()
@@ -780,7 +1141,7 @@ async def upload_video_file(
         dispatch_celery_job,
     )
 
-    active_count = await get_active_manual_jobs_count_async(db)
+    active_count = await get_active_manual_jobs_count_async(db, include_test=is_test_val)
     if active_count < MAX_CONCURRENT_MANUAL_JOBS:
         task_id = dispatch_celery_job(job_id, dispatch_kwargs)
         job.celery_task_id = task_id
@@ -788,7 +1149,7 @@ async def upload_video_file(
         await db.commit()
         return {"job_id": job_id, "message": "Upload received, processing started", "queued": False}
     else:
-        position = await get_pending_queue_position_async(db, job_id)
+        position = await get_pending_queue_position_async(db, job_id, include_test=is_test_val)
         job.current_step = format_queue_step(position)
         await db.commit()
         return {
@@ -816,6 +1177,124 @@ async def list_videos(db: AsyncSession = Depends(get_db)):
         }
         for v in videos
     ]
+
+
+# In-memory cache for resolved preview stream URLs: yt_id -> (stream_url, expire_timestamp)
+_PREVIEW_STREAM_CACHE: dict[str, tuple[str, float]] = {}
+
+
+async def resolve_youtube_stream_url(url: str) -> str:
+    """Resolve a progressive MP4 stream URL for a YouTube video using yt-dlp.
+    Cached for 1 hour to prevent repeated yt-dlp invocations during Range requests.
+    """
+    yt_id = extract_youtube_id(url)
+    if not yt_id:
+        raise HTTPException(status_code=400, detail="Invalid YouTube URL")
+
+    now = time.time()
+    if yt_id in _PREVIEW_STREAM_CACHE:
+        cached_url, expire_time = _PREVIEW_STREAM_CACHE[yt_id]
+        if now < expire_time:
+            return cached_url
+
+    cmd = [
+        "yt-dlp",
+        "--extractor-args", "youtube:player_client=ios,android",
+        "-g",
+        "-f", "18/best[ext=mp4]/best",
+        "--no-playlist",
+        "--quiet",
+    ]
+    # Add cookies if available
+    for path_str in ["/app/backend/cookies.txt", "/app/cookies.txt"]:
+        p = Path(path_str)
+        if p.exists():
+            cmd.extend(["--cookies", str(p)])
+            break
+
+    cmd.append(url)
+
+    proc = await asyncio.create_subprocess_exec(
+        *cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE
+    )
+    try:
+        stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=15.0)
+    except asyncio.TimeoutError:
+        proc.kill()
+        await proc.wait()
+        raise HTTPException(status_code=504, detail="Resolving YouTube stream URL timed out")
+
+    if proc.returncode != 0:
+        err_msg = stderr.decode(errors="replace")[:300] if stderr else "Failed to extract stream"
+        raise HTTPException(status_code=502, detail=f"yt-dlp stream extraction failed: {err_msg}")
+
+    lines = stdout.decode().strip().splitlines()
+    direct_url = lines[0].strip() if lines else ""
+    if not direct_url.startswith("http"):
+        raise HTTPException(status_code=502, detail="No valid stream URL returned by yt-dlp")
+
+    # Cache for 1 hour
+    _PREVIEW_STREAM_CACHE[yt_id] = (direct_url, now + 3600.0)
+    return direct_url
+
+
+@router.api_route("/preview-stream", methods=["GET", "HEAD"])
+async def stream_youtube_preview(url: str, request: Request):
+    """
+    Proxies a live progressive MP4 stream of a YouTube video to the browser with Range header support.
+    Enables native HTML5 <video> playback and live 60fps <canvas> rendering in Gaming Studio.
+    """
+    stream_url = await resolve_youtube_stream_url(url)
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    }
+    range_header = request.headers.get("range")
+    if range_header:
+        headers["Range"] = range_header
+
+    client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
+    try:
+        upstream_req = client.build_request(request.method, stream_url, headers=headers)
+        upstream_resp = await client.send(upstream_req, stream=True)
+    except Exception as e:
+        await client.aclose()
+        raise HTTPException(status_code=502, detail=f"Failed to connect to video stream: {str(e)}")
+
+    response_headers = {
+        "Accept-Ranges": "bytes",
+        "Content-Type": upstream_resp.headers.get("Content-Type", "video/mp4"),
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Range, Content-Type",
+        "Access-Control-Expose-Headers": "Content-Range, Content-Length, Accept-Ranges",
+    }
+    if "Content-Range" in upstream_resp.headers:
+        response_headers["Content-Range"] = upstream_resp.headers["Content-Range"]
+    if "Content-Length" in upstream_resp.headers:
+        response_headers["Content-Length"] = upstream_resp.headers["Content-Length"]
+
+    if request.method == "HEAD":
+        await upstream_resp.aclose()
+        await client.aclose()
+        from fastapi.responses import Response
+        return Response(status_code=upstream_resp.status_code, headers=response_headers, media_type=response_headers["Content-Type"])
+
+    async def stream_generator():
+        try:
+            async for chunk in upstream_resp.aiter_bytes(chunk_size=65536):
+                yield chunk
+        finally:
+            await upstream_resp.aclose()
+            await client.aclose()
+
+    return StreamingResponse(
+        stream_generator(),
+        status_code=upstream_resp.status_code,
+        headers=response_headers,
+        media_type=response_headers["Content-Type"],
+    )
 
 
 @router.get("/{video_id}")
@@ -1083,3 +1562,4 @@ async def get_video_frame(
                 tmp_path.unlink()
             except Exception:
                 pass
+

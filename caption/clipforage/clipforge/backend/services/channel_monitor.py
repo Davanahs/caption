@@ -8,7 +8,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from backend.models.models import Channel, Video, VideoDecision, VideoDecisionStatus
+from backend.models.models import Channel, ChannelDestination, Video, VideoDecision, VideoDecisionStatus
 from backend.services.downloader import get_channel_videos
 from backend.core.config import settings
 
@@ -180,9 +180,40 @@ async def run_channel_monitor(db: AsyncSession):
             deadline = now + timedelta(seconds=20)
             decision_id = str(uuid.uuid4())
 
-            # Snapshot channel profile with explicit provenance
+            # Snapshot channel profile with explicit provenance and active destination mappings
             profile_snapshot = dict(channel.processing_profile or {})
             profile_snapshot["origin"] = "automatic_monitor"
+            now_snap = datetime.now(timezone.utc)
+            cd_rows = (
+                await db.execute(
+                    select(ChannelDestination.destination_channel_id)
+                    .join(Channel, Channel.id == ChannelDestination.destination_channel_id)
+                    .where(
+                        ChannelDestination.source_channel_id == channel.id,
+                        ChannelDestination.is_default == True,
+                        (ChannelDestination.expires_at.is_(None) | (ChannelDestination.expires_at > now_snap)),
+                        Channel.is_destination == True,
+                        Channel.is_active == True,
+                    )
+                )
+            ).scalars().all()
+            if cd_rows:
+                mapped_ids = list(dict.fromkeys(cd_rows))
+                profile_snapshot["destination_ids"] = mapped_ids
+                profile_snapshot["publish_destination_id"] = mapped_ids[0]
+            elif channel.publish_destination_id:
+                leg_dest = (
+                    await db.execute(
+                        select(Channel.id).where(
+                            Channel.id == channel.publish_destination_id,
+                            Channel.is_destination == True,
+                            Channel.is_active == True,
+                        )
+                    )
+                ).scalar_one_or_none()
+                if leg_dest:
+                    profile_snapshot["destination_ids"] = [leg_dest]
+                    profile_snapshot["publish_destination_id"] = leg_dest
 
             # If auto_clip is enabled, schedule 20s countdown
             status = (
