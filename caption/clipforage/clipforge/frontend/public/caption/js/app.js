@@ -1993,8 +1993,14 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       renderFrameId = requestAnimationFrame(drawComp);
 
+      if (previewVideoPlayer) {
+        previewVideoPlayer.onended = () => {
+          if (recorder.state === 'recording') recorder.stop();
+        };
+      }
+
       checkInterval = setInterval(() => {
-        if (!isPlaying || currentTime >= totalDuration) {
+        if (currentTime >= totalDuration - 0.05) {
           clearInterval(checkInterval);
           if (recorder.state === 'recording') {
             recorder.stop();
@@ -2002,6 +2008,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }, 100);
     });
+  }
+
+  // ── Server-Side Kinetic Caption Burn (Instant & Guaranteed Full Duration) ───
+  async function burnClipOnServer(clipId, buttonEl, redirectUrl = null) {
+    if (!captionData.blocks || captionData.blocks.length === 0) {
+      alert('Please ensure caption blocks are loaded before saving.');
+      if (buttonEl) buttonEl.disabled = false;
+      return;
+    }
+    const origText = buttonEl ? buttonEl.textContent : '';
+    if (buttonEl) {
+      buttonEl.disabled = true;
+      buttonEl.textContent = '⚡ Burning Captions...';
+    }
+    statusText.textContent = '⚡ Burning kinetic captions onto full video on server (FFmpeg)...';
+
+    try {
+      const payload = {
+        blocks: captionData.blocks,
+        preset_style: captionData.styleId || 'hormozi',
+        layout: captionData.layout,
+        full_text: scriptInput ? scriptInput.value : ''
+      };
+
+      const res = await fetch(`/api/caption/burn-clip/${clipId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.detail || 'Server failed to burn captions.');
+      }
+
+      const data = await res.json();
+      statusText.textContent = '✅ Full-length video with kinetic captions saved to library!';
+      if (buttonEl) buttonEl.textContent = '✅ Saved!';
+
+      if (redirectUrl) {
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 500);
+      } else {
+        setTimeout(() => {
+          if (buttonEl) {
+            buttonEl.disabled = false;
+            buttonEl.textContent = origText || '💾 Save Draft to Library';
+          }
+        }, 2000);
+      }
+    } catch (err) {
+      console.error('Burn captions error:', err);
+      alert('Failed to save captioned video: ' + err.message);
+      if (buttonEl) {
+        buttonEl.disabled = false;
+        buttonEl.textContent = origText || '💾 Save Draft to Library';
+      }
+      statusText.textContent = '❌ Failed to burn captions: ' + err.message;
+    }
   }
 
   // ── Upload & Persist Rendered Video to Backend ────────────────────────────
@@ -2139,43 +2205,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const bridgeSaveClipBtn = document.getElementById('bridgeSaveClipBtn');
         const bridgePublishClipBtn = document.getElementById('bridgePublishClipBtn');
 
-        // Action 1: Save Draft to Library
+        // Action 1: Save Draft to Library (Fast & Full-Duration Server-Side Burn)
         if (bridgeSaveClipBtn && clipId) {
           bridgeSaveClipBtn.addEventListener('click', async () => {
-            bridgeSaveClipBtn.disabled = true;
-            bridgeSaveClipBtn.textContent = '🎬 Rendering 0%...';
-            statusText.textContent = '🎬 Rendering kinetic captions into video...';
-            try {
-              const blob = await renderCompositeVideo((pct) => {
-                bridgeSaveClipBtn.textContent = `🎬 Rendering ${pct}%`;
-                statusText.textContent = `🎬 Rendering kinetic captions into video (${pct}%)...`;
-              });
-              await saveRenderedClipToServer(clipId, blob, bridgeSaveClipBtn, null);
-            } catch (err) {
-              console.error('Save draft error:', err);
-              bridgeSaveClipBtn.disabled = false;
-              bridgeSaveClipBtn.textContent = '💾 Save Draft to Library';
-            }
+            await burnClipOnServer(clipId, bridgeSaveClipBtn, null);
           });
         }
 
-        // Action 2: Publish with Captions
+        // Action 2: Publish with Captions (Fast & Full-Duration Server-Side Burn -> Redirect)
         if (bridgePublishClipBtn && clipId) {
           bridgePublishClipBtn.addEventListener('click', async () => {
-            bridgePublishClipBtn.disabled = true;
-            bridgePublishClipBtn.textContent = '🎬 Rendering 0%...';
-            statusText.textContent = '🎬 Rendering kinetic captions into video...';
-            try {
-              const blob = await renderCompositeVideo((pct) => {
-                bridgePublishClipBtn.textContent = `🎬 Rendering ${pct}%`;
-                statusText.textContent = `🎬 Rendering kinetic captions into video (${pct}%)...`;
-              });
-              await saveRenderedClipToServer(clipId, blob, bridgePublishClipBtn, `/publish?clip=${clipId}`);
-            } catch (err) {
-              console.error('Publish with captions error:', err);
-              bridgePublishClipBtn.disabled = false;
-              bridgePublishClipBtn.textContent = '🚀 Publish with Captions';
-            }
+            await burnClipOnServer(clipId, bridgePublishClipBtn, `/publish?clip=${clipId}`);
           });
         }
       }

@@ -89,6 +89,13 @@ class DirectorPassRequest(BaseModel):
     blocks: List[Dict[str, Any]]
 
 
+class BurnClipCaptionsRequest(BaseModel):
+    blocks: List[Dict[str, Any]]
+    preset_style: Optional[str] = "hormozi"
+    layout: Optional[Dict[str, Any]] = None
+    full_text: Optional[str] = None
+
+
 # ── Constants for Deterministic Break Scoring ────────────────────────────────
 CONJUNCTIONS = {
     'and', 'but', 'so', 'because', 'or', 'when', 'if', 'while',
@@ -1230,4 +1237,216 @@ async def save_rendered_caption_clip(
         "publish_status": clip.publish_status,
         "message": "Captioned video successfully saved, drafted to library, and ready to publish!"
     }
+
+
+def format_ass_time(sec: float) -> str:
+    sec = max(0.0, float(sec))
+    m = int(sec // 60)
+    h = int(m // 60)
+    m = m % 60
+    s = sec % 60
+    return f"{h}:{m:02d}:{s:05.2f}"
+
+
+def generate_ass_subtitles(blocks: list, preset_style: str = "hormozi", layout: dict = None) -> str:
+    font_name = "DejaVu Sans"
+    font_size = 68
+    primary_color = "&H00FFFFFF"    # White (&HAABBGGRR)
+    highlight_color = "&H0000FFFF"  # Yellow
+    outline_color = "&H00000000"    # Black
+    back_color = "&H80000000"       # Semi-transparent shadow
+    outline_w = 8
+    shadow_w = 4
+    margin_v = 240
+    alignment = 2
+
+    style_lower = (preset_style or "hormozi").lower()
+    if "beast" in style_lower:
+        highlight_color = "&H000099FF" # Orange/Gold
+        outline_w = 10
+    elif "cyber" in style_lower:
+        primary_color = "&H00FFFF00"   # Cyan
+        highlight_color = "&H00FF00FF" # Magenta
+        outline_w = 6
+    elif "submagic" in style_lower:
+        highlight_color = "&H0000FF00" # Neon Green
+        outline_w = 7
+
+    if layout and isinstance(layout, dict):
+        if layout.get("scale"):
+            try:
+                font_size = int(font_size * float(layout["scale"]))
+            except Exception:
+                pass
+        if layout.get("normY") is not None:
+            try:
+                norm_y = float(layout["normY"])
+                margin_v = int((1.0 - norm_y) * 1920)
+                if margin_v < 60:
+                    margin_v = 60
+            except Exception:
+                pass
+
+    header = f"""[Script Info]
+Title: ClipForge Kinetic Captions
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,{font_name},{font_size},{primary_color},&H000000FF,{outline_color},{back_color},-1,0,0,0,100,100,0,0,1,{outline_w},{shadow_w},{alignment},40,40,{margin_v},1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+    dialogues = []
+    for block in blocks:
+        words = block.get("words", [])
+        block_start = float(block.get("start", 0))
+        block_end = float(block.get("end", block_start + 1.0))
+        if block_end <= block_start:
+            block_end = block_start + 1.0
+
+        if not words:
+            t_start = format_ass_time(block_start)
+            t_end = format_ass_time(block_end)
+            text_str = str(block.get("text", "")).upper()
+            dialogues.append(f"Dialogue: 0,{t_start},{t_end},Default,,0,0,0,,{text_str}")
+            continue
+
+        for i, active_w in enumerate(words):
+            w_start = float(active_w.get("start", block_start))
+            w_end = float(active_w.get("end", block_end))
+            if w_end <= w_start:
+                w_end = w_start + 0.15
+
+            t_start = format_ass_time(w_start)
+            t_end = format_ass_time(w_end)
+
+            line_parts = []
+            for j, w in enumerate(words):
+                wt = str(w.get("word", "")).upper()
+                if j == i:
+                    line_parts.append(f"{{\\c{highlight_color}&}}{wt}{{\\c{primary_color}&}}")
+                else:
+                    line_parts.append(wt)
+            dialogue_text = " ".join(line_parts)
+            dialogues.append(f"Dialogue: 0,{t_start},{t_end},Default,,0,0,0,,{dialogue_text}")
+
+    return header + "\n".join(dialogues) + "\n"
+
+
+@router.post("/burn-clip/{clip_id}")
+async def burn_clip_captions_endpoint(
+    clip_id: str,
+    payload: BurnClipCaptionsRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Burns kinetic styled captions directly onto the video server-side using FFmpeg libass.
+    Guarantees 100% full original video duration without relying on browser real-time recording.
+    """
+    clip_result = await db.execute(select(Clip).where(Clip.id == clip_id))
+    clip = clip_result.scalar_one_or_none()
+    if not clip:
+        raise HTTPException(status_code=404, detail="Clip not found")
+
+    video_result = await db.execute(select(Video).where(Video.id == clip.video_id))
+    video_row = video_result.scalar_one_or_none()
+
+    orig_output_path = Path(clip.output_path) if clip.output_path else None
+    if orig_output_path and orig_output_path.parent.exists():
+        clip_dir = orig_output_path.parent
+    else:
+        clip_dir = Path(settings.OUTPUT_DIR) / "caption_renders" / clip_id
+        clip_dir.mkdir(parents=True, exist_ok=True)
+
+    final_mp4 = clip_dir / "final.mp4"
+    thumb_path = clip_dir / "thumb_a.jpg"
+
+    ass_content = generate_ass_subtitles(payload.blocks, payload.preset_style or "hormozi", payload.layout)
+    ass_path = clip_dir / f"captions_{uuid.uuid4().hex[:6]}.ass"
+    with open(ass_path, "w", encoding="utf-8") as f:
+        f.write(ass_content)
+
+    try:
+        # If parent video source is available, cut & burn directly from source in 1 pass
+        if video_row and video_row.local_path and Path(video_row.local_path).exists():
+            src_file = Path(video_row.local_path)
+            cmd = [
+                "ffmpeg", "-y",
+                "-ss", str(clip.start_time or 0),
+                "-i", str(src_file),
+                "-t", str(clip.duration or 60),
+                "-vf", f"ass={ass_path}",
+                "-c:v", "libx264",
+                "-preset", "fast",
+                "-crf", "18",
+                "-pix_fmt", "yuv420p",
+                "-c:a", "aac",
+                "-b:a", "192k",
+                "-movflags", "+faststart",
+                str(final_mp4)
+            ]
+        else:
+            clean_base = clip_dir / "clean_base.mp4"
+            if not clean_base.exists() and final_mp4.exists():
+                shutil.copyfile(final_mp4, clean_base)
+            src_file = clean_base if clean_base.exists() else final_mp4
+            cmd = [
+                "ffmpeg", "-y",
+                "-i", str(src_file),
+                "-vf", f"ass={ass_path}",
+                "-c:v", "libx264",
+                "-preset", "fast",
+                "-crf", "18",
+                "-pix_fmt", "yuv420p",
+                "-c:a", "copy",
+                "-movflags", "+faststart",
+                str(final_mp4)
+            ]
+
+        proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=180)
+        if proc.returncode != 0:
+            logger.error(f"FFmpeg burn captions error: {proc.stderr}")
+            raise HTTPException(status_code=500, detail=f"FFmpeg subtitle burn failed: {proc.stderr[-300:]}")
+
+        # Update thumbnail at 2 seconds
+        thumb_cmd = [
+            "ffmpeg", "-y",
+            "-ss", "00:00:02",
+            "-i", str(final_mp4),
+            "-vframes", "1",
+            "-q:v", "2",
+            str(thumb_path)
+        ]
+        subprocess.run(thumb_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=15)
+        if thumb_path.exists():
+            clip.thumbnail_path = str(thumb_path)
+
+        clip.output_path = str(final_mp4)
+        clip.transcript_segment = json.dumps(payload.blocks)
+        clip.publish_status = "draft"
+        clip.publish_error = None
+        clip.publish_stage = None
+
+        await db.commit()
+        await db.refresh(clip)
+
+        return {
+            "status": "success",
+            "clip_id": clip_id,
+            "output_path": str(final_mp4),
+            "thumbnail_path": clip.thumbnail_path,
+            "duration": clip.duration,
+            "message": "Full-length captioned video successfully burned, drafted to library, and ready to publish!"
+        }
+    finally:
+        if ass_path.exists():
+            try:
+                ass_path.unlink()
+            except Exception:
+                pass
 
