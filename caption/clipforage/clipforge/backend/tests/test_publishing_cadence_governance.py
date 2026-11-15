@@ -180,3 +180,30 @@ def test_publish_clip_task_non_blocking_celery_retry():
             retry_countdown = mock_task.retry.call_args[1].get("countdown")
             assert retry_countdown is not None
             assert 115 <= retry_countdown <= 121, f"Expected ~120s countdown, got {retry_countdown}"
+
+
+def test_caller_id_retry_does_not_infinitely_advance_cadence():
+    """
+    When a Celery task retries with its caller_id (target_id),
+    it must NOT push the deadline further into the future on retry.
+    Once its assigned time arrives, it must be granted immediate publication (0.0).
+    """
+    t0 = 2000000.0
+    reset_destination_cadence("dest_channel_retry_test")
+    
+    # Task 1 takes the immediate slot at T0
+    w1 = check_and_reserve_destination_cadence("dest_channel_retry_test", min_interval_sec=120.0, now_ts=t0, caller_id="target_1")
+    assert w1 == 0.0
+    
+    # Task 2 attempts at T0 + 10s -> told to wait ~110s until T0 + 120s
+    w2 = check_and_reserve_destination_cadence("dest_channel_retry_test", min_interval_sec=120.0, now_ts=t0 + 10.0, caller_id="target_2")
+    assert 109.0 <= w2 <= 111.0
+    
+    # Task 2 retries early at T0 + 60s -> still assigned T0 + 120s, so ~60s remaining (MUST NOT BE 240s!)
+    w2_retry1 = check_and_reserve_destination_cadence("dest_channel_retry_test", min_interval_sec=120.0, now_ts=t0 + 60.0, caller_id="target_2")
+    assert 59.0 <= w2_retry1 <= 61.0, f"Retry pushed deadline! Got {w2_retry1}"
+    
+    # Task 2 wakes up after countdown at T0 + 121s -> MUST BE GRANTED IMMEDIATELY (0.0)
+    w2_retry2 = check_and_reserve_destination_cadence("dest_channel_retry_test", min_interval_sec=120.0, now_ts=t0 + 121.0, caller_id="target_2")
+    assert w2_retry2 == 0.0, f"Expected 0.0 on assigned slot arrival, got {w2_retry2}"
+

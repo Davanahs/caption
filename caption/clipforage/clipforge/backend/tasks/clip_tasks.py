@@ -975,7 +975,7 @@ def publish_task(self, *args, **kwargs):
                         or dest_yt_channel_id == "UC_dest"
                     )
                     if not is_test_mode and hasattr(self, "retry"):
-                        wait_sec = check_and_reserve_destination_cadence(dest_yt_channel_id)
+                        wait_sec = check_and_reserve_destination_cadence(dest_yt_channel_id, caller_id=target_id)
                         if wait_sec > 0.5:
                             if len(target_ids) > 1:
                                 logger.info(
@@ -1940,7 +1940,7 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
 
             tg = session.query(PublishTarget).filter_by(id=target_id).first()
             if tg:
-                tg.publish_stage = "uploading"
+                tg.publish_stage = "preparing"
                 if rendered_path_str:
                     tg.rendered_video_path = rendered_path_str
                     tg.artifact_storage_key = variant_storage_key
@@ -1954,16 +1954,33 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
             or dest_yt_channel_id == "UC_dest"
         )
         if not is_test_mode and hasattr(task_context, "retry"):
-            wait_sec = check_and_reserve_destination_cadence(dest_yt_channel_id)
+            wait_sec = check_and_reserve_destination_cadence(dest_yt_channel_id, caller_id=target_id)
             if wait_sec > 0.5:
                 logger.info(
                     f"[Publish Cadence] Destination {dest_yt_channel_id} requires {wait_sec:.1f}s gap. "
                     f"Rescheduling target {target_id} via Celery countdown."
                 )
+                with SyncSessionLocal() as session:
+                    tg = session.query(PublishTarget).filter_by(id=target_id).first()
+                    if tg:
+                        tg.publish_stage = "cadence_wait"
+                    cl = session.query(Clip).filter_by(id=clip_id).first()
+                    if cl:
+                        cl.publish_stage = "cadence_wait"
+                    session.commit()
                 retry_exc = task_context.retry(countdown=int(wait_sec) + 1, max_retries=20)
                 if isinstance(retry_exc, BaseException):
                     raise retry_exc
                 return {"clip_id": clip_id, "target_id": target_id, "status": "cadence_rescheduled", "wait_sec": wait_sec}
+
+        with SyncSessionLocal() as session:
+            tg = session.query(PublishTarget).filter_by(id=target_id).first()
+            if tg:
+                tg.publish_stage = "uploading"
+            cl = session.query(Clip).filter_by(id=clip_id).first()
+            if cl:
+                cl.publish_stage = "uploading"
+            session.commit()
 
         upload_res = upload_short(
             video_path=video_path,
@@ -2467,16 +2484,27 @@ def publish_clip_task(self, *args, **kwargs):
             or channel_id == "UC_dest"
         )
         if not is_test_mode and hasattr(task_context, "retry"):
-            wait_sec = check_and_reserve_destination_cadence(channel_id)
+            wait_sec = check_and_reserve_destination_cadence(channel_id, caller_id=clip_id)
             if wait_sec > 0.5:
                 logger.info(
                     f"[Publish Cadence] Destination {channel_id} requires {wait_sec:.1f}s gap. "
                     f"Rescheduling publish_clip_task via Celery queue countdown to free worker process immediately."
                 )
+                with SyncSessionLocal() as session:
+                    cl = session.query(Clip).filter_by(id=clip_id).first()
+                    if cl:
+                        cl.publish_stage = "cadence_wait"
+                    session.commit()
                 retry_exc = task_context.retry(countdown=int(wait_sec) + 1, max_retries=20)
                 if isinstance(retry_exc, BaseException):
                     raise retry_exc
                 return {"clip_id": clip_id, "status": "cadence_rescheduled", "wait_sec": wait_sec}
+
+        with SyncSessionLocal() as session:
+            cl = session.query(Clip).filter_by(id=clip_id).first()
+            if cl:
+                cl.publish_stage = "uploading"
+            session.commit()
 
         upload_res = upload_short(
             video_path=video_path,

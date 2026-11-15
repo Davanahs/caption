@@ -72,7 +72,8 @@ def resolve_canonical_destination(dest_ref: str, session=None) -> Tuple[str, str
 def check_and_reserve_destination_cadence(
     destination_ref: str,
     min_interval_sec: float = MIN_PUBLISH_INTERVAL_SEC,
-    now_ts: Optional[float] = None
+    now_ts: Optional[float] = None,
+    caller_id: Optional[str] = None
 ) -> float:
     """
     Checks if the destination channel is currently eligible to publish immediately,
@@ -96,6 +97,7 @@ def check_and_reserve_destination_cadence(
     if redis_cli:
         key = f"publish:cadence:dest:{canonical_key_id}:next_allowed_ts"
         lock_key = f"publish:cadence:dest:{canonical_key_id}:lock"
+        caller_key = f"publish:cadence:dest:{canonical_key_id}:caller:{caller_id}" if caller_id else None
         
         # Acquire short distributed lock (max 5s) for atomic reservation
         lock_acquired = False
@@ -104,11 +106,35 @@ def check_and_reserve_destination_cadence(
             if not lock_acquired:
                 # If contested, wait 50ms and check value
                 time.sleep(0.05)
+                if caller_key:
+                    cval = redis_cli.get(caller_key)
+                    if cval:
+                        assigned_ts = float(cval)
+                        if assigned_ts > current_ts:
+                            return assigned_ts - current_ts
+                        return 0.0
                 val = redis_cli.get(key)
                 if val:
                     next_allowed = float(val)
                     if next_allowed > current_ts:
                         return next_allowed - current_ts
+
+            # Check if this specific caller already holds a reserved slot from a previous countdown
+            if caller_key:
+                cval = redis_cli.get(caller_key)
+                if cval:
+                    assigned_ts = float(cval)
+                    if assigned_ts <= current_ts:
+                        # Caller's reserved slot has arrived!
+                        redis_cli.delete(caller_key)
+                        # Ensure global next_allowed prevents other tasks from jumping in
+                        g_val = redis_cli.get(key)
+                        if not g_val or float(g_val) < current_ts + min_interval_sec:
+                            redis_cli.setex(key, int(min_interval_sec * 3), str(current_ts + min_interval_sec))
+                        return 0.0
+                    else:
+                        # Still waiting for assigned slot; return remaining wait WITHOUT advancing next_allowed
+                        return assigned_ts - current_ts
 
             val = redis_cli.get(key)
             if val:
@@ -118,6 +144,8 @@ def check_and_reserve_destination_cadence(
                     # Reserve consecutive slot for queued task
                     new_next = next_allowed + min_interval_sec
                     redis_cli.setex(key, int(min_interval_sec * 3), str(new_next))
+                    if caller_key:
+                        redis_cli.setex(caller_key, int(min_interval_sec * 3), str(next_allowed))
                     return wait_sec
 
             # Slot is available immediately
@@ -198,7 +226,9 @@ def reset_destination_cadence(destination_ref: str) -> None:
     redis_cli = get_redis_client()
     if redis_cli:
         try:
-            redis_cli.delete(f"publish:cadence:dest:{canonical_key_id}:next_allowed_ts")
-            redis_cli.delete(f"publish:cadence:dest:{canonical_key_id}:lock")
+            pattern = f"publish:cadence:dest:{canonical_key_id}:*"
+            keys = redis_cli.keys(pattern)
+            if keys:
+                redis_cli.delete(*keys)
         except Exception:
             pass

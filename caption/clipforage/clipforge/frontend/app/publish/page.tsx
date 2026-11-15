@@ -1868,9 +1868,15 @@ function PublishPageContent() {
                     badgeIcon = '🔍';
                     badgeText = 'manual review';
                   } else if (isUploading) {
-                    badgeClass = '';
-                    badgeIcon = '⚡';
-                    badgeText = q.publish_stage ? `${q.publish_stage} (${q.publish_progress || 0}%)` : `uploading (${q.publish_progress || 0}%)`;
+                    if (q.publish_stage === 'cadence_wait' || q.publish_stage === 'cooldown') {
+                      badgeClass = 'badge-warning';
+                      badgeIcon = '⏳';
+                      badgeText = 'cooldown / rate limit';
+                    } else {
+                      badgeClass = '';
+                      badgeIcon = '⚡';
+                      badgeText = q.publish_stage ? `${q.publish_stage} (${q.publish_progress || 0}%)` : `uploading (${q.publish_progress || 0}%)`;
+                    }
                   } else if (q.publish_status === 'scheduled') {
                     badgeClass = '';
                     badgeIcon = '📅';
@@ -2050,6 +2056,7 @@ function PublishPageContent() {
                                     >
                                       {target.status === 'published' ? '✓ Published' :
                                        target.status === 'rendering_outro' ? '🎬 Outro Render' :
+                                       target.publish_stage === 'cadence_wait' || target.publish_stage === 'cooldown' ? '⏳ Cooldown' :
                                        target.status === 'publishing' ? '🚀 Publishing' :
                                        target.status === 'failed' ? '✕ Failed' :
                                        target.status === 'cancelled' ? 'Cancelled' : '⏳ Pending'}
