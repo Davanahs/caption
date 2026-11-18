@@ -38,6 +38,10 @@ export interface LiveGamingRegionSelectorProps {
   onChangeFacecamRoi: (rect: NormalizedRect) => void;
   onChangePlacement: (preset: FacecamPreset, rect: NormalizedRect) => void;
   onResetBoxes: () => void;
+  onStartMonitoring?: () => void;
+  isStarting?: boolean;
+  canStart?: boolean;
+  startLabel?: string;
 }
 
 export default function LiveGamingRegionSelector({
@@ -51,8 +55,13 @@ export default function LiveGamingRegionSelector({
   onChangeFacecamRoi,
   onChangePlacement,
   onResetBoxes,
+  onStartMonitoring,
+  isStarting = false,
+  canStart = false,
+  startLabel,
 }: LiveGamingRegionSelectorProps) {
   const [activeTool, setActiveTool] = useState<'gameplay' | 'facecam'>('gameplay');
+  const [aspectLock, setAspectLock] = useState<'free' | '9:16'>('free');
   const [dragState, setDragState] = useState<{
     roiType: 'gameplay' | 'facecam';
     opType: 'move' | 'resize';
@@ -65,7 +74,7 @@ export default function LiveGamingRegionSelector({
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const justDraggedRef = useRef<boolean>(false);
 
-  // Video aspect ratio assumed standard 16:9 for livestreams
+  // Standard video aspect ratio assumed 16:9 for livestreams
   const videoDimensions = { width: 1920, height: 1080 };
 
   // Pointer down on ROI box or handle
@@ -115,8 +124,8 @@ export default function LiveGamingRegionSelector({
           MIN_ROI_SIZE
         );
 
-        // For gameplay, lock to 9:16 vertical ratio
-        if (dragState.roiType === 'gameplay') {
+        // If aspectLock is strictly '9:16' and it is gameplay, apply aspect ratio lock
+        if (dragState.roiType === 'gameplay' && aspectLock === '9:16') {
           const normAspect = (9 / 16) * (videoDimensions.height / videoDimensions.width);
           const { x: x0, y: y0, width: w0, height: h0 } = dragState.initialRect;
           const h = dragState.handle;
@@ -167,6 +176,34 @@ export default function LiveGamingRegionSelector({
               resized = { x: nX2, y: nY2, width: w, height: ht };
               break;
             }
+            case 'n': {
+              w = ht * normAspect;
+              const cX = x0 + w0 / 2;
+              const nX3 = Math.max(0, Math.min(1 - w, cX - w / 2));
+              resized = { x: nX3, y: resized.y, width: w, height: ht };
+              break;
+            }
+            case 's': {
+              w = ht * normAspect;
+              const cX2 = x0 + w0 / 2;
+              const nX4 = Math.max(0, Math.min(1 - w, cX2 - w / 2));
+              resized = { x: nX4, y: y0, width: w, height: ht };
+              break;
+            }
+            case 'w': {
+              ht = w / normAspect;
+              const cY = y0 + h0 / 2;
+              const nY3 = Math.max(0, Math.min(1 - ht, cY - ht / 2));
+              resized = { x: resized.x, y: nY3, width: w, height: ht };
+              break;
+            }
+            case 'e': {
+              ht = w / normAspect;
+              const cY2 = y0 + h0 / 2;
+              const nY4 = Math.max(0, Math.min(1 - ht, cY2 - ht / 2));
+              resized = { x: x0, y: nY4, width: w, height: ht };
+              break;
+            }
           }
         }
         updatedRect = clampNormalizedRect(resized, MIN_ROI_SIZE);
@@ -196,7 +233,65 @@ export default function LiveGamingRegionSelector({
       window.removeEventListener('pointerup', handlePointerUp);
       window.removeEventListener('pointercancel', handlePointerUp);
     };
-  }, [dragState, videoDimensions, onChangeGameplayRoi, onChangeFacecamRoi]);
+  }, [dragState, videoDimensions, aspectLock, onChangeGameplayRoi, onChangeFacecamRoi]);
+
+  // Corner & Edge handle generator
+  const renderHandles = (roiType: 'gameplay' | 'facecam', color: string) => {
+    const isBoxActive = activeTool === roiType;
+    if (!isBoxActive) return null;
+
+    const cornerHandles: { handle: ResizeHandle; style: React.CSSProperties }[] = [
+      { handle: 'nw', style: { top: -6, left: -6, width: 12, height: 12, borderRadius: 2 } },
+      { handle: 'ne', style: { top: -6, right: -6, width: 12, height: 12, borderRadius: 2 } },
+      { handle: 'sw', style: { bottom: -6, left: -6, width: 12, height: 12, borderRadius: 2 } },
+      { handle: 'se', style: { bottom: -6, right: -6, width: 12, height: 12, borderRadius: 2 } },
+    ];
+
+    const edgeHandles: { handle: ResizeHandle; style: React.CSSProperties }[] = [
+      { handle: 'n', style: { top: -5, left: 'calc(50% - 15px)', width: 30, height: 9, borderRadius: 3 } },
+      { handle: 's', style: { bottom: -5, left: 'calc(50% - 15px)', width: 30, height: 9, borderRadius: 3 } },
+      { handle: 'w', style: { left: -5, top: 'calc(50% - 15px)', width: 9, height: 30, borderRadius: 3 } },
+      { handle: 'e', style: { right: -5, top: 'calc(50% - 15px)', width: 9, height: 30, borderRadius: 3 } },
+    ];
+
+    return (
+      <>
+        {cornerHandles.map(({ handle, style }) => (
+          <div
+            key={handle}
+            onPointerDown={(e) => handleRoiPointerDown(e, roiType, 'resize', handle)}
+            style={{
+              position: 'absolute',
+              background: '#fff',
+              border: `2px solid ${color}`,
+              cursor: handleCursorMap[handle],
+              pointerEvents: 'auto',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.6)',
+              zIndex: 35,
+              ...style,
+            }}
+          />
+        ))}
+        {edgeHandles.map(({ handle, style }) => (
+          <div
+            key={handle}
+            onPointerDown={(e) => handleRoiPointerDown(e, roiType, 'resize', handle)}
+            style={{
+              position: 'absolute',
+              background: color,
+              border: '1px solid #fff',
+              cursor: handleCursorMap[handle],
+              pointerEvents: 'auto',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.6)',
+              opacity: 0.9,
+              zIndex: 34,
+              ...style,
+            }}
+          />
+        ))}
+      </>
+    );
+  };
 
   return (
     <div
@@ -262,7 +357,7 @@ export default function LiveGamingRegionSelector({
           </div>
         </div>
 
-        {/* Action buttons */}
+        {/* Action buttons & Start Clipping button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           {/* Box 1 (Gameplay) Tool Button */}
           <button
@@ -283,7 +378,29 @@ export default function LiveGamingRegionSelector({
             }}
           >
             <span style={{ width: 10, height: 10, borderRadius: 2, background: '#10b981' }} />
-            Box 1: Gameplay (9:16)
+            Box 1: Gameplay ({aspectLock === 'free' ? 'Custom' : '9:16'})
+          </button>
+
+          {/* Aspect Ratio Lock Toggle */}
+          <button
+            type="button"
+            onClick={() => setAspectLock((prev) => (prev === 'free' ? '9:16' : 'free'))}
+            title={aspectLock === 'free' ? 'Currently Free Custom Resize. Click to lock 9:16 ratio.' : 'Currently Locked 9:16. Click for Free Custom Resize.'}
+            style={{
+              background: aspectLock === 'free' ? 'rgba(99, 102, 241, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+              border: aspectLock === 'free' ? '1px solid #6366f1' : '1px solid rgba(255, 255, 255, 0.08)',
+              color: aspectLock === 'free' ? '#a5b4fc' : '#94a3b8',
+              borderRadius: 8,
+              padding: '6px 12px',
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <span>{aspectLock === 'free' ? '🔓 Free Custom' : '🔒 9:16 Lock'}</span>
           </button>
 
           {/* Box 2 (Facecam) Tool Button */}
@@ -323,8 +440,41 @@ export default function LiveGamingRegionSelector({
               cursor: 'pointer',
             }}
           >
-            ↺ Reset Boxes
+            ↺ Reset
           </button>
+
+          {/* Direct Start Action Button */}
+          {onStartMonitoring && (
+            <button
+              type="button"
+              onClick={onStartMonitoring}
+              disabled={!canStart || isStarting}
+              style={{
+                background: canStart
+                  ? 'linear-gradient(135deg, #ef4444 0%, #8b5cf6 100%)'
+                  : 'rgba(255, 255, 255, 0.08)',
+                border: 'none',
+                borderRadius: 8,
+                padding: '7px 16px',
+                color: '#fff',
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: canStart && !isStarting ? 'pointer' : 'not-allowed',
+                opacity: canStart && !isStarting ? 1 : 0.45,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                boxShadow: canStart ? '0 4px 16px rgba(239, 68, 68, 0.4)' : 'none',
+                transition: 'all 0.2s',
+              }}
+            >
+              {isStarting ? (
+                <>⏳ Starting Pipeline...</>
+              ) : (
+                <>⚡ {startLabel || 'Start Monitoring & Clipping'}</>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -447,31 +597,11 @@ export default function LiveGamingRegionSelector({
                     gap: 4,
                   }}
                 >
-                  🎮 Gameplay (9:16)
+                  🎮 Gameplay ({aspectLock === 'free' ? 'Custom' : '9:16'})
                 </div>
 
-                {/* Resize Handles */}
-                {(['nw', 'ne', 'se', 'sw'] as ResizeHandle[]).map((handle) => (
-                  <div
-                    key={handle}
-                    onPointerDown={(e) => handleRoiPointerDown(e, 'gameplay', 'resize', handle)}
-                    style={{
-                      position: 'absolute',
-                      width: 10,
-                      height: 10,
-                      background: '#fff',
-                      border: '2px solid #10b981',
-                      borderRadius: 2,
-                      cursor: handleCursorMap[handle],
-                      pointerEvents: 'auto',
-                      top: handle.includes('n') ? -5 : undefined,
-                      bottom: handle.includes('s') ? -5 : undefined,
-                      left: handle.includes('w') ? -5 : undefined,
-                      right: handle.includes('e') ? -5 : undefined,
-                      display: activeTool === 'gameplay' ? 'block' : 'none',
-                    }}
-                  />
-                ))}
+                {/* 8 Resize Handles: 4 corners + 4 edges */}
+                {renderHandles('gameplay', '#10b981')}
               </div>
 
               {/* Box 2: Facecam / Streamer ROI (Amber) */}
@@ -516,28 +646,8 @@ export default function LiveGamingRegionSelector({
                   👤 Streamer Facecam
                 </div>
 
-                {/* Resize Handles */}
-                {(['nw', 'ne', 'se', 'sw'] as ResizeHandle[]).map((handle) => (
-                  <div
-                    key={handle}
-                    onPointerDown={(e) => handleRoiPointerDown(e, 'facecam', 'resize', handle)}
-                    style={{
-                      position: 'absolute',
-                      width: 10,
-                      height: 10,
-                      background: '#fff',
-                      border: '2px solid #f59e0b',
-                      borderRadius: 2,
-                      cursor: handleCursorMap[handle],
-                      pointerEvents: 'auto',
-                      top: handle.includes('n') ? -5 : undefined,
-                      bottom: handle.includes('s') ? -5 : undefined,
-                      left: handle.includes('w') ? -5 : undefined,
-                      right: handle.includes('e') ? -5 : undefined,
-                      display: activeTool === 'facecam' ? 'block' : 'none',
-                    }}
-                  />
-                ))}
+                {/* 8 Resize Handles: 4 corners + 4 edges */}
+                {renderHandles('facecam', '#f59e0b')}
               </div>
             </div>
           </div>
@@ -554,11 +664,11 @@ export default function LiveGamingRegionSelector({
             }}
           >
             <span>
-              💡 Click on any box to select it. Drag to move, or drag corner handles to resize.
+              💡 Drag box to move. Drag any corner or edge to customly resize.
             </span>
             <span>
               Active: <strong style={{ color: activeTool === 'gameplay' ? '#34d399' : '#fbbf24' }}>
-                {activeTool === 'gameplay' ? 'Box 1: Gameplay' : 'Box 2: Facecam'}
+                {activeTool === 'gameplay' ? `Box 1: Gameplay (${aspectLock})` : 'Box 2: Facecam'}
               </strong>
             </span>
           </div>
@@ -648,6 +758,42 @@ export default function LiveGamingRegionSelector({
               })}
             </div>
           </div>
+
+          {/* Start Clipping Action Button directly under Preview */}
+          {onStartMonitoring && (
+            <button
+              type="button"
+              onClick={onStartMonitoring}
+              disabled={!canStart || isStarting}
+              style={{
+                width: '100%',
+                marginTop: 4,
+                background: canStart
+                  ? 'linear-gradient(135deg, #10b981 0%, #6366f1 100%)'
+                  : 'rgba(255, 255, 255, 0.08)',
+                border: 'none',
+                borderRadius: 10,
+                padding: '12px 14px',
+                color: '#fff',
+                fontSize: 13,
+                fontWeight: 700,
+                cursor: canStart && !isStarting ? 'pointer' : 'not-allowed',
+                opacity: canStart && !isStarting ? 1 : 0.45,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+                boxShadow: canStart ? '0 4px 16px rgba(16, 185, 129, 0.35)' : 'none',
+                transition: 'all 0.2s',
+              }}
+            >
+              {isStarting ? (
+                <>⏳ Starting...</>
+              ) : (
+                <>⚡ Start Clipping Now</>
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

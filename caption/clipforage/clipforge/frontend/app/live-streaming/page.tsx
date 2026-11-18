@@ -226,6 +226,16 @@ export default function LiveStreamingPage() {
   const handleStartMonitoring = async () => {
     if (!validation || !validation.valid) return;
 
+    if (validation.is_already_monitored && validation.existing_job_id) {
+      setActiveJobId(validation.existing_job_id);
+      return;
+    }
+
+    if (validation.live_status === 'is_upcoming') {
+      alert('This livestream has not started broadcasting yet. Please wait until the broadcast starts.');
+      return;
+    }
+
     const count = clipCountPreset === 'custom' ? parseInt(customClipCount, 10) || 10 : parseInt(clipCountPreset, 10);
     setStarting(true);
 
@@ -298,6 +308,21 @@ export default function LiveStreamingPage() {
   const isJobActive = jobDetails && ['monitoring', 'processing', 'waiting'].includes(jobDetails.status);
   const isJobStopped = jobDetails?.status === 'stopped';
   const isJobCompleted = jobDetails?.status === 'completed';
+
+  // Submission & Validation readiness
+  const isUpcoming = validation?.live_status === 'is_upcoming';
+  const isAlreadyMonitored = Boolean(validation?.is_already_monitored);
+  const canStart = Boolean(validation && validation.valid) && !isUpcoming && !starting;
+
+  const startButtonLabel = starting
+    ? 'Starting Pipeline...'
+    : isAlreadyMonitored
+    ? 'View Active Monitoring Job'
+    : isUpcoming
+    ? 'Livestream Not Started Yet'
+    : validation?.is_live || validation?.live_status === 'is_live'
+    ? 'Start Live Stream Monitoring'
+    : 'Start Clipping Stream Video';
 
   return (
     <div style={{ maxWidth: 1280, margin: '0 auto', padding: '24px 20px 80px' }}>
@@ -789,35 +814,52 @@ export default function LiveStreamingPage() {
           <button
             type="button"
             onClick={handleStartMonitoring}
-            disabled={starting || !validation || !validation.valid || validation.is_already_monitored || (!validation.is_live && validation.live_status !== 'is_live')}
+            disabled={!canStart && !isAlreadyMonitored}
             style={{
               width: '100%',
-              background: 'linear-gradient(135deg, #ef4444, #8b5cf6)',
+              background: canStart || isAlreadyMonitored
+                ? 'linear-gradient(135deg, #ef4444, #8b5cf6)'
+                : 'rgba(255, 255, 255, 0.08)',
               border: 'none',
               borderRadius: 12,
               padding: '14px',
               color: '#fff',
               fontSize: 15,
               fontWeight: 700,
-              cursor: starting || !validation || !validation.valid || validation.is_already_monitored || (!validation.is_live && validation.live_status !== 'is_live') ? 'not-allowed' : 'pointer',
-              opacity: starting || !validation || !validation.valid || validation.is_already_monitored || (!validation.is_live && validation.live_status !== 'is_live') ? 0.5 : 1,
+              cursor: canStart || isAlreadyMonitored ? 'pointer' : 'not-allowed',
+              opacity: canStart || isAlreadyMonitored ? 1 : 0.45,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: 10,
-              boxShadow: '0 4px 20px rgba(239, 68, 68, 0.3)',
+              boxShadow: canStart || isAlreadyMonitored ? '0 4px 20px rgba(239, 68, 68, 0.3)' : 'none',
               transition: 'all 0.2s',
             }}
           >
             {starting ? (
               <>
                 <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⏳</span>
-                Starting Live Monitoring Pipeline...
+                Starting Pipeline...
               </>
-            ) : (
+            ) : isAlreadyMonitored ? (
+              <>
+                <span>🔍</span>
+                View Active Monitoring Job
+              </>
+            ) : isUpcoming ? (
+              <>
+                <span>⏳</span>
+                Livestream Not Started Yet
+              </>
+            ) : validation?.is_live || validation?.live_status === 'is_live' ? (
               <>
                 <span>📡</span>
                 Start Live Stream Monitoring
+              </>
+            ) : (
+              <>
+                <span>⚡</span>
+                Start Clipping Stream Video
               </>
             )}
           </button>
@@ -842,6 +884,10 @@ export default function LiveStreamingPage() {
             setFacecamOutputRect(rect);
           }}
           onResetBoxes={handleResetBoxes}
+          onStartMonitoring={handleStartMonitoring}
+          isStarting={starting}
+          canStart={canStart}
+          startLabel={startButtonLabel}
         />
       )}
 
