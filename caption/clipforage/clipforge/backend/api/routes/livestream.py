@@ -34,6 +34,12 @@ class StartMonitoringRequest(BaseModel):
     clip_generation_mode: str = "ai_highlights"  # "ai_highlights" | "equal_split"
     reframe_mode: str = "blur"  # "blur" | "gaming"
     gaming_layout: Optional[Dict[str, Any]] = None
+    start_offset_seconds: float = 0.0
+
+
+class AutoDetectFacecamRequest(BaseModel):
+    youtube_url: str
+    timestamp: float = 0.0
 
 
 @router.post("/validate")
@@ -53,6 +59,116 @@ async def validate_url_endpoint(req: ValidateRequest, db: AsyncSession = Depends
             detail=res.get("error", "Invalid YouTube livestream URL")
         )
     return res
+
+
+@router.post("/auto-detect-facecam")
+async def auto_detect_facecam_endpoint(req: AutoDetectFacecamRequest):
+    """
+    Analyzes livestream frames using OpenCV YuNet / MediaPipe to auto-detect
+    the streamer's webcam / facecam region and calculate optimal gaming ROI boxes.
+    """
+    url = req.youtube_url.strip()
+    if not url:
+        raise HTTPException(status_code=400, detail="YouTube URL is required")
+
+    import re
+    import urllib.request
+    import cv2
+    import numpy as np
+    from backend.services.advanced_podcast_engine import detect_faces_in_frame
+    from backend.services.downloader import extract_youtube_id
+
+    yt_id = extract_youtube_id(url)
+    if not yt_id:
+        m = re.search(r"(?:v=|\/live\/|\.be\/)([a-zA-Z0-9_-]{11})", url)
+        yt_id = m.group(1) if m else None
+
+    if not yt_id:
+        raise HTTPException(status_code=400, detail="Could not extract YouTube video ID")
+
+    thumb_candidates = [
+        f"https://img.youtube.com/vi/{yt_id}/maxresdefault.jpg",
+        f"https://img.youtube.com/vi/{yt_id}/hqdefault.jpg",
+        f"https://img.youtube.com/vi/{yt_id}/mqdefault.jpg",
+    ]
+
+    img = None
+    for t_url in thumb_candidates:
+        try:
+            req_img = urllib.request.Request(t_url, headers={"User-Agent": "Mozilla/5.0"})
+            with urllib.request.urlopen(req_img, timeout=6) as resp:
+                if resp.status == 200:
+                    arr = np.asarray(bytearray(resp.read()), dtype=np.uint8)
+                    decoded = cv2.imdecode(arr, cv2.IMREAD_COLOR)
+                    if decoded is not None and decoded.size > 0:
+                        img = decoded
+                        break
+        except Exception:
+            continue
+
+    if img is None:
+        return {
+            "success": True,
+            "detected": False,
+            "message": "Thumbnail image unavailable. Default gaming layout applied.",
+            "facecam_roi": {"x": 0.70, "y": 0.05, "width": 0.25, "height": 0.25},
+            "gameplay_roi": {"x": 0.15, "y": 0.0, "width": 0.70, "height": 1.0},
+            "facecam_placement": "top-right",
+        }
+
+    faces = detect_faces_in_frame(img, min_confidence=0.45)
+
+    if not faces:
+        return {
+            "success": True,
+            "detected": False,
+            "message": "No human faces detected in frame. Default corner facecam applied.",
+            "facecam_roi": {"x": 0.70, "y": 0.05, "width": 0.25, "height": 0.25},
+            "gameplay_roi": {"x": 0.15, "y": 0.0, "width": 0.70, "height": 1.0},
+            "facecam_placement": "top-right",
+        }
+
+    best_face = max(faces, key=lambda f: f["width"] * f["height"] * f.get("confidence", 0.5))
+    fx, fy, fw, fh = best_face["x"], best_face["y"], best_face["width"], best_face["height"]
+
+    target_w = max(0.20, min(0.40, fw * 2.2))
+    target_h = max(0.20, min(0.40, fh * 2.2))
+
+    cx = fx + fw / 2.0
+    cy = fy + fh / 2.0
+
+    x = max(0.0, min(1.0 - target_w, cx - target_w / 2.0))
+    y = max(0.0, min(1.0 - target_h, cy - target_h / 2.0))
+
+    if cx >= 0.5 and cy < 0.5:
+        placement = "top-right"
+    elif cx < 0.5 and cy < 0.5:
+        placement = "top-left"
+    elif cx >= 0.5 and cy >= 0.5:
+        placement = "bottom-right"
+    else:
+        placement = "bottom-left"
+
+    return {
+        "success": True,
+        "detected": True,
+        "face_count": len(faces),
+        "confidence": best_face.get("confidence", 0.9),
+        "message": f"AI detected streamer face at ({int(cx*100)}%, {int(cy*100)}%) with {int(best_face.get('confidence', 0.9)*100)}% confidence.",
+        "facecam_roi": {
+            "x": round(x, 4),
+            "y": round(y, 4),
+            "width": round(target_w, 4),
+            "height": round(target_h, 4),
+        },
+        "gameplay_roi": {
+            "x": 0.15,
+            "y": 0.0,
+            "width": 0.70,
+            "height": 1.0,
+        },
+        "facecam_placement": placement,
+    }
 
 
 @router.post("/start")
@@ -114,7 +230,7 @@ async def start_monitoring_endpoint(req: StartMonitoringRequest, db: AsyncSessio
         live_status=live_status if live_status else ("is_live" if is_live else "not_live"),
         current_step="Starting live stream monitoring pipeline...",
         total_duration=raw_dur,
-        processed_until=0.0,
+        processed_until=max(0.0, float(req.start_offset_seconds or 0.0)),
         newly_detected_duration=0.0,
         clips_count=max(1, min(50, req.clip_count)),
         clip_generation_mode="equal_split" if req.clip_generation_mode == "equal_split" else "ai_highlights",

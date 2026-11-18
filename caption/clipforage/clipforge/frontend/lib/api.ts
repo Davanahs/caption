@@ -2230,6 +2230,7 @@ export const startLiveStreamMonitoring = (data: {
   clip_generation_mode: string;
   reframe_mode?: string;
   gaming_layout?: any;
+  start_offset_seconds?: number;
 }) =>
   request<{ success: boolean; job_id: string; video_id: string; title: string; status: string; message: string }>(
     '/api/livestream/start',
@@ -2238,6 +2239,21 @@ export const startLiveStreamMonitoring = (data: {
       body: JSON.stringify(data),
     }
   );
+
+export const autoDetectLiveStreamFacecam = (youtube_url: string, timestamp: number = 0) =>
+  request<{
+    success: boolean;
+    detected: boolean;
+    face_count?: number;
+    confidence?: number;
+    message: string;
+    facecam_roi: { x: number; y: number; width: number; height: number };
+    gameplay_roi: { x: number; y: number; width: number; height: number };
+    facecam_placement: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+  }>('/api/livestream/auto-detect-facecam', {
+    method: 'POST',
+    body: JSON.stringify({ youtube_url, timestamp }),
+  });
 
 export const getLiveStreamJobs = () =>
   request<{ items: LiveStreamJobSummary[]; total: number }>('/api/livestream/jobs');

@@ -53,6 +53,20 @@ def get_media_duration(file_path: Path) -> float:
     return 0.0
 
 
+def check_audio_level(audio_file: Path) -> float:
+    """Returns mean audio volume in dB using ffmpeg volumedetect. True silence / muted stream is < -48 dB."""
+    try:
+        cmd = ["ffmpeg", "-i", str(audio_file), "-af", "volumedetect", "-f", "null", "-"]
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        for line in res.stderr.splitlines():
+            if "mean_volume:" in line:
+                val = float(line.split("mean_volume:")[1].split("dB")[0].strip())
+                return val
+    except Exception as e:
+        logger.debug(f"Audio volume detect failed: {e}")
+    return -20.0
+
+
 @celery_app.task(bind=True, name="process_livestream_segment")
 def process_livestream_segment_task(self, job_id: str, is_initial: bool = False):
     """
@@ -238,6 +252,26 @@ def process_livestream_segment_task(self, job_id: str, is_initial: bool = False)
             transcript_data = {"segments": [], "text": ""}
 
         transcript_segments = transcript_data.get("segments", [])
+        transcript_text = transcript_data.get("text", "").strip()
+
+        # Dead air / silence detection (skip starting wallpapers / muted countdown screens)
+        mean_vol = check_audio_level(audio_path)
+        logger.info(f"[LiveStreamTask] Audio mean volume for slice {format_seconds(start_sec)} - {format_seconds(end_sec)}: {mean_vol:.1f} dB (speech segments: {len(transcript_segments)})")
+
+        has_active_speech = bool(transcript_segments or len(transcript_text) > 10)
+        is_dead_air = (mean_vol < -48.0 and not has_active_speech) or (not has_active_speech and is_initial and mean_vol < -42.0)
+
+        if is_dead_air:
+            logger.info(f"[LiveStreamTask] Detected intro dead air / silent wallpaper at {format_seconds(start_sec)} - {format_seconds(end_sec)}. Skipping and advancing checkpoint.")
+            with SyncSessionLocal() as session:
+                job = session.query(LiveStreamJob).filter_by(id=job_id).first()
+                if job:
+                    job.processed_until = end_sec
+                    job.current_step = f"Skipping intro silence / wallpaper ({format_seconds(start_sec)} - {format_seconds(end_sec)})..."
+                    session.commit()
+            if is_initial and not stream_ended:
+                process_livestream_segment_task.delay(job_id=job_id, is_initial=True)
+            return
 
         # 6. Candidate Highlight Selection
         with SyncSessionLocal() as session:

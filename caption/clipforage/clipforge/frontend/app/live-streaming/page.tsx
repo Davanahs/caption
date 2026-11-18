@@ -96,6 +96,8 @@ export default function LiveStreamingPage() {
   const [customClipCount, setCustomClipCount] = useState('10');
   const [distributionMode, setDistributionMode] = useState<'ai_highlights' | 'equal_split'>('ai_highlights');
   const [reframeMode, setReframeMode] = useState<'gaming' | 'blur'>('gaming');
+  const [startOffsetPreset, setStartOffsetPreset] = useState<'0m' | '15m' | '30m' | '45m' | '60m' | 'custom'>('0m');
+  const [customStartOffset, setCustomStartOffset] = useState('00:30:00');
   const [gameplayRoi, setGameplayRoi] = useState<NormalizedRect>(getCenteredPortraitRoi(1920, 1080));
   const [facecamRoi, setFacecamRoi] = useState<NormalizedRect>(getDefaultFacecamRoi());
   const [facecamPlacement, setFacecamPlacement] = useState<FacecamPreset | 'custom'>('top-right');
@@ -240,6 +242,18 @@ export default function LiveStreamingPage() {
     setStarting(true);
 
     try {
+      let startOffsetSec = 0;
+      if (startOffsetPreset === '15m') startOffsetSec = 15 * 60;
+      else if (startOffsetPreset === '30m') startOffsetSec = 30 * 60;
+      else if (startOffsetPreset === '45m') startOffsetSec = 45 * 60;
+      else if (startOffsetPreset === '60m') startOffsetSec = 60 * 60;
+      else if (startOffsetPreset === 'custom') {
+        const parts = customStartOffset.trim().split(':').map((p) => parseFloat(p) || 0);
+        if (parts.length === 3) startOffsetSec = parts[0] * 3600 + parts[1] * 60 + parts[2];
+        else if (parts.length === 2) startOffsetSec = parts[0] * 60 + parts[1];
+        else if (parts.length === 1) startOffsetSec = parts[0] * 60;
+      }
+
       const gamingLayoutConfig = reframeMode === 'gaming' ? {
         mode: 'gaming',
         gameplay_roi: gameplayRoi,
@@ -256,6 +270,7 @@ export default function LiveStreamingPage() {
         clip_generation_mode: distributionMode,
         reframe_mode: reframeMode,
         gaming_layout: gamingLayoutConfig,
+        start_offset_seconds: startOffsetSec,
       });
 
       setActiveJobId(res.job_id);
@@ -355,6 +370,151 @@ export default function LiveStreamingPage() {
         </div>
       </div>
 
+      {/* Active Livestreams Concurrent Tab Bar */}
+      {allJobs.length > 0 && (
+        <div
+          style={{
+            marginBottom: 24,
+            background: 'rgba(18, 22, 38, 0.85)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: 14,
+            padding: '14px 18px',
+            backdropFilter: 'blur(16px)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, flexWrap: 'wrap', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span
+                style={{
+                  display: 'inline-block',
+                  width: 9,
+                  height: 9,
+                  borderRadius: '50%',
+                  background: '#ef4444',
+                  boxShadow: '0 0 10px #ef4444',
+                }}
+              />
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#f1f5f9', letterSpacing: '0.01em' }}>
+                Active Livestreams & Sessions ({allJobs.filter((j) => ['monitoring', 'processing', 'waiting'].includes(j.status)).length} Running)
+              </span>
+              <span style={{ fontSize: 12, color: '#64748b' }}>
+                • Run multiple streams simultaneously and switch between active sessions
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setUrl('');
+                setValidation(null);
+                setValidationError(null);
+                const inputEl = document.getElementById('livestream-url-input');
+                if (inputEl) {
+                  inputEl.focus();
+                  inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                background: 'rgba(99, 102, 241, 0.18)',
+                border: '1px solid rgba(99, 102, 241, 0.4)',
+                borderRadius: 8,
+                padding: '6px 14px',
+                color: '#c7d2fe',
+                fontSize: 12,
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              <span>➕</span>
+              <span>Monitor Another Livestream</span>
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 6 }}>
+            {allJobs.map((j) => {
+              const isActive = activeJobId === j.id;
+              const isRunning = ['monitoring', 'processing', 'waiting'].includes(j.status);
+              return (
+                <div
+                  key={j.id}
+                  onClick={() => setActiveJobId(j.id)}
+                  style={{
+                    flex: '0 0 auto',
+                    minWidth: 240,
+                    maxWidth: 300,
+                    background: isActive
+                      ? 'linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(239, 68, 68, 0.18))'
+                      : 'rgba(255, 255, 255, 0.03)',
+                    border: isActive ? '1px solid #6366f1' : '1px solid rgba(255, 255, 255, 0.08)',
+                    boxShadow: isActive ? '0 0 16px rgba(99, 102, 241, 0.3)' : 'none',
+                    borderRadius: 10,
+                    padding: '10px 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    cursor: 'pointer',
+                    transition: 'all 0.18s ease',
+                  }}
+                >
+                  {j.thumbnail_url ? (
+                    <img
+                      src={j.thumbnail_url}
+                      alt=""
+                      style={{ width: 44, height: 28, borderRadius: 5, objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div style={{ width: 44, height: 28, borderRadius: 5, background: '#1e293b', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>
+                      📡
+                    </div>
+                  )}
+
+                  <div style={{ overflow: 'hidden', flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          width: 6,
+                          height: 6,
+                          borderRadius: '50%',
+                          background: isRunning ? '#ef4444' : j.status === 'completed' ? '#10b981' : '#64748b',
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 600,
+                          color: isActive ? '#fff' : '#cbd5e1',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          maxWidth: 170,
+                        }}
+                        title={j.video_title}
+                      >
+                        {j.video_title || 'Livestream'}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 10, color: '#94a3b8', display: 'flex', gap: 6 }}>
+                      <span style={{ fontWeight: 600, color: isRunning ? '#f87171' : '#94a3b8' }}>
+                        {j.status.toUpperCase()}
+                      </span>
+                      <span>•</span>
+                      <span>{formatSeconds(j.processed_until)}</span>
+                      <span>•</span>
+                      <span style={{ color: '#a5b4fc', fontWeight: 600 }}>{j.clips_generated || 0} clips</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Grid: Submission & Settings */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 24, marginBottom: 32 }}>
         {/* Left Column: URL Input & Validation */}
@@ -380,6 +540,7 @@ export default function LiveStreamingPage() {
             </label>
             <div style={{ display: 'flex', gap: 8 }}>
               <input
+                id="livestream-url-input"
                 type="text"
                 value={url}
                 onChange={(e) => {
@@ -786,6 +947,70 @@ export default function LiveStreamingPage() {
               </div>
             </div>
 
+            {/* Start Offset / Skip Intro Dead Air */}
+            <div style={{ marginBottom: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <label style={{ fontSize: 13, color: '#94a3b8', margin: 0, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span>⏩</span>
+                  <span>Start Clipping From (Skip Intro Wallpaper)</span>
+                </label>
+                <span style={{ fontSize: 10, color: '#34d399', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '2px 7px', borderRadius: 4, fontWeight: 600 }}>
+                  Auto-Silence Filter ON
+                </span>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {[
+                  { id: '0m', label: '00:00 (Start)' },
+                  { id: '15m', label: '15 min' },
+                  { id: '30m', label: '30 min ✨' },
+                  { id: '45m', label: '45 min' },
+                  { id: '60m', label: '60 min' },
+                  { id: 'custom', label: 'Custom' },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setStartOffsetPreset(item.id as any)}
+                    style={{
+                      background: startOffsetPreset === item.id ? 'rgba(99, 102, 241, 0.25)' : 'rgba(255, 255, 255, 0.04)',
+                      border: startOffsetPreset === item.id ? '1px solid #6366f1' : '1px solid rgba(255, 255, 255, 0.08)',
+                      borderRadius: 8,
+                      padding: '5px 11px',
+                      color: startOffsetPreset === item.id ? '#a5b4fc' : '#cbd5e1',
+                      fontSize: 12,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {startOffsetPreset === 'custom' && (
+                <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input
+                    type="text"
+                    placeholder="00:30:00"
+                    value={customStartOffset}
+                    onChange={(e) => setCustomStartOffset(e.target.value)}
+                    style={{
+                      width: 110,
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: 8,
+                      padding: '6px 10px',
+                      color: '#fff',
+                      fontSize: 13,
+                      fontFamily: 'monospace',
+                    }}
+                  />
+                  <span style={{ fontSize: 11, color: '#94a3b8' }}>HH:MM:SS format (e.g. 00:30:00 to bypass intro wallpaper/screens)</span>
+                </div>
+              )}
+            </div>
+
             {/* D. Video Aspect Ratio Badge */}
             <div
               style={{
@@ -871,6 +1096,7 @@ export default function LiveStreamingPage() {
       ═══════════════════════════════════════════════════════════ */}
       {reframeMode === 'gaming' && (
         <LiveGamingRegionSelector
+          youtubeUrl={url.trim()}
           youtubeVideoId={validation?.youtube_id || extractYouTubeVideoId(url)}
           thumbnailUrl={validation?.thumbnail_url}
           gameplayRoi={gameplayRoi}

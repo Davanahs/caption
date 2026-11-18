@@ -14,6 +14,7 @@ import {
   getDefaultFacecamRoi,
   getDefaultFacecamOutputRect,
 } from '@/lib/gamingCoordinates';
+import { autoDetectLiveStreamFacecam } from '@/lib/api';
 import GamingCompositeCanvas from '@/components/gaming/GamingCompositeCanvas';
 
 const handleCursorMap: Record<ResizeHandle, string> = {
@@ -28,6 +29,7 @@ const handleCursorMap: Record<ResizeHandle, string> = {
 };
 
 export interface LiveGamingRegionSelectorProps {
+  youtubeUrl?: string;
   youtubeVideoId: string | null;
   thumbnailUrl?: string | null;
   gameplayRoi: NormalizedRect;
@@ -45,6 +47,7 @@ export interface LiveGamingRegionSelectorProps {
 }
 
 export default function LiveGamingRegionSelector({
+  youtubeUrl,
   youtubeVideoId,
   thumbnailUrl,
   gameplayRoi,
@@ -62,6 +65,33 @@ export default function LiveGamingRegionSelector({
 }: LiveGamingRegionSelectorProps) {
   const [activeTool, setActiveTool] = useState<'gameplay' | 'facecam'>('gameplay');
   const [aspectLock, setAspectLock] = useState<'free' | '9:16'>('free');
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [detectMsg, setDetectMsg] = useState<string | null>(null);
+
+  const handleAutoDetect = async () => {
+    const target = youtubeUrl || (youtubeVideoId ? `https://www.youtube.com/watch?v=${youtubeVideoId}` : '');
+    if (!target) return;
+    setIsDetecting(true);
+    setDetectMsg(null);
+    try {
+      const res = await autoDetectLiveStreamFacecam(target);
+      if (res && res.success) {
+        if (res.facecam_roi) onChangeFacecamRoi(res.facecam_roi);
+        if (res.gameplay_roi) onChangeGameplayRoi(res.gameplay_roi);
+        if (res.facecam_placement) {
+          const newRect = getDefaultFacecamOutputRect(res.facecam_placement);
+          onChangePlacement(res.facecam_placement, newRect);
+        }
+        setDetectMsg(res.message || 'Streamer facecam detected successfully!');
+        setTimeout(() => setDetectMsg(null), 4500);
+      }
+    } catch (err: any) {
+      setDetectMsg('Auto-detection: ' + (err.message || 'Default facecam applied'));
+      setTimeout(() => setDetectMsg(null), 4500);
+    } finally {
+      setIsDetecting(false);
+    }
+  };
   const [dragState, setDragState] = useState<{
     roiType: 'gameplay' | 'facecam';
     opType: 'move' | 'resize';
@@ -425,6 +455,42 @@ export default function LiveGamingRegionSelector({
             Box 2: Facecam PiP
           </button>
 
+          {/* AI Auto-Detect Streamer Facecam */}
+          <button
+            type="button"
+            onClick={handleAutoDetect}
+            disabled={isDetecting || (!youtubeVideoId && !youtubeUrl)}
+            title="Automatically detect streamer facecam and position ROI box using OpenCV / MediaPipe"
+            style={{
+              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%)',
+              border: '1px solid #a855f7',
+              color: '#e9d5ff',
+              borderRadius: 8,
+              padding: '6px 12px',
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: isDetecting || (!youtubeVideoId && !youtubeUrl) ? 'not-allowed' : 'pointer',
+              opacity: (!youtubeVideoId && !youtubeUrl) ? 0.5 : 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              boxShadow: '0 2px 10px rgba(168, 85, 247, 0.25)',
+              transition: 'all 0.2s',
+            }}
+          >
+            {isDetecting ? (
+              <>
+                <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⏳</span>
+                Detecting Facecam...
+              </>
+            ) : (
+              <>
+                <span>✨</span>
+                Auto-Detect Facecam (AI)
+              </>
+            )}
+          </button>
+
           {/* Reset button */}
           <button
             type="button"
@@ -477,6 +543,28 @@ export default function LiveGamingRegionSelector({
           )}
         </div>
       </div>
+
+      {/* AI Detection Notification */}
+      {detectMsg && (
+        <div
+          style={{
+            background: 'rgba(168, 85, 247, 0.15)',
+            border: '1px solid rgba(168, 85, 247, 0.35)',
+            color: '#e9d5ff',
+            borderRadius: 8,
+            padding: '8px 14px',
+            fontSize: 12,
+            fontWeight: 600,
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+          }}
+        >
+          <span>✨</span>
+          <span>{detectMsg}</span>
+        </div>
+      )}
 
       {/* Main Studio Grid: Left (16:9 interactive boxes) + Right (9:16 composite canvas preview) */}
       <div
