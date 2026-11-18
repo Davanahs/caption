@@ -63,6 +63,17 @@ async def get_livestream_metadata(url: str) -> dict:
             duration = float(duration)
         except (ValueError, TypeError):
             duration = 0.0
+    elif is_live or live_status == "is_live":
+        import time
+        release_ts = data.get("release_timestamp") or data.get("timestamp")
+        epoch = data.get("epoch") or time.time()
+        if release_ts:
+            try:
+                duration = max(0.0, float(epoch - release_ts))
+            except Exception:
+                duration = 0.0
+        else:
+            duration = 0.0
     else:
         duration = 0.0
 

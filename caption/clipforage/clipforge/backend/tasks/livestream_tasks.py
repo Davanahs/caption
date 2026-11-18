@@ -15,6 +15,7 @@ from datetime import datetime, timezone, timedelta
 from backend.tasks.celery_app import celery_app
 from backend.models.database import SyncSessionLocal
 from backend.models.models import LiveStreamJob, LiveStreamSegment, Video, Clip
+from backend.core.config import settings
 from backend.core.storage import storage_service
 from backend.services.downloader import get_yt_dlp_base_args
 from backend.services.transcriber import transcribe_video
@@ -111,15 +112,32 @@ def process_livestream_segment_task(self, job_id: str, is_initial: bool = False)
             if not is_live and live_status != "is_live":
                 stream_ended = True
                 logger.info(f"[LiveStreamTask] Stream {youtube_url} has ended (live_status={live_status}).")
-            if meta.get("duration"):
+            
+            import time
+            release_ts = meta.get("release_timestamp") or meta.get("timestamp")
+            epoch = meta.get("epoch") or time.time()
+            if release_ts:
+                try:
+                    current_stream_duration = max(0.0, float(epoch - release_ts))
+                except Exception:
+                    current_stream_duration = 0.0
+            elif meta.get("duration"):
                 current_stream_duration = float(meta["duration"])
     except Exception as e:
         logger.warning(f"[LiveStreamTask] Failed to inspect stream metadata: {e}")
 
+    # Immediately update job total_duration in DB so UI reflects actual stream length
+    with SyncSessionLocal() as session:
+        job = session.query(LiveStreamJob).filter_by(id=job_id).first()
+        if job and current_stream_duration > 0:
+            job.total_duration = max(float(job.total_duration or 0.0), current_stream_duration)
+            session.commit()
+
     # 3. Determine segment boundaries
-    # Target chunk length: 15 minutes (900 seconds) for initial, 20 minutes (1200 seconds) for recurring
-    chunk_seconds = 900.0 if is_initial else (interval_min * 60.0)
-    overlap = 15.0 if (not is_initial and processed_until > 15.0) else 0.0
+    # Initial batch: capture 60s slice so clips are generated and visible immediately (within ~1 min).
+    # Recurring checks: capture 60-120s of the latest newly streamed footage.
+    chunk_seconds = 60.0 if is_initial else min(120.0, float(interval_min * 60.0))
+    overlap = 10.0 if (not is_initial and processed_until > 10.0) else 0.0
 
     start_sec = max(0.0, processed_until - overlap)
     end_sec = start_sec + chunk_seconds
@@ -140,7 +158,7 @@ def process_livestream_segment_task(self, job_id: str, is_initial: bool = False)
         dl_cmd = [
             "yt-dlp",
             "--no-playlist",
-            "--live-from-start",
+            "-f", "311+234/312+234/bestvideo+bestaudio/best",
             "--download-sections", f"*{int(start_sec)}-{int(end_sec)}",
             "-o", str(segment_video_path),
             "--force-overwrites",
@@ -149,8 +167,10 @@ def process_livestream_segment_task(self, job_id: str, is_initial: bool = False)
         dl_cmd.extend(get_yt_dlp_base_args())
         dl_cmd.append(youtube_url)
 
-        logger.info(f"[LiveStreamTask] Executing download: {' '.join(dl_cmd[:6])} ...")
-        dl_proc = subprocess.run(dl_cmd, capture_output=True, text=True, timeout=600)
+        logger.info(f"[LiveStreamTask] Executing download: {' '.join(dl_cmd[:8])} ...")
+        dl_proc = subprocess.run(dl_cmd, capture_output=True, text=True, timeout=300)
+        if dl_proc.returncode != 0:
+            logger.warning(f"[LiveStreamTask] yt-dlp returned {dl_proc.returncode}: {dl_proc.stderr}")
 
         # Check if video file exists and has content
         if not segment_video_path.exists() or segment_video_path.stat().st_size == 0:
@@ -387,15 +407,24 @@ def process_livestream_segment_task(self, job_id: str, is_initial: bool = False)
             ]
             subprocess.run(thumb_cmd, capture_output=True, text=True, timeout=30)
 
-            # Store artifacts in centralized storage
-            storage_clip_key = f"uploads/{video_id}/clips/{clip_id}.mp4"
-            storage_thumb_key = f"uploads/{video_id}/clips/{clip_id}_thumb.jpg"
+            # Store artifacts in outputs directory
+            clip_dir = Path(settings.OUTPUT_DIR) / str(video_id) / str(clip_id)
+            clip_dir.mkdir(parents=True, exist_ok=True)
+            dest_clip_path = clip_dir / "final.mp4"
+            dest_thumb_path = clip_dir / "thumbnail.jpg"
 
-            storage_service.upload_file(str(vertical_output), storage_clip_key)
+            shutil.copy2(str(vertical_output), str(dest_clip_path))
             if thumb_output.exists():
-                storage_service.upload_file(str(thumb_output), storage_thumb_key)
+                shutil.copy2(str(thumb_output), str(dest_thumb_path))
+                thumb_str = str(dest_thumb_path)
             else:
-                storage_thumb_key = ""
+                thumb_str = ""
+
+            try:
+                storage_clip_key = f"outputs/{video_id}/{clip_id}/final.mp4"
+                storage_service.put(storage_clip_key, str(dest_clip_path))
+            except Exception as st_err:
+                logger.warning(f"[LiveStreamTask] Storage sync note: {st_err}")
 
             clip_title = f"{video_title} - Part {total_clips_existing + clips_created_count + 1} ({format_seconds(global_start)})"
 
@@ -410,8 +439,8 @@ def process_livestream_segment_task(self, job_id: str, is_initial: bool = False)
                     end_time=global_end,
                     duration=c_dur,
                     score=float(c_win["score"]),
-                    output_path=storage_clip_key,
-                    thumbnail_path=storage_thumb_key,
+                    output_path=str(dest_clip_path),
+                    thumbnail_path=thumb_str,
                     transcript_segment=c_win["text"],
                     publish_status="draft",
                     status="completed"

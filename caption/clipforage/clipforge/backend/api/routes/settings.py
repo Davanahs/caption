@@ -29,7 +29,7 @@ class SettingsResponse(BaseModel):
     YOUTUBE_CLIENT_SECRET_MASKED: str
     OPENROUTER_API_KEY_SET: bool = False
     OPENROUTER_API_KEY_MASKED: str = ""
-    OPENROUTER_MODEL: str = "deepseek/deepseek-r1:free"
+    OPENROUTER_MODEL: str = "nvidia/nemotron-3.5-lightning:free"
     GROQ_API_KEY_SET: bool = False
     GROQ_API_KEY_MASKED: str = ""
     GROQ_MODEL: str = "whisper-large-v3-turbo"
@@ -140,7 +140,7 @@ async def get_settings():
         YOUTUBE_CLIENT_SECRET_MASKED=masked_secret,
         OPENROUTER_API_KEY_SET=has_openrouter,
         OPENROUTER_API_KEY_MASKED=SECRET_MASK if has_openrouter else "",
-        OPENROUTER_MODEL=settings.OPENROUTER_MODEL or "deepseek/deepseek-r1:free",
+        OPENROUTER_MODEL=settings.OPENROUTER_MODEL or "nvidia/nemotron-3.5-lightning:free",
         GROQ_API_KEY_SET=has_groq,
         GROQ_API_KEY_MASKED=SECRET_MASK if has_groq else "",
         GROQ_MODEL=settings.GROQ_MODEL or "whisper-large-v3-turbo",
@@ -271,7 +271,7 @@ async def update_settings(payload: SettingsUpdateRequest):
         YOUTUBE_CLIENT_SECRET_MASKED=masked_secret,
         OPENROUTER_API_KEY_SET=has_openrouter,
         OPENROUTER_API_KEY_MASKED=SECRET_MASK if has_openrouter else "",
-        OPENROUTER_MODEL=settings.OPENROUTER_MODEL or "deepseek/deepseek-r1:free",
+        OPENROUTER_MODEL=settings.OPENROUTER_MODEL or "nvidia/nemotron-3.5-lightning:free",
         GROQ_API_KEY_SET=has_groq,
         GROQ_API_KEY_MASKED=SECRET_MASK if has_groq else "",
         GROQ_MODEL=settings.GROQ_MODEL or "whisper-large-v3-turbo",

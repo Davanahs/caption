@@ -10,7 +10,7 @@ export default function SettingsPage() {
     YOUTUBE_CLIENT_ID: '',
     YOUTUBE_CLIENT_SECRET: '',
     OPENROUTER_API_KEY: '',
-    OPENROUTER_MODEL: 'deepseek/deepseek-r1:free',
+    OPENROUTER_MODEL: 'nvidia/nemotron-3.5-lightning:free',
     GROQ_API_KEY: '',
     GROQ_MODEL: 'whisper-large-v3-turbo',
     NVIDIA_API_KEY: '',
@@ -36,7 +36,7 @@ export default function SettingsPage() {
           YOUTUBE_CLIENT_ID: settings.YOUTUBE_CLIENT_ID || '',
           YOUTUBE_CLIENT_SECRET: settings.YOUTUBE_CLIENT_SECRET_SET ? SECRET_MASK : '',
           OPENROUTER_API_KEY: settings.OPENROUTER_API_KEY_SET ? SECRET_MASK : '',
-          OPENROUTER_MODEL: settings.OPENROUTER_MODEL || 'deepseek/deepseek-r1:free',
+          OPENROUTER_MODEL: settings.OPENROUTER_MODEL || 'nvidia/nemotron-3.5-lightning:free',
           GROQ_API_KEY: settings.GROQ_API_KEY_SET ? SECRET_MASK : '',
           GROQ_MODEL: settings.GROQ_MODEL || 'whisper-large-v3-turbo',
           NVIDIA_API_KEY: settings.NVIDIA_API_KEY_SET ? SECRET_MASK : '',
@@ -121,7 +121,7 @@ export default function SettingsPage() {
         YOUTUBE_CLIENT_ID: updated.YOUTUBE_CLIENT_ID || '',
         YOUTUBE_CLIENT_SECRET: updated.YOUTUBE_CLIENT_SECRET_SET ? SECRET_MASK : '',
         OPENROUTER_API_KEY: updated.OPENROUTER_API_KEY_SET ? SECRET_MASK : '',
-        OPENROUTER_MODEL: updated.OPENROUTER_MODEL || 'deepseek/deepseek-r1:free',
+        OPENROUTER_MODEL: updated.OPENROUTER_MODEL || 'nvidia/nemotron-3.5-lightning:free',
         GROQ_API_KEY: updated.GROQ_API_KEY_SET ? SECRET_MASK : '',
         GROQ_MODEL: updated.GROQ_MODEL || 'whisper-large-v3-turbo',
         NVIDIA_API_KEY: updated.NVIDIA_API_KEY_SET ? SECRET_MASK : '',
@@ -247,10 +247,10 @@ export default function SettingsPage() {
                     </label>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                       {[
-                        { label: 'DeepSeek R1', val: 'deepseek/deepseek-r1:free' },
-                        { label: 'Gemini 2.0 Flash', val: 'google/gemini-2.0-flash-exp:free' },
-                        { label: 'Llama 3.3 70B', val: 'meta-llama/llama-3.3-70b-instruct:free' },
-                        { label: 'Qwen 2.5 72B', val: 'qwen/qwen-2.5-72b-instruct:free' },
+                        { label: 'Nemotron Free', val: 'nvidia/nemotron-3.5-lightning:free' },
+                        { label: 'Ling Flash Free', val: 'inclusionai/ling-3.2-flash:free' },
+                        { label: 'Particle Free', val: 'particle-ai/particle-1:free' },
+                        { label: 'Ernie Free', val: 'baidu/ernie-5.5-flash-preview:free' },
                       ].map(preset => (
                         <button
                           key={preset.val}

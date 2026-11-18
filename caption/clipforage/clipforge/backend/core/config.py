@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "whisper-large-v3-turbo"
     OPENROUTER_API_KEY: str = ""
-    OPENROUTER_MODEL: str = "deepseek/deepseek-r1:free"
+    OPENROUTER_MODEL: str = "nvidia/nemotron-3.5-lightning:free"
     NVIDIA_API_KEY: str = ""
     NVIDIA_MODEL: str = "meta/llama-3.1-405b-instruct"
     PEXELS_API_KEY: str = ""

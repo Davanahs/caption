@@ -20,7 +20,8 @@ def is_ai_provider_configured() -> bool:
     """Check if at least one cloud AI provider is configured with non-empty credentials."""
     has_openrouter = bool(settings.OPENROUTER_API_KEY and settings.OPENROUTER_API_KEY.strip())
     has_nvidia = bool(settings.NVIDIA_API_KEY and settings.NVIDIA_API_KEY.strip())
-    return has_openrouter or has_nvidia
+    has_groq = bool(settings.GROQ_API_KEY and settings.GROQ_API_KEY.strip())
+    return has_openrouter or has_nvidia or has_groq
 
 
 def get_configured_providers() -> List[str]:
@@ -30,6 +31,8 @@ def get_configured_providers() -> List[str]:
         providers.append("OpenRouter")
     if settings.NVIDIA_API_KEY and settings.NVIDIA_API_KEY.strip():
         providers.append("Nvidia NIM")
+    if settings.GROQ_API_KEY and settings.GROQ_API_KEY.strip():
+        providers.append("Groq")
     return providers
 
 
@@ -129,10 +132,10 @@ async def get_ranked_openrouter_models() -> List[Dict[str, Any]]:
     if not models:
         # Hardcoded fallback list if OpenRouter models registry API is down
         return [
-            {"id": "deepseek/deepseek-r1:free",              "name": "DeepSeek R1 (Free)",        "is_free": True,  "score": 1300},
-            {"id": "meta-llama/llama-3.3-70b-instruct:free", "name": "Llama 3.3 70B (Free)",      "is_free": True,  "score": 1150},
-            {"id": "google/gemini-2.5-flash",                "name": "Gemini 2.5 Flash",          "is_free": False, "score": 120},
-            {"id": "meta-llama/llama-3.3-70b-instruct",      "name": "Llama 3.3 70B Instruct",   "is_free": False, "score": 150},
+            {"id": "nvidia/nemotron-3.5-lightning:free", "name": "Nemotron 3.5 Lightning (Free)", "is_free": True, "score": 1400},
+            {"id": "inclusionai/ling-3.2-flash:free", "name": "Ling 3.2 Flash (Free)", "is_free": True, "score": 1300},
+            {"id": "particle-ai/particle-1:free", "name": "Particle 1 (Free)", "is_free": True, "score": 1200},
+            {"id": "baidu/ernie-5.5-flash-preview:free", "name": "ERNIE 5.5 Flash (Free)", "is_free": True, "score": 1100},
         ]
     return rank_models(models)
 
