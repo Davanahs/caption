@@ -2105,15 +2105,15 @@ function PublishPageContent() {
                                       </a>
                                     )}
 
-                                    {target.status === 'failed' && (
+                                    {['failed', 'manual_review'].includes(target.status) && (
                                       <button
                                         type="button"
                                         className="btn-ghost"
-                                        style={{ fontSize: 10, padding: '2px 6px', color: '#60a5fa' }}
+                                        style={{ fontSize: 10, padding: '2px 6px', color: target.status === 'manual_review' ? '#f97316' : '#60a5fa' }}
                                         disabled={isTargetLoading}
-                                        onClick={() => handleRetryTarget(target.id)}
+                                        onClick={() => handleRetryTarget(target.id, target.status === 'manual_review')}
                                       >
-                                        🔄 Retry
+                                        {target.status === 'manual_review' ? '⚡ Force Retry' : '🔄 Retry'}
                                       </button>
                                     )}
 

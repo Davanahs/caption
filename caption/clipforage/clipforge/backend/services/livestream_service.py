@@ -46,6 +46,31 @@ async def get_livestream_metadata(url: str) -> dict:
                 return {"valid": False, "error": "This video is unavailable or does not exist."}
             elif "private" in err_text.lower():
                 return {"valid": False, "error": "This video is private."}
+
+            # Attempt YouTube oEmbed fallback before reporting error
+            try:
+                import urllib.request
+                oe_url = f"https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={yt_id}&format=json"
+                req_oe = urllib.request.Request(oe_url, headers={"User-Agent": "Mozilla/5.0"})
+                with urllib.request.urlopen(req_oe, timeout=5) as resp:
+                    if resp.status == 200:
+                        oe_data = json.loads(resp.read().decode('utf-8'))
+                        return {
+                            "valid": True,
+                            "youtube_id": yt_id,
+                            "title": oe_data.get("title", f"Livestream {yt_id}"),
+                            "thumbnail_url": oe_data.get("thumbnail_url", f"https://img.youtube.com/vi/{yt_id}/hqdefault.jpg"),
+                            "channel_name": oe_data.get("author_name", "YouTube Streamer"),
+                            "channel_id": None,
+                            "is_live": True,
+                            "live_status": "is_live",
+                            "duration": 0.0,
+                            "raw_info": {"webpage_url": url},
+                            "message": "Stream metadata retrieved via YouTube oEmbed."
+                        }
+            except Exception as oe_err:
+                logger.warning(f"[LiveStreamService] oEmbed fallback failed: {oe_err}")
+
             return {"valid": False, "error": f"Failed to retrieve video information: {err_text[-120:].strip()}"}
 
         data = json.loads(stdout.decode('utf-8', errors='ignore'))

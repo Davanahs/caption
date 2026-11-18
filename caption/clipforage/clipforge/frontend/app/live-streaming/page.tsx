@@ -226,14 +226,19 @@ export default function LiveStreamingPage() {
 
   // Start monitoring
   const handleStartMonitoring = async () => {
-    if (!validation || !validation.valid) return;
+    const trimmed = url.trim();
+    const ytId = extractYouTubeVideoId(trimmed);
+    if (!validation?.valid && !ytId) {
+      alert('Please enter a valid YouTube livestream URL.');
+      return;
+    }
 
-    if (validation.is_already_monitored && validation.existing_job_id) {
+    if (validation?.is_already_monitored && validation.existing_job_id) {
       setActiveJobId(validation.existing_job_id);
       return;
     }
 
-    if (validation.live_status === 'is_upcoming') {
+    if (validation?.live_status === 'is_upcoming') {
       alert('This livestream has not started broadcasting yet. Please wait until the broadcast starts.');
       return;
     }
@@ -325,9 +330,11 @@ export default function LiveStreamingPage() {
   const isJobCompleted = jobDetails?.status === 'completed';
 
   // Submission & Validation readiness
+  const extractedYtId = extractYouTubeVideoId(url.trim());
+  const hasValidUrl = Boolean(extractedYtId);
   const isUpcoming = validation?.live_status === 'is_upcoming';
   const isAlreadyMonitored = Boolean(validation?.is_already_monitored);
-  const canStart = Boolean(validation && validation.valid) && !isUpcoming && !starting;
+  const canStart = (Boolean(validation && validation.valid) || hasValidUrl) && !isUpcoming && !starting;
 
   const startButtonLabel = starting
     ? 'Starting Pipeline...'
@@ -335,7 +342,7 @@ export default function LiveStreamingPage() {
     ? 'View Active Monitoring Job'
     : isUpcoming
     ? 'Livestream Not Started Yet'
-    : validation?.is_live || validation?.live_status === 'is_live'
+    : validation?.is_live || validation?.live_status === 'is_live' || hasValidUrl
     ? 'Start Live Stream Monitoring'
     : 'Start Clipping Stream Video';
 

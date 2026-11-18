@@ -850,8 +850,9 @@ async def publish_now(body: PublishRequest, response: Response, db: AsyncSession
             "targets": serialized.get(clip.id, []),
         }
 
-    # Save metadata attributes to DB record (enforce private-by-default on publish)
-    clip.privacy = "private"
+    # Save metadata attributes to DB record
+    selected_privacy = body.privacy if body.privacy in ("public", "unlisted", "private") else "public"
+    clip.privacy = selected_privacy
     clip.made_for_kids = body.made_for_kids
     clip.age_restricted = body.age_restricted
     clip.tags = body.tags
@@ -879,7 +880,7 @@ async def publish_now(body: PublishRequest, response: Response, db: AsyncSession
                 clip_id=clip.id,
                 destination_id=dest_ch.id,
                 status="queued",
-                privacy="private",
+                privacy=selected_privacy,
                 made_for_kids=bool(body.made_for_kids),
                 age_restricted=bool(body.age_restricted),
                 publish_stage="queued",
@@ -895,7 +896,7 @@ async def publish_now(body: PublishRequest, response: Response, db: AsyncSession
             pt.status = "queued"
             pt.publish_stage = "queued"
             pt.publish_progress = 0.0
-            pt.privacy = "private"
+            pt.privacy = selected_privacy
             pt.made_for_kids = bool(body.made_for_kids)
             pt.age_restricted = bool(body.age_restricted)
             pt.error_message = None
@@ -1047,7 +1048,8 @@ async def retry_publish_clip(clip_id: str, body: RetryPublishRequest = None, db:
                     kwargs={
                         "channel_id": t.destination_id,
                         "target_id": t.id,
-                        "privacy": "private",
+                        "privacy": t.privacy or clip.privacy or "public",
+                        "force": force,
                     },
                 )
                 if isinstance(getattr(task, "id", None), str):
@@ -1058,7 +1060,8 @@ async def retry_publish_clip(clip_id: str, body: RetryPublishRequest = None, db:
                 args=[clip.id],
                 kwargs={
                     "channel_id": clip.publish_destination_id,
-                    "privacy": "private",
+                    "privacy": clip.privacy or "public",
+                    "force": force,
                 },
             )
             if isinstance(getattr(task, "id", None), str):
@@ -1275,7 +1278,7 @@ async def retry_publish_target(
     target.publish_progress = 0.0
     target.error_message = None
     target.publish_started_at = now
-    target.privacy = "private"
+    target.privacy = target.privacy or clip.privacy or "public"
     target.idempotency_key = target.idempotency_key or f"pub_{target.clip_id}_{target.destination_id}"
 
     await _recompute_clip_aggregate_async(clip, db)
@@ -1289,7 +1292,8 @@ async def retry_publish_target(
             kwargs={
                 "channel_id": target.destination_id,
                 "target_id": target.id,
-                "privacy": "private",
+                "privacy": target.privacy or "public",
+                "force": force,
             },
         )
         t_id = getattr(task, "id", None)

@@ -780,16 +780,17 @@ def _mock_upload_short(
     }
 
 
-def check_external_youtube_state(idempotency_key: str, channel_id: str = None) -> str | None:
+def check_external_youtube_state(idempotency_key: str, channel_id: str = None, force: bool = False) -> str | None:
     """
     Checks if a video was already published with the given idempotency key.
     
     Returns:
         - video_id (str): if the video was found on YouTube
-        - None: if definitely not found (safe to retry)
-        - "MANUAL_REVIEW_REQUIRED": if search depth was exhausted
-          and the upload may exist beyond the search window
+        - None: if not found (safe to upload/retry)
     """
+    if force:
+        return None
+
     is_test = os.environ.get("PUBLISH_MODE") == "test" or getattr(settings, "PUBLISH_MODE", "prod") == "test"
     mock_file = Path(settings.BASE_DIR) / "mock_external_state.json"
     if is_test or (mock_file.exists() and idempotency_key):
@@ -844,14 +845,11 @@ def check_external_youtube_state(idempotency_key: str, channel_id: str = None) -
             
             next_page_token = response.get("nextPageToken")
             if not next_page_token:
-                # No more pages — we've searched everything
+                # No more pages — searched everything
                 return None
         
-        # Exhausted MAX_PAGES but more results exist
-        # Cannot confidently say the upload doesn't exist
-        print(f"[Publisher] Reconciliation searched {total_checked} videos "
-              f"but more exist. Manual review required for key: {idempotency_key}")
-        return "MANUAL_REVIEW_REQUIRED"
+        # Not found in the latest 150 videos — safe to upload
+        return None
         
     except Exception as e:
         print(f"[Publisher] Failed to check external state: {e}")

@@ -408,7 +408,7 @@ export default function LiveGamingRegionSelector({
             }}
           >
             <span style={{ width: 10, height: 10, borderRadius: 2, background: '#10b981' }} />
-            Box 1: Gameplay ({aspectLock === 'free' ? 'Custom' : '9:16'})
+            Box 1: Gameplay ({aspectLock === 'free' ? 'Custom' : '9:16'}) • {Math.round(gameplayRoi.width * 1920)}×{Math.round(gameplayRoi.height * 1080)}
           </button>
 
           {/* Aspect Ratio Lock Toggle */}
@@ -452,7 +452,7 @@ export default function LiveGamingRegionSelector({
             }}
           >
             <span style={{ width: 10, height: 10, borderRadius: 2, background: '#f59e0b' }} />
-            Box 2: Facecam PiP
+            Box 2: Facecam • {Math.round(facecamRoi.width * 1920)}×{Math.round(facecamRoi.height * 1080)}
           </button>
 
           {/* AI Auto-Detect Streamer Facecam */}
@@ -678,14 +678,17 @@ export default function LiveGamingRegionSelector({
                     color: '#fff',
                     fontSize: 10,
                     fontWeight: 700,
-                    padding: '2px 6px',
+                    padding: '2px 7px',
                     borderBottomRightRadius: 4,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 4,
+                    gap: 6,
                   }}
                 >
-                  🎮 Gameplay ({aspectLock === 'free' ? 'Custom' : '9:16'})
+                  <span>🎮 Box 1: Gameplay</span>
+                  <span style={{ background: 'rgba(0,0,0,0.3)', padding: '1px 5px', borderRadius: 3, fontFamily: 'monospace' }}>
+                    {Math.round(gameplayRoi.width * 1920)}×{Math.round(gameplayRoi.height * 1080)}
+                  </span>
                 </div>
 
                 {/* 8 Resize Handles: 4 corners + 4 edges */}
@@ -724,14 +727,17 @@ export default function LiveGamingRegionSelector({
                     color: '#fff',
                     fontSize: 10,
                     fontWeight: 700,
-                    padding: '2px 6px',
+                    padding: '2px 7px',
                     borderBottomRightRadius: 4,
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 4,
+                    gap: 6,
                   }}
                 >
-                  👤 Streamer Facecam
+                  <span>👤 Box 2: Facecam</span>
+                  <span style={{ background: 'rgba(0,0,0,0.3)', padding: '1px 5px', borderRadius: 3, fontFamily: 'monospace' }}>
+                    {Math.round(facecamRoi.width * 1920)}×{Math.round(facecamRoi.height * 1080)}
+                  </span>
                 </div>
 
                 {/* 8 Resize Handles: 4 corners + 4 edges */}
@@ -752,12 +758,16 @@ export default function LiveGamingRegionSelector({
             }}
           >
             <span>
-              💡 Drag box to move. Drag any corner or edge to customly resize.
+              💡 Drag to move. Drag any corner/edge to customly resize.
             </span>
-            <span>
-              Active: <strong style={{ color: activeTool === 'gameplay' ? '#34d399' : '#fbbf24' }}>
-                {activeTool === 'gameplay' ? `Box 1: Gameplay (${aspectLock})` : 'Box 2: Facecam'}
-              </strong>
+            <span style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <span>
+                🎮 Box 1: <strong style={{ color: '#34d399' }}>{Math.round(gameplayRoi.width * 1920)}×{Math.round(gameplayRoi.height * 1080)} px</strong>
+              </span>
+              <span>•</span>
+              <span>
+                👤 Box 2: <strong style={{ color: '#fbbf24' }}>{Math.round(facecamRoi.width * 1920)}×{Math.round(facecamRoi.height * 1080)} px</strong>
+              </span>
             </span>
           </div>
         </div>

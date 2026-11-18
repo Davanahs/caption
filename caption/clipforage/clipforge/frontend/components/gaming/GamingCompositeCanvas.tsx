@@ -187,28 +187,44 @@ export default function GamingCompositeCanvas({
     const fCrop = toEvenPixels(facecamRoi, srcW, srcH);
     const fDest = toCanvasOverlay(facecamOutputRect, canvasWidth, canvasHeight);
 
-    // Calculate gameplay framing metadata for scale-to-fill
-    const framing = calculateGameplayFraming(gCrop, canvasWidth, canvasHeight);
-    const subCrop = framing.sourceSubCrop || gCrop;
+    const gpAspect = gCrop.w / Math.max(1, gCrop.h);
+    const isWideGameplay = gpAspect > 0.65;
 
-    // 2. Clear canvas and configure high-quality bicubic interpolation
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    // 2. Clear canvas and configure high-quality interpolation
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
 
-    // 3. Layer 1: Gameplay Scale-to-Fill Framing
-    // Draw gameplay crop filling 1080x1920 canvas without stretching
-    ctx.drawImage(
-      sourceDrawable,
-      subCrop.x,
-      subCrop.y,
-      subCrop.w,
-      subCrop.h,
-      0,
-      0,
-      canvasWidth,
-      canvasHeight
-    );
+    // 3. Layer 1: Gameplay Framing
+    if (isWideGameplay) {
+      // Wide gameplay (e.g. 16:9 full screen): Fit width with ambient blur backdrop
+      const destW = canvasWidth;
+      const destH = Math.round(canvasWidth / gpAspect);
+      const destY = Math.round((canvasHeight - destH) / 2);
+
+      ctx.save();
+      ctx.filter = 'blur(18px) brightness(0.55)';
+      ctx.drawImage(sourceDrawable, gCrop.x, gCrop.y, gCrop.w, gCrop.h, -40, -40, canvasWidth + 80, canvasHeight + 80);
+      ctx.restore();
+
+      ctx.drawImage(sourceDrawable, gCrop.x, gCrop.y, gCrop.w, gCrop.h, 0, destY, destW, destH);
+    } else {
+      // 9:16 portrait gameplay: Scale-to-fill framing
+      const framing = calculateGameplayFraming(gCrop, canvasWidth, canvasHeight);
+      const subCrop = framing.sourceSubCrop || gCrop;
+      ctx.drawImage(
+        sourceDrawable,
+        subCrop.x,
+        subCrop.y,
+        subCrop.w,
+        subCrop.h,
+        0,
+        0,
+        canvasWidth,
+        canvasHeight
+      );
+    }
 
     // 4. Layer 2: Facecam PiP Overlay (Bounded & Clipped)
     ctx.save();

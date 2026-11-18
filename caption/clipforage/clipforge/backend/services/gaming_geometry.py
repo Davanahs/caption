@@ -663,13 +663,19 @@ def create_gaming_layout_plan(
 
     plan_geom = calculate_gaming_coordinates(cfg)
 
+    # If the user selected a wide custom gameplay area (e.g. full 16:9 screen where aspect > 0.65):
+    # ScaleMode.CONTAIN fits the entire gameplay width into the 9:16 canvas centered vertically
+    # preserving 100% of the game action without chopping off the screen!
+    gp_aspect = plan_geom.gameplay_crop.w / max(1, plan_geom.gameplay_crop.h)
+    gameplay_scale = ScaleMode.CONTAIN if gp_aspect > 0.65 else ScaleMode.CROP
+
     r_gameplay = RegionModel(
         source_index=0,
         x=0,
         y=0,
         w=plan_geom.canvas_width,
         h=plan_geom.canvas_height,
-        scale_mode=ScaleMode.CROP,
+        scale_mode=gameplay_scale,
         z_order=1,
         crop_coords=plan_geom.gameplay_crop.to_crop_tuple()
     )

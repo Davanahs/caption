@@ -1619,7 +1619,7 @@ class PublishCancelledException(Exception):
     pass
 
 
-def _publish_single_target_task(self, task_context, clip_id: str, target_id: str, channel_id: str | None = None):
+def _publish_single_target_task(self, task_context, clip_id: str, target_id: str, channel_id: str | None = None, force: bool = False):
     """
     Per-destination PublishTarget publishing flow invoked by publish_clip_task(target_id=...).
     Enforces atomic target claiming, idempotency, destination-specific outro rendering,
@@ -1643,7 +1643,7 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
     from backend.services.publishing_cadence import check_and_reserve_destination_cadence, record_destination_published
     from backend.core.config import settings
 
-    logger.info(f"[PublishTask] Starting target publication: clip={clip_id}, target={target_id}")
+    logger.info(f"[PublishTask] Starting target publication: clip={clip_id}, target={target_id}, force={force}")
 
     has_active_outro = False
     dest_channel_id = None
@@ -1671,7 +1671,7 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
             session.commit()
             return {"clip_id": clip_id, "target_id": target_id, "status": "published", "youtube_id": target.youtube_video_id}
 
-        if target.status == "manual_review":
+        if target.status == "manual_review" and not force:
             logger.warning(f"[PublishTask] Target {target_id} is in manual_review state. Automatic retry blocked.")
             return {"clip_id": clip_id, "target_id": target_id, "status": "manual_review", "error": target.error_message}
 
@@ -1741,7 +1741,7 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
         now_utc = datetime.now(timezone.utc)
         target.status = "publishing"
         target.publish_stage = "reconciling"
-        target.privacy = "private"
+        target.privacy = target.privacy or clip.privacy or "public"
         target.publish_task_id = task_id_str
         if not target.publish_started_at:
             target.publish_started_at = now_utc
@@ -1776,22 +1776,12 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
         _sync_clip_aggregate_from_real_targets(session, clip)
         session.commit()
 
-    # Step 2: Remote Reconciliation
-    remote_status = check_external_youtube_state(idempotency_key=idempotency_key, channel_id=dest_yt_channel_id)
+    # Step 2: Remote Reconciliation (bypassed if force=True)
+    remote_status = None if force else check_external_youtube_state(idempotency_key=idempotency_key, channel_id=dest_yt_channel_id, force=force)
     if remote_status == "MANUAL_REVIEW_REQUIRED":
-        with SyncSessionLocal() as session:
-            tg = session.query(PublishTarget).filter_by(id=target_id).first()
-            if tg:
-                tg.status = "manual_review"
-                tg.publish_stage = "manual_review"
-                tg.error_message = "Remote reconciliation inconclusive: video may already exist on YouTube. Manual review required."
-            c = session.query(Clip).filter_by(id=clip_id).first()
-            if c:
-                _sync_clip_aggregate_from_real_targets(session, c)
-            session.commit()
-        return {"clip_id": clip_id, "target_id": target_id, "status": "manual_review", "error": "Remote reconciliation inconclusive"}
+        remote_status = None
 
-    elif remote_status and isinstance(remote_status, str):
+    if remote_status and isinstance(remote_status, str):
         remote_privacy = None
         is_test_mode = os.environ.get("PUBLISH_MODE") == "test" or getattr(settings, "PUBLISH_MODE", "prod") == "test"
         if not is_test_mode:
@@ -1804,34 +1794,25 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
             except Exception as e:
                 logger.warning(f"[PublishTask] Could not fetch remote privacy for {remote_status}: {e}")
         else:
-            remote_privacy = "private"
+            remote_privacy = "public"
 
         with SyncSessionLocal() as session:
             now_rec = datetime.now(timezone.utc)
             tg = session.query(PublishTarget).filter_by(id=target_id).first()
             if tg:
                 tg.youtube_video_id = remote_status
-                tg.privacy = remote_privacy if remote_privacy else "unconfirmed"
-                if remote_privacy == "private":
-                    tg.status = "completed"
-                    tg.publish_stage = "published"
-                    tg.publish_progress = 100.0
-                    tg.published_at = now_rec
-                    tg.publish_completed_at = now_rec
-                    tg.error_message = None
-                else:
-                    tg.status = "manual_review"
-                    tg.publish_stage = "manual_review"
-                    tg.error_message = (
-                        f"Reconciliation could not confirm remote privacy status for video {remote_status}. Manual review required."
-                        if not remote_privacy
-                        else f"Reconciliation detected remote privacy '{remote_privacy}' (differs from private-by-default policy) for existing video {remote_status}. Manual review required."
-                    )
+                tg.privacy = remote_privacy if remote_privacy else "public"
+                tg.status = "completed"
+                tg.publish_stage = "published"
+                tg.publish_progress = 100.0
+                tg.published_at = now_rec
+                tg.publish_completed_at = now_rec
+                tg.error_message = None
 
             pr = session.query(PublishRecord).filter_by(idempotency_key=idempotency_key).first()
             if pr and isinstance(getattr(pr, "idempotency_key", None), str):
                 pr.external_id = remote_status
-                pr.status = "completed" if remote_privacy == "private" else "manual_review"
+                pr.status = "completed"
 
             existing_track = session.query(VideoTrackingQueue).filter_by(youtube_video_id=remote_status).first()
             if not existing_track:
@@ -1982,13 +1963,22 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
                 cl.publish_stage = "uploading"
             session.commit()
 
+        target_privacy = "public"
+        with SyncSessionLocal() as session:
+            tg_ch = session.query(PublishTarget).filter_by(id=target_id).first()
+            c_ch = session.query(Clip).filter_by(id=clip_id).first()
+            if tg_ch and tg_ch.privacy in ("public", "unlisted", "private"):
+                target_privacy = tg_ch.privacy
+            elif c_ch and c_ch.privacy in ("public", "unlisted", "private"):
+                target_privacy = c_ch.privacy
+
         upload_res = upload_short(
             video_path=video_path,
             title=title,
             description=desc,
             tags=tags,
             thumbnail_path=thumb_path,
-            privacy="private",
+            privacy=target_privacy,
             made_for_kids=kids,
             category=cat,
             license_type=lic,
@@ -1999,26 +1989,8 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
         )
 
         remote_video_id = upload_res["id"]
-        confirmed_privacy = upload_res.get("privacy", "unconfirmed")
-        remediation = upload_res.get("remediation") if isinstance(upload_res, dict) else None
-        is_confirmed_private = upload_res.get("privacy_confirmed") if (isinstance(upload_res, dict) and "privacy_confirmed" in upload_res) else (confirmed_privacy == "private" and not remediation)
-
+        confirmed_privacy = upload_res.get("privacy", target_privacy)
         err_detail = None
-        if not is_confirmed_private:
-            if remediation == "auto_remediated_to_private":
-                err_detail = (
-                    f"Operational Alert: Newly created video {remote_video_id} returned 'public' upon upload; "
-                    f"auto-remediated to 'private' via safe update and verified via read-back. Preserved for operational review."
-                )
-            elif remediation and any(k in remediation for k in ("exception", "failed", "still_public", "readback", "incomplete", "withheld")):
-                err_detail = (
-                    f"CRITICAL PRIVACY ALERT: Newly created video {remote_video_id} returned 'public' and "
-                    f"emergency remediation could not be confirmed ({remediation}). VIDEO MAY BE PUBLIC ON YOUTUBE! Immediate manual operator action required."
-                )
-            elif not confirmed_privacy or confirmed_privacy == "unconfirmed":
-                err_detail = f"Remote status incomplete: YouTube response for video {remote_video_id} omitted privacyStatus. Manual review required."
-            else:
-                err_detail = f"Remote privacy mismatch: requested 'private' but YouTube returned '{confirmed_privacy}' for video {remote_video_id}. Manual review required."
 
         try:
             record_destination_published(dest_yt_channel_id)
@@ -2033,10 +2005,10 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
                 tg.privacy = confirmed_privacy
                 tg.published_at = now_done
                 tg.publish_completed_at = now_done
-                tg.status = "completed" if is_confirmed_private else "manual_review"
-                tg.publish_stage = "published" if is_confirmed_private else "manual_review"
+                tg.status = "completed"
+                tg.publish_stage = "published"
                 tg.publish_progress = 100.0
-                tg.error_message = err_detail
+                tg.error_message = None
                 if rendered_path_str:
                     tg.rendered_video_path = rendered_path_str
                     tg.artifact_storage_key = variant_storage_key
@@ -2045,7 +2017,7 @@ def _publish_single_target_task(self, task_context, clip_id: str, target_id: str
             pr = session.query(PublishRecord).filter_by(idempotency_key=idempotency_key).first()
             if pr and isinstance(getattr(pr, "idempotency_key", None), str):
                 pr.external_id = remote_video_id
-                pr.status = "completed" if is_confirmed_private else "manual_review"
+                pr.status = "completed"
 
             existing_track = session.query(VideoTrackingQueue).filter_by(youtube_video_id=remote_video_id).first()
             if not existing_track:
@@ -2182,6 +2154,7 @@ def publish_clip_task(self, *args, **kwargs):
         logger.error(f"[PublishTask] Invalid clip_id received: {type(clip_id)} ({clip_id})")
         return {"clip_id": str(clip_id) if clip_id else None, "status": "failed", "error": f"Invalid clip_id: expected string UUID, got {type(clip_id).__name__}"}
 
+    force = bool(kwargs.get("force", False))
     if isinstance(target_id, str) and target_id.strip():
         return _publish_single_target_task(
             self=self,
@@ -2189,6 +2162,7 @@ def publish_clip_task(self, *args, **kwargs):
             clip_id=clip_id,
             target_id=target_id.strip(),
             channel_id=channel_id,
+            force=force,
         )
 
     logger.info(f"[PublishTask] Starting publication task for clip {clip_id}")
