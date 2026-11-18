@@ -4,8 +4,9 @@ tracking real-time progress, stopping, and resuming live clipping.
 """
 import uuid
 import logging
+import json
 from datetime import datetime, timezone, timedelta
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -31,6 +32,8 @@ class StartMonitoringRequest(BaseModel):
     youtube_url: str
     clip_count: int = 10
     clip_generation_mode: str = "ai_highlights"  # "ai_highlights" | "equal_split"
+    reframe_mode: str = "blur"  # "blur" | "gaming"
+    gaming_layout: Optional[Dict[str, Any]] = None
 
 
 @router.post("/validate")
@@ -115,6 +118,8 @@ async def start_monitoring_endpoint(req: StartMonitoringRequest, db: AsyncSessio
         newly_detected_duration=0.0,
         clips_count=max(1, min(50, req.clip_count)),
         clip_generation_mode="equal_split" if req.clip_generation_mode == "equal_split" else "ai_highlights",
+        reframe_mode=req.reframe_mode or "blur",
+        gaming_layout=json.dumps(req.gaming_layout) if req.gaming_layout else None,
         monitoring_interval_minutes=20,
         next_check_at=datetime.now(timezone.utc) + timedelta(minutes=20),
         stop_requested=False,
@@ -178,6 +183,8 @@ async def list_livestream_jobs(db: AsyncSession = Depends(get_db)):
             "processed_until": j.processed_until,
             "clips_count": j.clips_count,
             "clip_generation_mode": j.clip_generation_mode,
+            "reframe_mode": j.reframe_mode or "blur",
+            "gaming_layout": json.loads(j.gaming_layout) if j.gaming_layout else None,
             "monitoring_interval_minutes": j.monitoring_interval_minutes,
             "next_check_at": j.next_check_at.isoformat() if j.next_check_at else None,
             "last_processed_at": j.last_processed_at.isoformat() if j.last_processed_at else None,
@@ -228,6 +235,8 @@ async def get_active_livestream_jobs(db: AsyncSession = Depends(get_db)):
             "processed_until": j.processed_until,
             "clips_count": j.clips_count,
             "clip_generation_mode": j.clip_generation_mode,
+            "reframe_mode": j.reframe_mode or "blur",
+            "gaming_layout": json.loads(j.gaming_layout) if j.gaming_layout else None,
             "monitoring_interval_minutes": j.monitoring_interval_minutes,
             "next_check_at": j.next_check_at.isoformat() if j.next_check_at else None,
             "last_processed_at": j.last_processed_at.isoformat() if j.last_processed_at else None,
@@ -306,6 +315,8 @@ async def get_livestream_job_details(job_id: str, db: AsyncSession = Depends(get
         "newly_detected_duration": job.newly_detected_duration,
         "clips_count": job.clips_count,
         "clip_generation_mode": job.clip_generation_mode,
+        "reframe_mode": job.reframe_mode or "blur",
+        "gaming_layout": json.loads(job.gaming_layout) if job.gaming_layout else None,
         "monitoring_interval_minutes": job.monitoring_interval_minutes,
         "next_check_at": job.next_check_at.isoformat() if job.next_check_at else None,
         "last_processed_at": job.last_processed_at.isoformat() if job.last_processed_at else None,

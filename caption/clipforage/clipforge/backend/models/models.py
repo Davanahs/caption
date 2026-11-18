@@ -825,6 +825,8 @@ class LiveStreamJob(Base):
     newly_detected_duration: Mapped[float] = mapped_column(Float, default=0.0, server_default="0.0")
     clips_count: Mapped[int] = mapped_column(Integer, default=10, server_default="10")
     clip_generation_mode: Mapped[str] = mapped_column(String(50), default="ai_highlights", server_default="ai_highlights")
+    reframe_mode: Mapped[str] = mapped_column(String(50), default="blur", server_default="blur")
+    gaming_layout: Mapped[str | None] = mapped_column(Text, nullable=True)
     monitoring_interval_minutes: Mapped[int] = mapped_column(Integer, default=20, server_default="20")
     next_check_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

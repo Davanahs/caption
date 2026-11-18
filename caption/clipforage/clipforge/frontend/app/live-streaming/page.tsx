@@ -11,11 +11,21 @@ import {
   resumeLiveStreamMonitoring,
   checkLiveStreamNow,
   deleteLiveStreamJob,
+  extractYouTubeVideoId,
   type LiveStreamValidation,
   type LiveStreamJobSummary,
   type LiveStreamJobDetails,
   type LiveStreamClipItem,
 } from '@/lib/api';
+import LiveGamingRegionSelector from '@/components/livestream/LiveGamingRegionSelector';
+import {
+  NormalizedRect,
+  FacecamPreset,
+  getDefaultGameplayRoi,
+  getDefaultFacecamRoi,
+  getDefaultFacecamOutputRect,
+  getCenteredPortraitRoi,
+} from '@/lib/gamingCoordinates';
 
 const PIPELINE_STAGES = [
   { id: 1, label: 'Inspection', icon: '📡', desc: 'Syncing live metadata' },
@@ -26,7 +36,7 @@ const PIPELINE_STAGES = [
   { id: 6, label: 'Library Ready', icon: '✅', desc: 'Saved & ready to publish' },
 ];
 
-function getActiveStageIndex(step: string = '', status: string = ''): number {
+function getActiveStageIndex(step?: string | null, status?: string | null): number {
   if (status === 'completed') return 6;
   const s = (step || '').toLowerCase();
   if (s.includes('rendering') || s.includes('vertical')) return 5;
@@ -85,7 +95,19 @@ export default function LiveStreamingPage() {
   const [clipCountPreset, setClipCountPreset] = useState<'5' | '10' | '15' | '20' | 'custom'>('10');
   const [customClipCount, setCustomClipCount] = useState('10');
   const [distributionMode, setDistributionMode] = useState<'ai_highlights' | 'equal_split'>('ai_highlights');
+  const [reframeMode, setReframeMode] = useState<'gaming' | 'blur'>('gaming');
+  const [gameplayRoi, setGameplayRoi] = useState<NormalizedRect>(getCenteredPortraitRoi(1920, 1080));
+  const [facecamRoi, setFacecamRoi] = useState<NormalizedRect>(getDefaultFacecamRoi());
+  const [facecamPlacement, setFacecamPlacement] = useState<FacecamPreset | 'custom'>('top-right');
+  const [facecamOutputRect, setFacecamOutputRect] = useState<NormalizedRect>(getDefaultFacecamOutputRect('top-right'));
   const [starting, setStarting] = useState(false);
+
+  const handleResetBoxes = () => {
+    setGameplayRoi(getCenteredPortraitRoi(1920, 1080));
+    setFacecamRoi(getDefaultFacecamRoi());
+    setFacecamPlacement('top-right');
+    setFacecamOutputRect(getDefaultFacecamOutputRect('top-right'));
+  };
 
   // Monitoring active job state
   const [activeJobId, setActiveJobId] = useState<string | null>(null);
@@ -208,10 +230,22 @@ export default function LiveStreamingPage() {
     setStarting(true);
 
     try {
+      const gamingLayoutConfig = reframeMode === 'gaming' ? {
+        mode: 'gaming',
+        gameplay_roi: gameplayRoi,
+        facecam_roi: facecamRoi,
+        facecam_placement: facecamPlacement,
+        facecam_output_rect: facecamOutputRect,
+        canvas_width: 1080,
+        canvas_height: 1920,
+      } : null;
+
       const res = await startLiveStreamMonitoring({
         youtube_url: url.trim(),
         clip_count: count,
         clip_generation_mode: distributionMode,
+        reframe_mode: reframeMode,
+        gaming_layout: gamingLayoutConfig,
       });
 
       setActiveJobId(res.job_id);
@@ -672,11 +706,66 @@ export default function LiveStreamingPage() {
               </div>
             </div>
 
-            {/* C. Video Aspect Ratio Badge */}
+            {/* C. Reframe & Framing Layout Mode */}
+            <div style={{ marginBottom: 18 }}>
+              <label style={{ display: 'block', fontSize: 13, color: '#94a3b8', marginBottom: 8 }}>
+                Framing & Layout Style
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div
+                  onClick={() => setReframeMode('gaming')}
+                  style={{
+                    background: reframeMode === 'gaming' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.03)',
+                    border: reframeMode === 'gaming' ? '1px solid #10b981' : '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: 10,
+                    padding: 12,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <span style={{ fontSize: 14 }}>🎮</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#f8fafc' }}>
+                      Dual-Region Gaming
+                    </span>
+                    <span style={{ fontSize: 10, background: '#10b981', color: '#fff', padding: '1px 5px', borderRadius: 4 }}>
+                      Streamers
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, lineHeight: 1.4 }}>
+                    Gameplay + Streamer facecam PiP overlay in 9:16 vertical shorts.
+                  </p>
+                </div>
+
+                <div
+                  onClick={() => setReframeMode('blur')}
+                  style={{
+                    background: reframeMode === 'blur' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.03)',
+                    border: reframeMode === 'blur' ? '1px solid #6366f1' : '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: 10,
+                    padding: 12,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <span style={{ fontSize: 14 }}>📱</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: '#f8fafc' }}>
+                      Smart Vertical
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 11, color: '#94a3b8', margin: 0, lineHeight: 1.4 }}>
+                    Full 16:9 stream reframed into 9:16 with dynamic blurred backdrop.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* D. Video Aspect Ratio Badge */}
             <div
               style={{
-                background: 'rgba(16, 185, 129, 0.08)',
-                border: '1px solid rgba(16, 185, 129, 0.25)',
+                background: reframeMode === 'gaming' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(99, 102, 241, 0.08)',
+                border: reframeMode === 'gaming' ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(99, 102, 241, 0.25)',
                 borderRadius: 10,
                 padding: '10px 14px',
                 display: 'flex',
@@ -685,11 +774,13 @@ export default function LiveStreamingPage() {
                 marginBottom: 20,
               }}
             >
-              <span style={{ fontSize: 18 }}>📱</span>
-              <div style={{ fontSize: 12, color: '#6ee7b7', lineHeight: 1.4 }}>
-                <strong>9:16 Vertical Shorts Format (1080×1920)</strong>
+              <span style={{ fontSize: 18 }}>{reframeMode === 'gaming' ? '🎮' : '📱'}</span>
+              <div style={{ fontSize: 12, color: reframeMode === 'gaming' ? '#6ee7b7' : '#c7d2fe', lineHeight: 1.4 }}>
+                <strong>9:16 Shorts Format (1080×1920)</strong> — {reframeMode === 'gaming' ? 'Dual-Region Gaming Composite Mode Active' : 'Intelligent Background Blur Active'}
                 <br />
-                Automatically converts 16:9 gameplay and speakers with smart reframing without stretching.
+                {reframeMode === 'gaming'
+                  ? 'Selected gameplay actions and facecam are cleanly cropped and overlaid together with zero video distortion.'
+                  : '16:9 stream is centered with ambient background blurring to preserve complete frame context.'}
               </div>
             </div>
           </div>
@@ -732,6 +823,27 @@ export default function LiveStreamingPage() {
           </button>
         </div>
       </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          DUAL-REGION GAMING WORKSPACE (Interactive 2-Box Selector)
+      ═══════════════════════════════════════════════════════════ */}
+      {reframeMode === 'gaming' && (
+        <LiveGamingRegionSelector
+          youtubeVideoId={validation?.youtube_id || extractYouTubeVideoId(url)}
+          thumbnailUrl={validation?.thumbnail_url}
+          gameplayRoi={gameplayRoi}
+          facecamRoi={facecamRoi}
+          facecamPlacement={facecamPlacement}
+          facecamOutputRect={facecamOutputRect}
+          onChangeGameplayRoi={setGameplayRoi}
+          onChangeFacecamRoi={setFacecamRoi}
+          onChangePlacement={(preset, rect) => {
+            setFacecamPlacement(preset);
+            setFacecamOutputRect(rect);
+          }}
+          onResetBoxes={handleResetBoxes}
+        />
+      )}
 
       {/* Progress Monitoring Dashboard */}
       {jobDetails && (
@@ -796,6 +908,35 @@ export default function LiveStreamingPage() {
                   <span style={{ fontSize: 13, color: '#94a3b8' }}>
                     {jobDetails.channel_name || 'YouTube Stream'}
                   </span>
+                  {jobDetails.reframe_mode === 'gaming' ? (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 10,
+                        background: 'rgba(16, 185, 129, 0.15)',
+                        color: '#10b981',
+                        border: '1px solid rgba(16, 185, 129, 0.3)',
+                      }}
+                    >
+                      🎮 Dual-Region Gaming
+                    </span>
+                  ) : (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 700,
+                        padding: '2px 8px',
+                        borderRadius: 10,
+                        background: 'rgba(99, 102, 241, 0.15)',
+                        color: '#a5b4fc',
+                        border: '1px solid rgba(99, 102, 241, 0.3)',
+                      }}
+                    >
+                      📱 Smart Vertical
+                    </span>
+                  )}
                 </div>
                 <h2 style={{ fontSize: 18, fontWeight: 700, color: '#f8fafc', margin: 0 }}>
                   {jobDetails.video_title}
@@ -1079,6 +1220,13 @@ export default function LiveStreamingPage() {
                 {jobDetails.clip_generation_mode === 'equal_split' ? 'Evenly Distributed' : 'AI Highlights'}
               </div>
             </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10, padding: 12 }}>
+              <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 4 }}>FRAMING MODE</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: jobDetails.reframe_mode === 'gaming' ? '#34d399' : '#a5b4fc', display: 'flex', alignItems: 'center', gap: 6 }}>
+                {jobDetails.reframe_mode === 'gaming' ? '🎮 Dual-Region Gaming' : '📱 Smart Vertical'}
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -1294,7 +1442,20 @@ export default function LiveStreamingPage() {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      padding: '2px 6px',
+                      borderRadius: 4,
+                      background: j.reframe_mode === 'gaming' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(99, 102, 241, 0.12)',
+                      color: j.reframe_mode === 'gaming' ? '#34d399' : '#a5b4fc',
+                      border: j.reframe_mode === 'gaming' ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(99, 102, 241, 0.25)',
+                    }}
+                  >
+                    {j.reframe_mode === 'gaming' ? '🎮 Gaming' : '📱 Vertical'}
+                  </span>
                   <span style={{ fontSize: 12, color: '#a5b4fc', fontWeight: 600 }}>
                     {j.clips_generated} clips
                   </span>

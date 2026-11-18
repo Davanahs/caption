@@ -25,3 +25,23 @@
 3. **Manual Immediate Processing ("Process Next Footage Now")**:
    - Added `POST /api/livestream/{job_id}/check-now` so users don't have to wait 20 minutes for scheduled timer intervals.
    - Added `⚡ Process Next Footage Now` button to UI. Tested and verified it triggers immediate capture and processing of the next livestream slice (`00:34 - 02:34`).
+
+## Dual-Region Gaming Feature Integration (Gameplay ROI + Streamer Facecam PiP)
+- **User Requirement**: Bring the Dual-Region Gaming Studio feature (2 interactive boxes: Box 1 Gameplay ROI and Box 2 Streamer Facecam ROI) directly into the Live Streaming page so livestream gaming sessions can be clipped into vertical 9:16 Shorts with facecam overlay.
+- **Database Schema**: Added columns `reframe_mode VARCHAR(50) DEFAULT 'blur'` and `gaming_layout TEXT` to `live_stream_jobs`.
+- **Backend Routing**:
+  - `StartMonitoringRequest` in `backend/api/routes/livestream.py` now accepts `reframe_mode` and `gaming_layout`.
+  - Stores layout configuration on `LiveStreamJob` and exposes it in all livestream status and details endpoints.
+- **Video Processing Pipeline**:
+  - In `backend/tasks/livestream_tasks.py`, when `reframe_mode == "gaming"`, invokes `LayoutEngine.create_gaming_plan(gl_cfg, raw_w, raw_h, 1080, 1920)`.
+  - Executes dual-layer compositing via FFmpeg with Layer 1 as 9:16 cropped gameplay and Layer 2 as cleanly overlaid streamer facecam PiP.
+- **Frontend Studio Integration**:
+  - Created `LiveGamingRegionSelector.tsx` component with:
+    - Box 1 (Gameplay ROI - Emerald 9:16 border) with drag & resize handles.
+    - Box 2 (Streamer Facecam ROI - Amber border) with drag & resize handles.
+    - Active box selector and reset buttons.
+    - 4-corner placement presets: Top-Right (default), Top-Left, Bottom-Right, Bottom-Left.
+    - Real-time 9:16 Composite Canvas preview.
+  - Added Framing & Layout Style selector in `frontend/app/live-streaming/page.tsx` with `🎮 Dual-Region Gaming` and `📱 Smart Vertical`.
+  - Verified build passes and containers running cleanly.
+

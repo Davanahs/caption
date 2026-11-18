@@ -1474,6 +1474,7 @@ export interface PublishRequest {
   category?: string;
   license?: string;
   scheduled_at?: string;
+  force?: boolean;
 }
 
 export type SchedulePublishRequest = PublishRequest & {
@@ -2172,6 +2173,8 @@ export interface LiveStreamJobSummary {
   processed_until: number;
   clips_count: number;
   clip_generation_mode: string;
+  reframe_mode?: string;
+  gaming_layout?: any;
   monitoring_interval_minutes: number;
   next_check_at?: string | null;
   last_processed_at?: string | null;
@@ -2225,6 +2228,8 @@ export const startLiveStreamMonitoring = (data: {
   youtube_url: string;
   clip_count: number;
   clip_generation_mode: string;
+  reframe_mode?: string;
+  gaming_layout?: any;
 }) =>
   request<{ success: boolean; job_id: string; video_id: string; title: string; status: string; message: string }>(
     '/api/livestream/start',

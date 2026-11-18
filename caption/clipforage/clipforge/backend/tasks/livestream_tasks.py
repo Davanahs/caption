@@ -90,6 +90,8 @@ def process_livestream_segment_task(self, job_id: str, is_initial: bool = False)
         clips_count = int(job.clips_count or 10)
         clip_mode = job.clip_generation_mode or "ai_highlights"
         interval_min = int(job.monitoring_interval_minutes or 20)
+        reframe_mode = job.reframe_mode or "blur"
+        gaming_layout_json = job.gaming_layout
 
     # 2. Check current stream status using yt-dlp
     stream_ended = False
@@ -375,8 +377,16 @@ def process_livestream_segment_task(self, job_id: str, is_initial: bool = False)
             # Reframe to 9:16 vertical format (1080x1920)
             vertical_output = temp_dir / f"vertical_{idx}.mp4"
             try:
-                # Use asyncio.run for calling reframe_to_vertical
-                asyncio.run(reframe_to_vertical(raw_subclip, vertical_output))
+                if reframe_mode == "gaming" and gaming_layout_json:
+                    import json
+                    from backend.services.layout_engine import LayoutEngine
+                    gl_cfg = json.loads(gaming_layout_json) if isinstance(gaming_layout_json, str) else gaming_layout_json
+                    raw_w, raw_h = asyncio.run(get_video_dimensions(raw_subclip))
+                    plan = LayoutEngine.create_gaming_plan(gl_cfg, raw_w, raw_h, 1080, 1920)
+                    asyncio.run(reframe_to_vertical(raw_subclip, vertical_output, plan=plan))
+                    logger.info(f"[LiveStreamTask] Successfully rendered Dual-Region Gaming clip {idx} with facecam overlay")
+                else:
+                    asyncio.run(reframe_to_vertical(raw_subclip, vertical_output))
             except Exception as rf_err:
                 logger.warning(f"[LiveStreamTask] Reframe failed: {rf_err}, using fallback vertical scale")
                 # Fallback FFmpeg 9:16 filter with backdrop blur
