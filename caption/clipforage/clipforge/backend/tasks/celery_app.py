@@ -72,6 +72,7 @@ TASK_MODULES = [
     "backend.tasks.hook_tasks",
     "backend.tasks.dubbing_tasks",
     "backend.tasks.studio_tasks",
+    "backend.tasks.livestream_tasks",
 ]
 
 celery_app.conf.update(

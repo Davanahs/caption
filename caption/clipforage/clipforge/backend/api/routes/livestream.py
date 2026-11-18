@@ -411,3 +411,35 @@ async def delete_livestream_job(job_id: str, db: AsyncSession = Depends(get_db))
     await db.delete(job)
     await db.commit()
     return {"success": True, "message": "Live stream job deleted"}
+
+
+@router.post("/{job_id}/check-now")
+async def check_livestream_now_endpoint(job_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Manually triggers an immediate capture and processing cycle of the latest footage
+    without waiting for the scheduled 20-minute timer.
+    """
+    stmt = select(LiveStreamJob).where(LiveStreamJob.id == job_id)
+    res = await db.execute(stmt)
+    job = res.scalars().first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Live stream job not found")
+
+    job.status = "processing"
+    job.stop_requested = False
+    job.current_step = "Immediate check triggered. Capturing newly available footage..."
+    await db.commit()
+
+    try:
+        task = process_livestream_segment_task.delay(job_id=job.id, is_initial=False)
+        job.active_task_id = task.id
+        await db.commit()
+    except Exception as e:
+        logger.error(f"Failed to enqueue check-now task: {e}")
+
+    return {
+        "success": True,
+        "job_id": job.id,
+        "status": job.status,
+        "message": "Immediate footage check triggered."
+    }

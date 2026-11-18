@@ -9,12 +9,34 @@ import {
   getLiveStreamJobDetails,
   stopLiveStreamMonitoring,
   resumeLiveStreamMonitoring,
+  checkLiveStreamNow,
   deleteLiveStreamJob,
   type LiveStreamValidation,
   type LiveStreamJobSummary,
   type LiveStreamJobDetails,
   type LiveStreamClipItem,
 } from '@/lib/api';
+
+const PIPELINE_STAGES = [
+  { id: 1, label: 'Inspection', icon: '📡', desc: 'Syncing live metadata' },
+  { id: 2, label: 'Capture', icon: '📥', desc: 'Downloading footage slice' },
+  { id: 3, label: 'Transcribe', icon: '🎙️', desc: 'Whisper speech-to-text' },
+  { id: 4, label: 'Highlights', icon: '🤖', desc: 'AI viral moment detection' },
+  { id: 5, label: '9:16 Shorts', icon: '🎬', desc: 'Vertical reframing (1080x1920)' },
+  { id: 6, label: 'Library Ready', icon: '✅', desc: 'Saved & ready to publish' },
+];
+
+function getActiveStageIndex(step: string = '', status: string = ''): number {
+  if (status === 'completed') return 6;
+  const s = (step || '').toLowerCase();
+  if (s.includes('rendering') || s.includes('vertical')) return 5;
+  if (s.includes('analyzing') || s.includes('highlights') || s.includes('viral')) return 4;
+  if (s.includes('transcribing') || s.includes('speech') || s.includes('audio')) return 3;
+  if (s.includes('downloading') || s.includes('footage')) return 2;
+  if (s.includes('inspecting') || s.includes('starting')) return 1;
+  if (s.includes('waiting') || status === 'waiting') return 6;
+  return 1;
+}
 
 function formatSeconds(sec: number): string {
   if (!sec || isNaN(sec) || sec <= 0) return '00:00';
@@ -75,11 +97,26 @@ export default function LiveStreamingPage() {
   const [showStopModal, setShowStopModal] = useState(false);
   const [stopping, setStopping] = useState(false);
   const [resuming, setResuming] = useState(false);
+  const [triggeringCheck, setTriggeringCheck] = useState(false);
 
   // Preview video modal
   const [previewClip, setPreviewClip] = useState<LiveStreamClipItem | null>(null);
 
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleCheckNow = async () => {
+    if (!activeJobId) return;
+    setTriggeringCheck(true);
+    try {
+      await checkLiveStreamNow(activeJobId);
+      await fetchJobDetails(activeJobId);
+      await refreshJobsList();
+    } catch (e: any) {
+      console.warn('Failed to trigger check now:', e);
+    } finally {
+      setTriggeringCheck(false);
+    }
+  };
 
   // Load all jobs on initial mount
   const refreshJobsList = useCallback(async () => {
@@ -125,7 +162,7 @@ export default function LiveStreamingPage() {
     if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
 
     const isRunning = jobDetails?.status === 'processing' || jobDetails?.status === 'monitoring';
-    const interval = isRunning ? 3500 : 8000;
+    const interval = isRunning ? 2000 : 5000;
 
     pollIntervalRef.current = setInterval(() => {
       fetchJobDetails(activeJobId);
@@ -813,6 +850,30 @@ export default function LiveStreamingPage() {
                 </button>
               )}
 
+              {jobDetails.status === 'waiting' && !isJobStopped && (
+                <button
+                  type="button"
+                  onClick={handleCheckNow}
+                  disabled={triggeringCheck}
+                  style={{
+                    background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                    border: 'none',
+                    color: '#fff',
+                    borderRadius: 8,
+                    padding: '8px 16px',
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: triggeringCheck ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+                  }}
+                >
+                  {triggeringCheck ? '⏳ Triggering...' : '⚡ Process Next Footage Now'}
+                </button>
+              )}
+
               <Link
                 href="/clips"
                 style={{
@@ -869,33 +930,124 @@ export default function LiveStreamingPage() {
             </div>
           </div>
 
-          {/* Live Status Ticker */}
+          {/* Active Processing Stage Stepper & Live Status Ticker */}
           <div
             style={{
-              background: 'rgba(0, 0, 0, 0.3)',
-              border: '1px solid rgba(255, 255, 255, 0.06)',
-              borderRadius: 10,
-              padding: '12px 16px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              background: 'rgba(0, 0, 0, 0.4)',
+              border: '1px solid rgba(255, 255, 255, 0.08)',
+              borderRadius: 12,
+              padding: '16px 20px',
               marginBottom: 20,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 16 }}>
-                {isJobActive ? '⚙️' : isJobCompleted ? '✅' : '⏹️'}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span
+                  style={{
+                    display: 'inline-block',
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    background: isJobActive ? '#10b981' : '#64748b',
+                    boxShadow: isJobActive ? '0 0 8px #10b981' : 'none',
+                  }}
+                />
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#f8fafc', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  Live Pipeline Steps & Real-Time Status
+                </span>
+                {isJobActive && (
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: '#a5b4fc',
+                      background: 'rgba(99, 102, 241, 0.15)',
+                      padding: '2px 8px',
+                      borderRadius: 12,
+                      border: '1px solid rgba(99, 102, 241, 0.3)',
+                    }}
+                  >
+                    Live Auto-Polling (2s)
+                  </span>
+                )}
+              </div>
+
+              {jobDetails.next_check_at && isJobActive && jobDetails.status === 'waiting' && (
+                <span style={{ fontSize: 12, color: '#f59e0b', fontWeight: 600 }}>
+                  Next automatic check: {formatRelativeTime(jobDetails.next_check_at)}
+                </span>
+              )}
+            </div>
+
+            {/* Current Step Banner with Status */}
+            <div
+              style={{
+                padding: '10px 14px',
+                borderRadius: 8,
+                background: isJobActive ? 'rgba(99, 102, 241, 0.12)' : 'rgba(255, 255, 255, 0.03)',
+                border: isJobActive ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid rgba(255, 255, 255, 0.06)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                marginBottom: 16,
+              }}
+            >
+              <span style={{ fontSize: 18 }}>
+                {jobDetails.status === 'processing' ? '⚙️' : jobDetails.status === 'waiting' ? '⏳' : isJobCompleted ? '✅' : '⏹️'}
               </span>
-              <span style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 500 }}>
+              <span style={{ fontSize: 14, color: '#e2e8f0', fontWeight: 600 }}>
                 {jobDetails.current_step || 'Monitoring stream status...'}
               </span>
             </div>
 
-            {jobDetails.next_check_at && isJobActive && (
-              <span style={{ fontSize: 12, color: '#f59e0b', fontWeight: 600 }}>
-                Next check: {formatRelativeTime(jobDetails.next_check_at)}
-              </span>
-            )}
+            {/* 6 Step Progress Stepper Pills */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8 }}>
+              {PIPELINE_STAGES.map((stg) => {
+                const activeIdx = getActiveStageIndex(jobDetails.current_step, jobDetails.status);
+                const isCompleted = activeIdx > stg.id || (stg.id === 6 && jobDetails.clips_generated_count > 0);
+                const isCurrent = activeIdx === stg.id && jobDetails.status === 'processing';
+                return (
+                  <div
+                    key={stg.id}
+                    style={{
+                      background: isCurrent
+                        ? 'rgba(99, 102, 241, 0.18)'
+                        : isCompleted
+                        ? 'rgba(16, 185, 129, 0.08)'
+                        : 'rgba(255, 255, 255, 0.02)',
+                      border: isCurrent
+                        ? '1px solid #818cf8'
+                        : isCompleted
+                        ? '1px solid rgba(16, 185, 129, 0.3)'
+                        : '1px solid rgba(255, 255, 255, 0.05)',
+                      borderRadius: 8,
+                      padding: '8px 10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: 13 }}>{stg.icon}</span>
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: isCurrent ? '#a5b4fc' : isCompleted ? '#34d399' : '#64748b',
+                        }}
+                      >
+                        {isCompleted ? '✓ Done' : isCurrent ? '● Active' : `Step ${stg.id}`}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: isCurrent ? '#fff' : isCompleted ? '#e2e8f0' : '#94a3b8' }}>
+                      {stg.label}
+                    </div>
+                    <div style={{ fontSize: 10, color: '#64748b' }}>
+                      {stg.desc}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* Stats Metrics Grid */}

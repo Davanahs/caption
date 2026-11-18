@@ -2255,6 +2255,12 @@ export const resumeLiveStreamMonitoring = (jobId: string) =>
     { method: 'POST' }
   );
 
+export const checkLiveStreamNow = (jobId: string) =>
+  request<{ success: boolean; job_id: string; status: string; message: string }>(
+    `/api/livestream/${encodeURIComponent(jobId)}/check-now`,
+    { method: 'POST' }
+  );
+
 export const deleteLiveStreamJob = (jobId: string) =>
   request<{ success: boolean; message: string }>(
     `/api/livestream/${encodeURIComponent(jobId)}`,
