@@ -2141,4 +2141,125 @@ export const refreshVideoSeoMetadata = (videoId: string) =>
     method: 'POST',
   });
 
+// ── Live Streaming API ───────────────────────────────────────────────────────
+export interface LiveStreamValidation {
+  valid: boolean;
+  youtube_id: string;
+  title: string;
+  thumbnail_url?: string | null;
+  channel_name?: string | null;
+  channel_id?: string | null;
+  is_live: boolean;
+  live_status: string; // 'is_live' | 'is_upcoming' | 'was_live' | 'not_live'
+  duration: number;
+  is_already_monitored: boolean;
+  existing_job_id?: string | null;
+  message: string;
+}
+
+export interface LiveStreamJobSummary {
+  id: string;
+  video_id?: string | null;
+  youtube_url: string;
+  youtube_id: string;
+  video_title: string;
+  thumbnail_url?: string | null;
+  channel_name?: string | null;
+  status: string; // 'monitoring' | 'processing' | 'waiting' | 'completed' | 'stopped' | 'failed'
+  live_status: string;
+  current_step?: string | null;
+  total_duration: number;
+  processed_until: number;
+  clips_count: number;
+  clip_generation_mode: string;
+  monitoring_interval_minutes: number;
+  next_check_at?: string | null;
+  last_processed_at?: string | null;
+  stop_requested?: boolean;
+  error_message?: string | null;
+  created_at?: string | null;
+  clips_generated: number;
+  segments_count?: number;
+}
+
+export interface LiveStreamSegmentItem {
+  id: string;
+  segment_index: number;
+  start_time: number;
+  end_time: number;
+  duration: number;
+  clips_generated: number;
+  status: string;
+  created_at?: string | null;
+}
+
+export interface LiveStreamClipItem {
+  id: string;
+  video_id: string;
+  title: string;
+  description?: string | null;
+  start_time: number;
+  end_time: number;
+  duration: number;
+  score: number;
+  output_path?: string | null;
+  thumbnail_path?: string | null;
+  status: string;
+  publish_status: string;
+  created_at?: string | null;
+}
+
+export interface LiveStreamJobDetails extends LiveStreamJobSummary {
+  segments: LiveStreamSegmentItem[];
+  clips: LiveStreamClipItem[];
+  clips_generated_count: number;
+}
+
+export const validateLiveStreamUrl = (url: string) =>
+  request<LiveStreamValidation>('/api/livestream/validate', {
+    method: 'POST',
+    body: JSON.stringify({ url }),
+  });
+
+export const startLiveStreamMonitoring = (data: {
+  youtube_url: string;
+  clip_count: number;
+  clip_generation_mode: string;
+}) =>
+  request<{ success: boolean; job_id: string; video_id: string; title: string; status: string; message: string }>(
+    '/api/livestream/start',
+    {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }
+  );
+
+export const getLiveStreamJobs = () =>
+  request<{ items: LiveStreamJobSummary[]; total: number }>('/api/livestream/jobs');
+
+export const getActiveLiveStreamJobs = () =>
+  request<{ active_jobs: LiveStreamJobSummary[]; count: number }>('/api/livestream/active');
+
+export const getLiveStreamJobDetails = (jobId: string) =>
+  request<LiveStreamJobDetails>(`/api/livestream/${encodeURIComponent(jobId)}`);
+
+export const stopLiveStreamMonitoring = (jobId: string) =>
+  request<{ success: boolean; job_id: string; status: string; message: string }>(
+    `/api/livestream/${encodeURIComponent(jobId)}/stop`,
+    { method: 'POST' }
+  );
+
+export const resumeLiveStreamMonitoring = (jobId: string) =>
+  request<{ success: boolean; job_id: string; status: string; message: string }>(
+    `/api/livestream/${encodeURIComponent(jobId)}/resume`,
+    { method: 'POST' }
+  );
+
+export const deleteLiveStreamJob = (jobId: string) =>
+  request<{ success: boolean; message: string }>(
+    `/api/livestream/${encodeURIComponent(jobId)}`,
+    { method: 'DELETE' }
+  );
+
+
 

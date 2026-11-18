@@ -14,7 +14,10 @@ import {
   getJobStats,
   retryJob,
   type QueueStats,
+  getActiveLiveStreamJobs,
+  type LiveStreamJobSummary,
 } from '@/lib/api';
+import Link from 'next/link';
 import ProcessVideoModal, { ProcessVideoConfig } from '@/components/ProcessVideoModal';
 import PodcastSelectionModal, { PodcastProcessingConfig } from '@/components/PodcastSelectionModal';
 
@@ -710,6 +713,7 @@ export default function DashboardPage() {
   const [targetLanguage, setTargetLanguage] = useState('none');
   const [hookTitle, setHookTitle] = useState(true);
   const [activeJobs, setActiveJobs] = useState<Job[]>([]);
+  const [activeLiveStreams, setActiveLiveStreams] = useState<LiveStreamJobSummary[]>([]);
   const [recentJobs, setRecentJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -720,14 +724,16 @@ export default function DashboardPage() {
   const wsMapRef = useRef<Map<string, WebSocket>>(new Map());
 
   const refreshAll = useCallback(async () => {
-    const [s, active, history, q] = await Promise.all([
+    const [s, active, history, q, live] = await Promise.all([
       getStats().catch(() => null),
       getActiveJobs().catch(() => []),
       getJobHistory(24).catch(() => []),
       getJobStats().catch(() => null),
+      getActiveLiveStreamJobs().catch(() => ({ active_jobs: [], count: 0 })),
     ]);
     if (s) setStats(s);
     if (q) setQueueStats(q);
+    if (live && live.active_jobs) setActiveLiveStreams(live.active_jobs);
     setActiveJobs((active || []) as Job[]);
     const sortedHistory = [...((history || []) as Job[])].sort((a, b) => {
       const timeA = new Date(a.created_at || 0).getTime();
@@ -1129,6 +1135,95 @@ export default function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Active Live Streams Card */}
+      {activeLiveStreams && activeLiveStreams.length > 0 && (
+        <div
+          className="glass"
+          style={{
+            padding: '16px 20px',
+            marginBottom: 24,
+            background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(139, 92, 246, 0.12))',
+            border: '1px solid rgba(239, 68, 68, 0.35)',
+            borderRadius: 14,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 16,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                background: '#ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 20,
+                boxShadow: '0 0 16px rgba(239, 68, 68, 0.5)',
+              }}
+            >
+              📡
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: '#f87171',
+                    background: 'rgba(239, 68, 68, 0.25)',
+                    padding: '2px 7px',
+                    borderRadius: 4,
+                    textTransform: 'uppercase',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 5,
+                  }}
+                >
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#ef4444' }} />
+                  Live Monitoring Active ({activeLiveStreams.length})
+                </span>
+                <span style={{ fontSize: 12, color: '#94a3b8' }}>
+                  {activeLiveStreams[0].channel_name || 'YouTube Stream'}
+                </span>
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: '#f8fafc' }}>
+                {activeLiveStreams[0].video_title}
+              </div>
+              <div style={{ fontSize: 12, color: '#cbd5e1', marginTop: 2 }}>
+                {activeLiveStreams[0].current_step || 'Autonomous monitoring in progress...'} •{' '}
+                <strong style={{ color: '#a5b4fc' }}>
+                  {activeLiveStreams[0].clips_generated} clips created
+                </strong>
+              </div>
+            </div>
+          </div>
+
+          <Link
+            href="/live-streaming"
+            style={{
+              background: 'linear-gradient(135deg, #ef4444, #8b5cf6)',
+              color: '#fff',
+              padding: '10px 18px',
+              borderRadius: 10,
+              fontSize: 13,
+              fontWeight: 700,
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)',
+            }}
+          >
+            Open Live Streaming Studio →
+          </Link>
+        </div>
+      )}
 
       <div className="dashboard-main-grid">
         {/* Input Section */}

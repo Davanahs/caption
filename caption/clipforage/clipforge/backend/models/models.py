@@ -804,3 +804,51 @@ class DubbingSegment(Base):
     status: Mapped[str] = mapped_column(String(50), default="pending")
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+
+class LiveStreamJob(Base):
+    __tablename__ = "live_stream_jobs"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    video_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    youtube_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    youtube_id: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    video_title: Mapped[str] = mapped_column(String(500), nullable=False, default="Live Stream")
+    thumbnail_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    channel_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    channel_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), default="monitoring", server_default="monitoring", index=True)
+    live_status: Mapped[str] = mapped_column(String(50), default="is_live", server_default="is_live")
+    current_step: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    total_duration: Mapped[float] = mapped_column(Float, default=0.0, server_default="0.0")
+    processed_until: Mapped[float] = mapped_column(Float, default=0.0, server_default="0.0")
+    newly_detected_duration: Mapped[float] = mapped_column(Float, default=0.0, server_default="0.0")
+    clips_count: Mapped[int] = mapped_column(Integer, default=10, server_default="10")
+    clip_generation_mode: Mapped[str] = mapped_column(String(50), default="ai_highlights", server_default="ai_highlights")
+    monitoring_interval_minutes: Mapped[int] = mapped_column(Integer, default=20, server_default="20")
+    next_check_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_processed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    stop_requested: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    active_task_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), server_default=func.now())
+
+    segments: Mapped[list["LiveStreamSegment"]] = relationship("LiveStreamSegment", back_populates="job", cascade="all, delete-orphan", order_by="LiveStreamSegment.segment_index")
+
+
+class LiveStreamSegment(Base):
+    __tablename__ = "live_stream_segments"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    job_id: Mapped[str] = mapped_column(String, ForeignKey("live_stream_jobs.id", ondelete="CASCADE"), nullable=False, index=True)
+    segment_index: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    start_time: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    end_time: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    duration: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    clips_generated: Mapped[int] = mapped_column(Integer, default=0, server_default="0")
+    status: Mapped[str] = mapped_column(String(50), default="completed", server_default="completed")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), server_default=func.now())
+
+    job: Mapped["LiveStreamJob"] = relationship("LiveStreamJob", back_populates="segments")
+

@@ -8,6 +8,7 @@ const nav = [
   { href: '/gaming',          icon: '🎮', label: 'Gaming Studio' },
   { href: '/podcasts',        icon: '🎙️', label: 'Podcasts / Interviews' },
   { href: '/studio',          icon: '🎞️', label: 'Upload Studio' },
+  { href: '/live-streaming',  icon: '📡', label: 'Live Streaming' },
   { href: '/clips',           icon: '🎬', label: 'Clips Library' },
   { href: '/analytics',       icon: '📊', label: 'Analytics' },
   { href: '/automation',      icon: '🤖', label: 'Automation' },

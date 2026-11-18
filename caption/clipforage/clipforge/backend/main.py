@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from backend.models.database import init_db, cleanup_orphaned_jobs, AsyncSessionLocal
 from backend.core.config import settings
-from backend.api.routes import videos, clips, jobs, channels, publish, analytics, dubbing, studio, youtube_channels, settings as settings_route
+from backend.api.routes import videos, clips, jobs, channels, publish, analytics, dubbing, studio, youtube_channels, settings as settings_route, livestream
 from backend.core.diagnostics import run_diagnostics
 
 
@@ -54,6 +54,35 @@ async def scheduled_queue_drain_check():
             await dispatch_next_queued_manual_jobs_async(db)
     except Exception as e:
         print(f"[ScheduledQueueDrainCheck] Error: {e}")
+
+
+async def scheduled_livestream_check():
+    """Run every minute to pick up waiting livestream jobs due for next segment processing."""
+    try:
+        from datetime import datetime, timezone
+        from sqlalchemy import select
+        from backend.models.models import LiveStreamJob
+        from backend.tasks.livestream_tasks import process_livestream_segment_task
+        async with AsyncSessionLocal() as db:
+            now = datetime.now(timezone.utc)
+            stmt = select(LiveStreamJob).where(
+                LiveStreamJob.status == "waiting",
+                LiveStreamJob.stop_requested == False,
+                LiveStreamJob.next_check_at <= now
+            )
+            res = await db.execute(stmt)
+            jobs = res.scalars().all()
+            for j in jobs:
+                print(f"[ScheduledLiveStreamCheck] Triggering scheduled segment check for job {j.id[:8]}...")
+                j.status = "processing"
+                j.current_step = "Periodic scheduled check triggered. Capturing newly available footage..."
+                await db.commit()
+                task = process_livestream_segment_task.delay(job_id=j.id, is_initial=False)
+                j.active_task_id = task.id
+                await db.commit()
+    except Exception as e:
+        print(f"[ScheduledLiveStreamCheck] Error: {e}")
+
 
 
 
@@ -120,12 +149,21 @@ async def lifespan(app: FastAPI):
         id="manual_queue_drain",
         replace_existing=True,
     )
+
+    scheduler.add_job(
+        scheduled_livestream_check,
+        "interval",
+        minutes=1,
+        id="livestream_monitor",
+        replace_existing=True,
+    )
     
     scheduler.start()
     print(f"[ClipForge] Channel monitor scheduled every {settings.CHANNEL_CHECK_INTERVAL_MINUTES} min")
     print("[ClipForge] Auto-publisher scheduled every 1 min")
     print("[ClipForge] Real-time delayed tracker scheduled every 1 min")
     print("[ClipForge] Manual video queue drain scheduled every 30 sec")
+    print("[ClipForge] Live stream background monitor scheduled every 1 min")
 
     yield
 
@@ -179,6 +217,7 @@ app.include_router(dubbing.router)     # Phase 15 — multi-language dubbing
 app.include_router(studio.router)      # Upload Studio Phase 1
 app.include_router(youtube_channels.router)  # My YouTube Channels Management
 app.include_router(settings_route.router)    # Phase 5.1 — Settings Persistence (REQ-GAP-001)
+app.include_router(livestream.router)        # Live Streaming & Autonomous Monitoring Pipeline
 
 # Caption Studio routes
 try:
