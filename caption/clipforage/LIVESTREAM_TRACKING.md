@@ -45,3 +45,9 @@
   - Added Framing & Layout Style selector in `frontend/app/live-streaming/page.tsx` with `🎮 Dual-Region Gaming` and `📱 Smart Vertical`.
   - Verified build passes and containers running cleanly.
 
+## Custom Gameplay ROI Resizing & Stream Starting Enhancements
+- **Free Custom Gameplay Resizing**: Removed the forced 9:16 lock on Box 1 (Gameplay ROI). Added `🔓 Free Custom` / `🔒 9:16 Lock` mode toggle and 8 drag handles (4 corners + 4 edge bars) so users can freely shape and custom-resize the green gameplay box in any dimension, matching the Gaming Studio experience.
+- **Button Unblocking for Archived/Uploaded Streams**: Fixed the validation disabled check that previously blocked the "Start Live Stream Monitoring" button if a livestream was completed (`was_live`) or standard uploaded video (`not_live`). Users can now start clipping on any validated YouTube video.
+- **Direct Start Buttons in Dual-Region Studio**: Added direct `⚡ Start Monitoring & Clipping` action buttons inside the Dual-Region Studio toolbar and right under the 9:16 preview canvas so users can immediately trigger clipping directly from where they adjust the boxes.
+
+
